@@ -1,9 +1,8 @@
-import nltk
 import os
+import nltk
 import torch
 import numpy as np
 import pandas as pd
-import random
 from datasets import Dataset, DatasetDict
 from huggingface_hub import HfApi
 from requests.exceptions import HTTPError
@@ -13,31 +12,42 @@ import evaluate
 from sklearn.preprocessing import LabelEncoder
 from nltk.tokenize import sent_tokenize, word_tokenize
 import argparse
+import textract
 
 # Set NLTK data path
 nltk.data.path.append("./nltk_data")
 
-# Check for the Hugging Face token
-hf_token = os.getenv("HUGGINGFACE_HUB_TOKEN")
+def check_hf_token():
+    hf_token = os.getenv("HUGGINGFACE_HUB_TOKEN")
+    if hf_token is None:
+        raise ValueError("Hugging Face API token is missing. Please set the environment variable 'HUGGINGFACE_HUB_TOKEN'.")
 
-if hf_token is None:
-    raise ValueError("Hugging Face API token is missing. Please set the environment variable 'HUGGINGFACE_HUB_TOKEN'.")
+    api = HfApi()
+    try:
+        api.whoami(token=hf_token)
+        print("Hugging Face API token is valid.")
+    except HTTPError as e:
+        raise ValueError("Invalid Hugging Face API token. Please check the token and try again.")
 
-# Validate the token
-api = HfApi()
-try:
-    api.whoami(token=hf_token)
-except HTTPError as e:
-    raise ValueError("Invalid Hugging Face API token. Please check the token and try again.")
+def extract_text_from_file(file_path):
+    try:
+        text = textract.process(file_path).decode('utf-8')
+        return text
+    except Exception as e:
+        print(f"Error processing file {file_path}: {str(e)}")
+        return None
 
 def get_files_and_categories(root_dir, test_mode=False):
     files_and_categories = []
+    supported_formats = ['.txt', '.doc', '.docx', '.rtf', '.pdf']
+
     for root, dirs, files in os.walk(root_dir):
         for file in files:
-            if file.endswith('.txt'):
+            if any(file.endswith(fmt) for fmt in supported_formats):
                 file_path = os.path.join(root, file)
-                # Extract categories from the file path
                 categories = os.path.relpath(root, root_dir).split(os.sep)
+                if 'unknown' in categories:
+                    categories = ['unknown']
                 files_and_categories.append((file_path, categories))
 
                 if test_mode and len(files_and_categories) >= 10:
@@ -50,20 +60,16 @@ def create_dataset(root_dir, test_mode=False):
     all_categories = []
 
     for file_path, categories in files_and_categories:
-        with open(file_path, 'r', encoding='utf-8') as file:
-            text = file.read()
+        text = extract_text_from_file(file_path)
+        if text:
+            if test_mode:
+                text = text[:1000]  # Limit to first 1000 characters in test mode
+            texts.append(text)
+            all_categories.append("-".join(categories))
 
-        if test_mode:
-            text = text[:1000]  # Limit to first 1000 characters in test mode
-
-        texts.append(text)
-        all_categories.append("-".join(categories))  # Join categories into a single string
-
-    # Create a LabelEncoder to transform categories into numeric labels
     le = LabelEncoder()
     numeric_categories = le.fit_transform(all_categories)
 
-    # Create dataset dictionary
     dataset_dict = {
         'text': texts,
         'labels': numeric_categories
@@ -82,13 +88,24 @@ def compute_metrics(eval_pred):
     predictions = np.argmax(predictions, axis=1)
     return accuracy.compute(predictions=predictions, references=labels)
 
+def predict_with_confidence(trainer, tokenizer, text, le):
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
+    with torch.no_grad():
+        logits = trainer.model(**inputs).logits
+    probabilities = torch.nn.functional.softmax(logits, dim=-1)
+    predicted_class = torch.argmax(probabilities, dim=1).item()
+    confidence = probabilities[0][predicted_class].item()
+    predicted_category = le.inverse_transform([predicted_class])[0]
+    return predicted_category, confidence
+
 def main(args):
+    check_hf_token()
+
     root_dir = 'documents'
     test_mode = args.test_mode
 
     dataset, le = create_dataset(root_dir, test_mode)
 
-    # Split dataset into train, validation, and test
     dataset = dataset.train_test_split(test_size=0.2)
     test_valid = dataset['test'].train_test_split(test_size=0.5)
     dataset_dict = DatasetDict({
@@ -129,21 +146,27 @@ def main(args):
 
     trainer.train()
 
-    # Evaluate on test set
     results = trainer.evaluate(tokenized_dataset['test'])
-    print(results)
+    print("Test results:", results)
 
-    # Example of prediction
-    text = "This is a sample text to classify."
-    inputs = tokenizer(text, return_tensors="pt")
-    with torch.no_grad():
-        logits = model(**inputs).logits
-    predicted_class = torch.argmax(logits, dim=1).item()
-    predicted_category = le.inverse_transform([predicted_class])[0]
-    print(f"Predicted category: {predicted_category}")
+    # Example predictions
+    example_texts = [
+        "This is a sample text to classify.",
+        "Another example of unknown text.",
+        "A text that might be from LRH in the 1950s."
+    ]
+
+    confidence_threshold = 0.7  # Set your desired threshold
+
+    for text in example_texts:
+        predicted_category, confidence = predict_with_confidence(trainer, tokenizer, text, le)
+        if confidence < confidence_threshold:
+            print(f"Text: '{text[:50]}...' | Prediction: Possibly Unknown | Confidence: {confidence:.2f}")
+        else:
+            print(f"Text: '{text[:50]}...' | Prediction: {predicted_category} | Confidence: {confidence:.2f}")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Multi-Class Text Classification')
+    parser = argparse.ArgumentParser(description='Multi-Format Document Classification')
     parser.add_argument('-approach', choices=['discriminative'], required=True)
     parser.add_argument('-test_mode', action='store_true', help='Run in test mode with limited data')
     args = parser.parse_args()

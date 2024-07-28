@@ -5,6 +5,7 @@ backups/
 documents/
 venv/
 Ngram_classifier/
+Ngram_classifier.demo/
 
 # Andere zu ignorierende Dateien
 
