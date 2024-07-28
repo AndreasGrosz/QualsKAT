@@ -12,7 +12,11 @@ import evaluate
 from sklearn.preprocessing import LabelEncoder
 from nltk.tokenize import sent_tokenize, word_tokenize
 import argparse
-import textract
+import docx
+from pypdf import PdfReader
+import pptx
+import xlrd
+
 
 # Set NLTK data path
 nltk.data.path.append("./nltk_data")
@@ -30,12 +34,29 @@ def check_hf_token():
         raise ValueError("Invalid Hugging Face API token. Please check the token and try again.")
 
 def extract_text_from_file(file_path):
-    try:
-        text = textract.process(file_path).decode('utf-8')
-        return text
-    except Exception as e:
-        print(f"Error processing file {file_path}: {str(e)}")
+    if file_path.endswith('.txt'):
+        with open(file_path, 'r', encoding='utf-8') as file:
+            return file.read()
+    elif file_path.endswith('.docx'):
+        doc = docx.Document(file_path)
+        return ' '.join([para.text for para in doc.paragraphs])
+    elif file_path.endswith('.pdf'):
+        reader = PdfReader(file_path)
+        return ' '.join([page.extract_text() for page in reader.pages])
+    elif file_path.endswith('.pptx'):
+        ppt = pptx.Presentation(file_path)
+        return ' '.join([shape.text for slide in ppt.slides for shape in slide.shapes if hasattr(shape, 'text')])
+    elif file_path.endswith('.xlsx') or file_path.endswith('.xls'):
+        workbook = xlrd.open_workbook(file_path)
+        return ' '.join([sheet.cell_value(row, col)
+                         for sheet in workbook.sheets()
+                         for row in range(sheet.nrows)
+                         for col in range(sheet.ncols)
+                         if sheet.cell_value(row, col)])
+    else:
+        print(f"Unsupported file type: {file_path}")
         return None
+
 
 def get_files_and_categories(root_dir, test_mode=False):
     files_and_categories = []
