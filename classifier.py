@@ -16,6 +16,11 @@ import docx
 from pypdf import PdfReader
 import pptx
 import xlrd
+import logging
+
+# Konfiguriere Logging
+logging.basicConfig(filename='file_errors.log', level=logging.ERROR,
+                    format='%(asctime)s %(levelname)s:%(message)s')
 
 
 # Set NLTK data path
@@ -33,29 +38,39 @@ def check_hf_token():
     except HTTPError as e:
         raise ValueError("Invalid Hugging Face API token. Please check the token and try again.")
 
+
 def extract_text_from_file(file_path):
-    if file_path.endswith('.txt'):
-        with open(file_path, 'r', encoding='utf-8') as file:
-            return file.read()
-    elif file_path.endswith('.docx'):
-        doc = docx.Document(file_path)
-        return ' '.join([para.text for para in doc.paragraphs])
-    elif file_path.endswith('.pdf'):
-        reader = PdfReader(file_path)
-        return ' '.join([page.extract_text() for page in reader.pages])
-    elif file_path.endswith('.pptx'):
-        ppt = pptx.Presentation(file_path)
-        return ' '.join([shape.text for slide in ppt.slides for shape in slide.shapes if hasattr(shape, 'text')])
-    elif file_path.endswith('.xlsx') or file_path.endswith('.xls'):
-        workbook = xlrd.open_workbook(file_path)
-        return ' '.join([sheet.cell_value(row, col)
-                         for sheet in workbook.sheets()
-                         for row in range(sheet.nrows)
-                         for col in range(sheet.ncols)
-                         if sheet.cell_value(row, col)])
-    else:
-        print(f"Unsupported file type: {file_path}")
-        return None
+    encodings = ['utf-8', 'latin-1', 'iso-8859-1']
+
+    for encoding in encodings:
+        try:
+            if file_path.endswith('.txt'):
+                with open(file_path, 'r', encoding=encoding) as file:
+                    return file.read()
+            elif file_path.endswith('.docx'):
+                doc = docx.Document(file_path)
+                return ' '.join([para.text for para in doc.paragraphs])
+            elif file_path.endswith('.pdf'):
+                reader = PdfReader(file_path)
+                return ' '.join([page.extract_text() for page in reader.pages])
+            elif file_path.endswith('.pptx'):
+                ppt = pptx.Presentation(file_path)
+                return ' '.join([shape.text for slide in ppt.slides for shape in slide.shapes if hasattr(shape, 'text')])
+            elif file_path.endswith('.xlsx') or file_path.endswith('.xls'):
+                workbook = xlrd.open_workbook(file_path)
+                return ' '.join([sheet.cell_value(row, col)
+                                 for sheet in workbook.sheets()
+                                 for row in range(sheet.nrows)
+                                 for col in range(sheet.ncols)
+                                 if sheet.cell_value(row, col)])
+            else:
+                print(f"Unsupported file type: {file_path}")
+                return None
+        except UnicodeDecodeError as e:
+            logging.error(f"UnicodeDecodeError for file {file_path} with encoding {encoding}: {e}")
+            continue
+    logging.error(f"Unable to read the file {file_path} with supported encodings.")
+    return None
 
 
 def get_files_and_categories(root_dir, test_mode=False):
@@ -84,7 +99,7 @@ def create_dataset(root_dir, test_mode=False):
         text = extract_text_from_file(file_path)
         if text:
             if test_mode:
-                text = text[:1000]  # Limit to first 1000 characters in test mode
+                text = text[:10000]  # Limit to first 1000 characters in test mode
             texts.append(text)
             all_categories.append("-".join(categories))
 
