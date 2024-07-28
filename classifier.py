@@ -22,7 +22,6 @@ import logging
 logging.basicConfig(filename='file_errors.log', level=logging.ERROR,
                     format='%(asctime)s %(levelname)s:%(message)s')
 
-
 # Set NLTK data path
 nltk.data.path.append("./nltk_data")
 
@@ -40,37 +39,54 @@ def check_hf_token():
 
 
 def extract_text_from_file(file_path):
-    encodings = ['utf-8', 'latin-1', 'iso-8859-1']
+    encodings = ['utf-8', 'latin-1', 'iso-8859-1', 'windows-1252', 'iso-8859-15', 'mac_roman']
 
-    for encoding in encodings:
-        try:
-            if file_path.endswith('.txt'):
+    if file_path.endswith('.txt'):
+        # Spezifische Behandlung für .txt Dateien
+        for encoding in encodings:
+            try:
                 with open(file_path, 'r', encoding=encoding) as file:
                     return file.read()
-            elif file_path.endswith('.docx'):
-                doc = docx.Document(file_path)
-                return ' '.join([para.text for para in doc.paragraphs])
-            elif file_path.endswith('.pdf'):
-                reader = PdfReader(file_path)
-                return ' '.join([page.extract_text() for page in reader.pages])
-            elif file_path.endswith('.pptx'):
-                ppt = pptx.Presentation(file_path)
-                return ' '.join([shape.text for slide in ppt.slides for shape in slide.shapes if hasattr(shape, 'text')])
-            elif file_path.endswith('.xlsx') or file_path.endswith('.xls'):
-                workbook = xlrd.open_workbook(file_path)
-                return ' '.join([sheet.cell_value(row, col)
-                                 for sheet in workbook.sheets()
-                                 for row in range(sheet.nrows)
-                                 for col in range(sheet.ncols)
-                                 if sheet.cell_value(row, col)])
-            else:
-                print(f"Unsupported file type: {file_path}")
-                return None
-        except UnicodeDecodeError as e:
-            logging.error(f"UnicodeDecodeError for file {file_path} with encoding {encoding}: {e}")
-            continue
-    logging.error(f"Unable to read the file {file_path} with supported encodings.")
-    return None
+            except UnicodeDecodeError as e:
+                logging.error(f"UnicodeDecodeError for file {file_path} with encoding {encoding}: {e}")
+        logging.error(f"Unable to read the .txt file {file_path} with supported encodings.")
+        return None
+    elif file_path.endswith('.docx'):
+        try:
+            doc = docx.Document(file_path)
+            return ' '.join([para.text for para in doc.paragraphs])
+        except Exception as e:
+            logging.error(f"Error reading .docx file {file_path}: {e}")
+            return None
+    elif file_path.endswith('.pdf'):
+        try:
+            reader = PdfReader(file_path)
+            return ' '.join([page.extract_text() for page in reader.pages])
+        except Exception as e:
+            logging.error(f"Error reading .pdf file {file_path}: {e}")
+            return None
+    elif file_path.endswith('.pptx'):
+        try:
+            ppt = pptx.Presentation(file_path)
+            return ' '.join([shape.text for slide in ppt.slides for shape in slide.shapes if hasattr(shape, 'text')])
+        except Exception as e:
+            logging.error(f"Error reading .pptx file {file_path}: {e}")
+            return None
+    elif file_path.endswith('.xlsx') or file_path.endswith('.xls'):
+        try:
+            workbook = xlrd.open_workbook(file_path)
+            return ' '.join([sheet.cell_value(row, col)
+                             for sheet in workbook.sheets()
+                             for row in range(sheet.nrows)
+                             for col in range(sheet.ncols)
+                             if sheet.cell_value(row, col)])
+        except Exception as e:
+            logging.error(f"Error reading Excel file {file_path}: {e}")
+            return None
+    else:
+        logging.error(f"Unsupported file type: {file_path}")
+        return None
+
 
 
 def get_files_and_categories(root_dir, test_mode=False):
