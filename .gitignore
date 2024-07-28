@@ -1,0 +1,11 @@
+# Ignoriere diese Verzeichnisse
+nltk_data/
+.git/
+backups/
+documents/
+venv/
+Ngram_classifier/
+
+# Andere zu ignorierende Dateien
+
+
