@@ -17,6 +17,11 @@ from pypdf import PdfReader
 import pptx
 import xlrd
 import logging
+import time
+from bs4 import BeautifulSoup
+import striprtf.striprtf as striprtf
+
+
 
 # Konfiguriere Logging
 logging.basicConfig(filename='file_errors.log', level=logging.ERROR,
@@ -83,15 +88,31 @@ def extract_text_from_file(file_path):
         except Exception as e:
             logging.error(f"Error reading Excel file {file_path}: {e}")
             return None
+        elif file_path.endswith('.rtf'):
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                rtf_text = file.read()
+                return striprtf.striprtf(rtf_text)
+        except Exception as e:
+            logging.error(f"Error reading .rtf file {file_path}: {e}")
+            return None
+
+    elif file_path.endswith('.html') or file_path.endswith('.htm'):
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                soup = BeautifulSoup(file, 'html.parser')
+                return soup.get_text()
+        except Exception as e:
+            logging.error(f"Error reading HTML file {file_path}: {e}")
+            return None
+
     else:
         logging.error(f"Unsupported file type: {file_path}")
         return None
 
-
-
 def get_files_and_categories(root_dir, test_mode=False):
     files_and_categories = []
-    supported_formats = ['.txt', '.doc', '.docx', '.rtf', '.pdf']
+    supported_formats = ['.txt', '.doc', '.docx', '.rtf', '.pdf', '.html', '.htm']
 
     for root, dirs, files in os.walk(root_dir):
         for file in files:
@@ -117,7 +138,7 @@ def create_dataset(root_dir, test_mode=False):
             if test_mode:
                 text = text[:10000]  # Limit to first 10000 characters in test mode
             texts.append(text)
-            all_categories.extend(categories)  # This is now a list of single items
+            all_categories.append(categories[0])  # Nehmen Sie nur die erste Kategorie
 
     le = LabelEncoder()
     numeric_categories = le.fit_transform(all_categories)
@@ -151,6 +172,9 @@ def predict_with_confidence(trainer, tokenizer, text, le):
     return predicted_category, confidence
 
 def main(args):
+    start_time = time.time()
+    print(f"Script started at: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}")
+
     check_hf_token()
 
     root_dir = 'documents'
@@ -216,6 +240,9 @@ def main(args):
             print(f"Text: '{text[:50]}...' | Prediction: Possibly Unknown | Confidence: {confidence:.2f}")
         else:
             print(f"Text: '{text[:50]}...' | Prediction: {predicted_category} | Confidence: {confidence:.2f}")
+    end_time = time.time()
+    print(f"Script ended at: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(end_time))}")
+    print(f"Total runtime: {end_time - start_time:.2f} seconds")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Multi-Format Document Classification')
