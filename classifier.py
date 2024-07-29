@@ -115,9 +115,9 @@ def create_dataset(root_dir, test_mode=False):
         text = extract_text_from_file(file_path)
         if text:
             if test_mode:
-                text = text[:10000]  # Limit to first 1000 characters in test mode
+                text = text[:10000]  # Limit to first 10000 characters in test mode
             texts.append(text)
-            all_categories.append("-".join(categories))
+            all_categories.extend(categories)  # This is now a list of single items
 
     le = LabelEncoder()
     numeric_categories = le.fit_transform(all_categories)
