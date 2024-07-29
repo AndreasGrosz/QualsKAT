@@ -88,7 +88,7 @@ def extract_text_from_file(file_path):
         except Exception as e:
             logging.error(f"Error reading Excel file {file_path}: {e}")
             return None
-        elif file_path.endswith('.rtf'):
+    elif file_path.endswith('.rtf'):
         try:
             with open(file_path, 'r', encoding='utf-8') as file:
                 rtf_text = file.read()
