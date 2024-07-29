@@ -70,6 +70,7 @@ six==1.16.0
 sortedcontainers==2.4.0
 soupsieve==2.5
 SpeechRecognition==3.8.1
+striprtf==0.0.26
 sympy==1.13.1
 threadpoolctl==3.5.0
 tokenizers==0.19.1
