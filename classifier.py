@@ -283,11 +283,13 @@ def main(args):
 
     root_dir = 'documents'
     test_mode = args.test_mode
+    model_path = "Multi_Class_Classifier"
 
-    if not args.checkthis:
-        # Sammeln und Ausgeben der Kategoriegrößen
-        category_sizes = collect_category_sizes(root_dir)
-        print_category_sizes(category_sizes)
+    if args.checkthis:
+        if not os.path.exists(model_path):
+            print("Trainiertes Modell nicht gefunden. Bitte führen Sie zuerst das Training durch mit:")
+            print("python classifier.py -approach discriminative")
+            return
 
     dataset, le = create_dataset(root_dir, test_mode)
 
@@ -330,9 +332,17 @@ def main(args):
     )
 
     if not args.checkthis:
+        # Sammeln und Ausgeben der Kategoriegrößen
+        category_sizes = collect_category_sizes(root_dir)
+        print_category_sizes(category_sizes)
+
         trainer.train()
         results = trainer.evaluate(tokenized_dataset['test'])
         print("Test results:", results)
+
+        # Speichern des trainierten Modells
+        trainer.save_model(model_path)
+        tokenizer.save_pretrained(model_path)
 
         example_texts = [
             "The tech of auditing involves the use of an E-meter to locate areas of spiritual distress.",
@@ -349,8 +359,18 @@ def main(args):
             print()
     else:
         # Laden des trainierten Modells
-        trainer.model = AutoModelForSequenceClassification.from_pretrained("Multi_Class_Classifier")
-        check_files(trainer, tokenizer, le)
+        if os.path.exists(model_path):
+            model = AutoModelForSequenceClassification.from_pretrained(model_path)
+            tokenizer = AutoTokenizer.from_pretrained(model_path)
+            trainer = Trainer(
+                model=model,
+                args=training_args,
+                tokenizer=tokenizer,
+            )
+            check_files(trainer, tokenizer, le)
+        else:
+            print(f"Trainiertes Modell nicht gefunden in {model_path}. Bitte führen Sie zuerst das Training durch.")
+            return
 
     end_time = time.time()
     print(f"Script ended at: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(end_time))}")
