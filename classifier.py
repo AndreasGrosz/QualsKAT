@@ -20,8 +20,7 @@ import logging
 import time
 from bs4 import BeautifulSoup
 import striprtf.striprtf as striprtf
-
-
+from tqdm import tqdm
 
 # Konfiguriere Logging
 logging.basicConfig(filename='file_errors.log', level=logging.ERROR,
@@ -42,12 +41,10 @@ def check_hf_token():
     except HTTPError as e:
         raise ValueError("Invalid Hugging Face API token. Please check the token and try again.")
 
-
 def extract_text_from_file(file_path):
     encodings = ['utf-8', 'latin-1', 'iso-8859-1', 'windows-1252', 'iso-8859-15', 'mac_roman']
 
     if file_path.endswith('.txt'):
-        # Spezifische Behandlung für .txt Dateien
         for encoding in encodings:
             try:
                 with open(file_path, 'r', encoding=encoding) as file:
@@ -96,7 +93,6 @@ def extract_text_from_file(file_path):
         except Exception as e:
             logging.error(f"Error reading .rtf file {file_path}: {e}")
             return None
-
     elif file_path.endswith('.html') or file_path.endswith('.htm'):
         try:
             with open(file_path, 'r', encoding='utf-8') as file:
@@ -105,7 +101,6 @@ def extract_text_from_file(file_path):
         except Exception as e:
             logging.error(f"Error reading HTML file {file_path}: {e}")
             return None
-
     else:
         logging.error(f"Unsupported file type: {file_path}")
         return None
@@ -119,26 +114,73 @@ def get_files_and_categories(root_dir, test_mode=False):
             if any(file.endswith(fmt) for fmt in supported_formats):
                 file_path = os.path.join(root, file)
                 categories = os.path.relpath(root, root_dir).split(os.sep)
-                if 'unknown' in categories:
-                    categories = ['unknown']
-                files_and_categories.append((file_path, categories))
+
+                if categories[0] == "LRH":
+                    # LRH mit Unterkategorien
+                    category = f"LRH-{'-'.join(categories[1:])}"
+                elif categories[0] == "unknown":
+                    category = "unknown"
+                else:
+                    # Potenzielle Ghostwriter
+                    category = f"Ghostwriter-{categories[0]}"
+
+                files_and_categories.append((file_path, category))
 
                 if test_mode and len(files_and_categories) >= 10:
                     return files_and_categories
     return files_and_categories
+
+def collect_category_sizes(root_dir):
+    category_sizes = {}
+    files_and_categories = get_files_and_categories(root_dir)
+
+    for file_path, category in tqdm(files_and_categories, desc="Sammle Kategoriegrößen"):
+        text = extract_text_from_file(file_path)
+        if text:
+            size = len(text.encode('utf-8'))  # Größe in Bytes
+            if category in category_sizes:
+                category_sizes[category] += size
+            else:
+                category_sizes[category] = size
+
+    return category_sizes
+
+def print_category_sizes(category_sizes):
+    print("Kategorien und ihre Größen:")
+
+    lrh_total = 0
+    ghostwriter_total = 0
+    unknown_total = 0
+
+    for category, size in sorted(category_sizes.items()):
+        print(f"{category}: {size} Bytes")
+        if category.startswith("LRH"):
+            lrh_total += size
+        elif category.startswith("Ghostwriter"):
+            ghostwriter_total += size
+        elif category == "unknown":
+            unknown_total += size
+
+    print("\nZusammenfassung:")
+    print(f"LRH Gesamt: {lrh_total} Bytes")
+    print(f"Ghostwriter Gesamt: {ghostwriter_total} Bytes")
+    print(f"Unbekannt Gesamt: {unknown_total} Bytes")
+    print(f"Gesamtzahl der Kategorien: {len(category_sizes)}")
+    print(f"Gesamtgröße aller Kategorien: {sum(category_sizes.values())} Bytes")
+    print()
 
 def create_dataset(root_dir, test_mode=False):
     files_and_categories = get_files_and_categories(root_dir, test_mode)
     texts = []
     all_categories = []
 
-    for file_path, categories in files_and_categories:
+    for file_path, category in files_and_categories:
         text = extract_text_from_file(file_path)
         if text:
             if test_mode:
                 text = text[:10000]  # Limit to first 10000 characters in test mode
             texts.append(text)
-            all_categories.append(categories[0])  # Nehmen Sie nur die erste Kategorie
+            all_categories.append(category)
 
     le = LabelEncoder()
     numeric_categories = le.fit_transform(all_categories)
@@ -161,15 +203,17 @@ def compute_metrics(eval_pred):
     predictions = np.argmax(predictions, axis=1)
     return accuracy.compute(predictions=predictions, references=labels)
 
-def predict_with_confidence(trainer, tokenizer, text, le):
+def predict_top_n(trainer, tokenizer, text, le, n=3):
     inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
     with torch.no_grad():
         logits = trainer.model(**inputs).logits
     probabilities = torch.nn.functional.softmax(logits, dim=-1)
-    predicted_class = torch.argmax(probabilities, dim=1).item()
-    confidence = probabilities[0][predicted_class].item()
-    predicted_category = le.inverse_transform([predicted_class])[0]
-    return predicted_category, confidence
+    top_n_prob, top_n_indices = torch.topk(probabilities, n)
+    results = []
+    for prob, idx in zip(top_n_prob[0], top_n_indices[0]):
+        category = le.inverse_transform([idx.item()])[0]
+        results.append((category, prob.item()))
+    return results
 
 def main(args):
     start_time = time.time()
@@ -179,6 +223,10 @@ def main(args):
 
     root_dir = 'documents'
     test_mode = args.test_mode
+
+    # Sammeln und Ausgeben der Kategoriegrößen
+    category_sizes = collect_category_sizes(root_dir)
+    print_category_sizes(category_sizes)
 
     dataset, le = create_dataset(root_dir, test_mode)
 
@@ -206,7 +254,7 @@ def main(args):
         per_device_eval_batch_size=16,
         num_train_epochs=3,
         weight_decay=0.01,
-        evaluation_strategy="epoch",
+        eval_strategy="epoch",
         save_strategy="epoch",
         load_best_model_at_end=True,
     )
@@ -225,21 +273,20 @@ def main(args):
     results = trainer.evaluate(tokenized_dataset['test'])
     print("Test results:", results)
 
-    # Example predictions
     example_texts = [
-        "This is a sample text to classify.",
-        "Another example of unknown text.",
-        "A text that might be from LRH in the 1950s."
+        "The tech of auditing involves the use of an E-meter to locate areas of spiritual distress.",
+        "In the 1950s, LRH gave lectures on Dianetics and the fundamentals of Scientology.",
+        "David Mayo was known for his contributions to the upper levels of Scientology tech.",
+        "This is an unknown text that doesn't clearly belong to any specific author.",
     ]
 
-    confidence_threshold = 0.7  # Set your desired threshold
-
     for text in example_texts:
-        predicted_category, confidence = predict_with_confidence(trainer, tokenizer, text, le)
-        if confidence < confidence_threshold:
-            print(f"Text: '{text[:50]}...' | Prediction: Possibly Unknown | Confidence: {confidence:.2f}")
-        else:
-            print(f"Text: '{text[:50]}...' | Prediction: {predicted_category} | Confidence: {confidence:.2f}")
+        top_predictions = predict_top_n(trainer, tokenizer, text, le)
+        print(f"Text: '{text[:50]}...'")
+        for category, confidence in top_predictions:
+            print(f"  {category}: {confidence:.2f}")
+        print()
+
     end_time = time.time()
     print(f"Script ended at: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(end_time))}")
     print(f"Total runtime: {end_time - start_time:.2f} seconds")
