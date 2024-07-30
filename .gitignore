@@ -1,12 +1,26 @@
 # Ignoriere diese Verzeichnisse
-nltk_data/
 .git/
 backups/
 documents/
+Documents
 venv/
-Ngram_classifier/
-Ngram_classifier.demo/
+models/
+output/
 
-# Andere zu ignorierende Dateien
+# Andere zu ignorierende Dateien:
 
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
 
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore environment-specific files
+.env
+venv/
+*.log
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
