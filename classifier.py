@@ -356,6 +356,7 @@ def main(args):
     print(f"Script ended at: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(end_time))}")
     print(f"Total runtime: {end_time - start_time:.2f} seconds")
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Multi-Format Document Classification')
     parser.add_argument('-approach', choices=['discriminative'], required=False)
