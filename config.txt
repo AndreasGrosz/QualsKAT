@@ -1,0 +1,14 @@
+[Paths]
+documents = documents
+check_this = CheckThis
+output = output
+models = models
+
+[Training]
+batch_size = 16
+learning_rate = 2e-5
+num_epochs = 3
+
+[Model]
+model_name = distilbert-base-uncased
+#model_name = distilbert-base-uncased,roberta-base,albert-base-v2
