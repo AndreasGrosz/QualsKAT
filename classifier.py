@@ -88,18 +88,27 @@ def check_hf_token():
         raise ValueError("Invalid Hugging Face API token. Please check the token and try again.")
 
 def extract_text_from_file(file_path):
-    try:
-        if file_path.endswith('.txt'):
-            with open(file_path, 'r', encoding='utf-8') as file:
-                return file.read()
-        elif file_path.endswith('.rtf'):
-            return handle_rtf_error(file_path)
-        # Fügen Sie hier weitere Dateitypen hinzu, wenn nötig
-        else:
-            logging.error(f"Unsupported file type: {file_path}")
+    encodings = ['utf-8', 'iso-8859-1', 'windows-1252']
+
+    if file_path.endswith('.txt'):
+        for encoding in encodings:
+            try:
+                with open(file_path, 'r', encoding=encoding) as file:
+                    return file.read()
+            except UnicodeDecodeError:
+                continue
+        logging.error(f"Konnte {file_path} mit keinem der versuchten Encodings lesen.")
+        return None
+    elif file_path.endswith('.rtf'):
+        return handle_rtf_error(file_path)
+    elif file_path.endswith('.doc') or file_path.endswith('.docx'):
+        try:
+            return docx2txt.process(file_path)
+        except Exception as e:
+            logging.error(f"Error reading .doc/.docx file {file_path}: {str(e)}")
             return None
-    except Exception as e:
-        logging.error(f"Error reading file {file_path}: {str(e)}")
+    else:
+        logging.error(f"Unsupported file type: {file_path}")
         return None
 
 def handle_rtf_error(file_path):
@@ -115,7 +124,7 @@ def handle_rtf_error(file_path):
 def get_files_and_categories(config):
     root_dir = config['Paths']['documents']
     files_and_categories = []
-    supported_formats = ['.txt', '.rtf']  # Erweitern Sie diese Liste bei Bedarf
+    supported_formats = ['.txt', '.rtf', '.doc', '.docx']
 
     for root, _, files in os.walk(root_dir):
         for file in files:
@@ -216,7 +225,8 @@ def predict_top_n(trainer, tokenizer, text, le, n=3):
 def analyze_new_article(file_path, trainer, tokenizer, le):
     text = extract_text_from_file(file_path)
 
-    if text is None:
+    if text is None or len(text) == 0:
+        logging.warning(f"Konnte Text aus {file_path} nicht extrahieren oder Text ist leer.")
         return None
 
     file_size = len(text.encode('utf-8'))
@@ -225,7 +235,14 @@ def analyze_new_article(file_path, trainer, tokenizer, le):
     lrh_probability = sum(conf for cat, conf in top_predictions if cat.startswith("LRH"))
     ghostwriter_probability = sum(conf for cat, conf in top_predictions if cat.startswith("Ghostwriter"))
 
-    conclusion = "Wahrscheinlich LRH" if lrh_probability > ghostwriter_probability else "Wahrscheinlich nicht LRH"
+    # Neue Logik für die Schlussfolgerung
+    threshold = 0.1  # 10% Unterschied als Schwellenwert
+    if abs(lrh_probability - ghostwriter_probability) < threshold:
+        conclusion = "Nicht eindeutig"
+    elif lrh_probability > ghostwriter_probability:
+        conclusion = "Wahrscheinlich LRH"
+    else:
+        conclusion = "Wahrscheinlich Ghostwriter"
 
     return {
         "Dateiname": os.path.basename(file_path),
@@ -251,9 +268,15 @@ def check_files(trainer, tokenizer, le, config):
     results = []
     for file in files:
         file_path = os.path.join(check_folder, file)
+        logging.info(f"Analysiere Datei: {file}")
         result = analyze_new_article(file_path, trainer, tokenizer, le)
         if result:
             results.append(result)
+            logging.info(f"Ergebnis für {file}: LRH: {result['LRH Wahrscheinlichkeit']}, "
+                         f"Ghostwriter: {result['Ghostwriter Wahrscheinlichkeit']}, "
+                         f"Schlussfolgerung: {result['Schlussfolgerung']}")
+        else:
+            logging.warning(f"Konnte keine Analyse für {file} durchführen.")
 
     csv_filename = os.path.join(config['Paths']['output'], "CheckThisResults.csv")
     with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
