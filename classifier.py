@@ -21,6 +21,9 @@ import time
 from bs4 import BeautifulSoup
 import striprtf.striprtf as striprtf
 from tqdm import tqdm
+from tabulate import tabulate
+from datetime import date
+
 
 # Konfiguriere Logging
 logging.basicConfig(filename='file_errors.log', level=logging.ERROR,
@@ -215,6 +218,63 @@ def predict_top_n(trainer, tokenizer, text, le, n=3):
         results.append((category, prob.item()))
     return results
 
+def analyze_new_article(file_path, trainer, tokenizer, le):
+    text = extract_text_from_file(file_path)
+
+    if text is None:
+        return None
+
+    file_size = len(text.encode('utf-8'))
+    top_predictions = predict_top_n(trainer, tokenizer, text, le, n=5)
+
+    lrh_probability = sum(conf for cat, conf in top_predictions if cat.startswith("LRH"))
+    ghostwriter_probability = sum(conf for cat, conf in top_predictions if cat.startswith("Ghostwriter"))
+
+    conclusion = "Wahrscheinlich LRH" if lrh_probability > ghostwriter_probability else "Wahrscheinlich nicht LRH"
+
+    return {
+        "Dateiname": os.path.basename(file_path),
+        "Dateigröße (Bytes)": file_size,
+        "Datum": date.today().strftime("%Y-%m-%d"),
+        "LRH Wahrscheinlichkeit": f"{lrh_probability:.2f}",
+        "Ghostwriter Wahrscheinlichkeit": f"{ghostwriter_probability:.2f}",
+        "Schlussfolgerung": conclusion
+    }
+
+def check_files(trainer, tokenizer, le):
+    check_folder = "CheckThis"
+    if not os.path.exists(check_folder):
+        print(f"Der Ordner '{check_folder}' existiert nicht.")
+        return
+
+    files = [f for f in os.listdir(check_folder) if os.path.isfile(os.path.join(check_folder, f))]
+
+    if not files:
+        print(f"Keine Dateien im Ordner '{check_folder}' gefunden.")
+        return
+
+    results = []
+    for file in files:
+        file_path = os.path.join(check_folder, file)
+        result = analyze_new_article(file_path, trainer, tokenizer, le)
+        if result:
+            results.append(result)
+
+    # Ausgabe in CSV-Datei
+    csv_filename = "CheckThisResults.csv"
+    with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
+        fieldnames = results[0].keys()
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for result in results:
+            writer.writerow(result)
+
+    print(f"Ergebnisse wurden in {csv_filename} gespeichert.")
+
+    lrh_count = sum(1 for r in results if r["Schlussfolgerung"] == "Wahrscheinlich LRH")
+    print(f"\nZusammenfassung: {len(results)} Dateien analysiert, {lrh_count} wahrscheinlich von LRH.")
+
+
 def main(args):
     start_time = time.time()
     print(f"Script started at: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}")
@@ -224,9 +284,10 @@ def main(args):
     root_dir = 'documents'
     test_mode = args.test_mode
 
-    # Sammeln und Ausgeben der Kategoriegrößen
-    category_sizes = collect_category_sizes(root_dir)
-    print_category_sizes(category_sizes)
+    if not args.checkthis:
+        # Sammeln und Ausgeben der Kategoriegrößen
+        category_sizes = collect_category_sizes(root_dir)
+        print_category_sizes(category_sizes)
 
     dataset, le = create_dataset(root_dir, test_mode)
 
@@ -254,7 +315,7 @@ def main(args):
         per_device_eval_batch_size=16,
         num_train_epochs=3,
         weight_decay=0.01,
-        eval_strategy="epoch",
+        evaluation_strategy="epoch",
         save_strategy="epoch",
         load_best_model_at_end=True,
     )
@@ -268,24 +329,28 @@ def main(args):
         compute_metrics=compute_metrics
     )
 
-    trainer.train()
+    if not args.checkthis:
+        trainer.train()
+        results = trainer.evaluate(tokenized_dataset['test'])
+        print("Test results:", results)
 
-    results = trainer.evaluate(tokenized_dataset['test'])
-    print("Test results:", results)
+        example_texts = [
+            "The tech of auditing involves the use of an E-meter to locate areas of spiritual distress.",
+            "In the 1950s, LRH gave lectures on Dianetics and the fundamentals of Scientology.",
+            "David Mayo was known for his contributions to the upper levels of Scientology tech.",
+            "This is an unknown text that doesn't clearly belong to any specific author.",
+        ]
 
-    example_texts = [
-        "The tech of auditing involves the use of an E-meter to locate areas of spiritual distress.",
-        "In the 1950s, LRH gave lectures on Dianetics and the fundamentals of Scientology.",
-        "David Mayo was known for his contributions to the upper levels of Scientology tech.",
-        "This is an unknown text that doesn't clearly belong to any specific author.",
-    ]
-
-    for text in example_texts:
-        top_predictions = predict_top_n(trainer, tokenizer, text, le)
-        print(f"Text: '{text[:50]}...'")
-        for category, confidence in top_predictions:
-            print(f"  {category}: {confidence:.2f}")
-        print()
+        for text in example_texts:
+            top_predictions = predict_top_n(trainer, tokenizer, text, le)
+            print(f"Text: '{text[:50]}...'")
+            for category, confidence in top_predictions:
+                print(f"  {category}: {confidence:.2f}")
+            print()
+    else:
+        # Laden des trainierten Modells
+        trainer.model = AutoModelForSequenceClassification.from_pretrained("Multi_Class_Classifier")
+        check_files(trainer, tokenizer, le)
 
     end_time = time.time()
     print(f"Script ended at: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(end_time))}")
@@ -293,7 +358,8 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Multi-Format Document Classification')
-    parser.add_argument('-approach', choices=['discriminative'], required=True)
+    parser.add_argument('-approach', choices=['discriminative'], required=False)
     parser.add_argument('-test_mode', action='store_true', help='Run in test mode with limited data')
+    parser.add_argument('-checkthis', action='store_true', help='Analyze files in the CheckThis folder')
     args = parser.parse_args()
     main(args)
