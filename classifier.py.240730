@@ -8,12 +8,10 @@ from datetime import date
 import torch
 import numpy as np
 from datasets import Dataset, DatasetDict
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, DataCollatorWithPadding
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer
 from sklearn.preprocessing import LabelEncoder
 from huggingface_hub import HfApi
 from requests.exceptions import HTTPError
-import docx2txt
-from striprtf.striprtf import rtf_to_text
 
 # Konfiguration des Loggings
 logging.basicConfig(level=logging.INFO,
@@ -117,6 +115,7 @@ def handle_rtf_error(file_path):
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
             rtf_text = file.read()
+            from striprtf.striprtf import rtf_to_text
             return rtf_to_text(rtf_text)
     except Exception as e:
         logging.error(f"Error reading .rtf file {file_path}: {str(e)}")
@@ -195,20 +194,12 @@ def setup_model_and_trainer(dataset_dict, num_labels, config, model_name):
     else:
         eval_dataset = dataset_dict['validation']
 
-    def tokenize_function(examples):
-        return tokenizer(examples["text"], truncation=True, padding="max_length")
-
-    tokenized_datasets = dataset_dict.map(tokenize_function, batched=True)
-
-    data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
-
     trainer = Trainer(
         model=model,
         args=training_args,
-        train_dataset=tokenized_datasets['train'],
-        eval_dataset=tokenized_datasets['validation'] if 'validation' in tokenized_datasets else tokenized_datasets['test'],
+        train_dataset=dataset_dict['train'],
+        eval_dataset=eval_dataset,
         tokenizer=tokenizer,
-        data_collator=data_collator,
         compute_metrics=compute_metrics
     )
 
@@ -244,6 +235,7 @@ def analyze_new_article(file_path, trainer, tokenizer, le):
     lrh_probability = sum(conf for cat, conf in top_predictions if cat.startswith("LRH"))
     ghostwriter_probability = sum(conf for cat, conf in top_predictions if cat.startswith("Ghostwriter"))
 
+    # Neue Logik für die Schlussfolgerung
     threshold = 0.1  # 10% Unterschied als Schwellenwert
     if abs(lrh_probability - ghostwriter_probability) < threshold:
         conclusion = "Nicht eindeutig"
@@ -330,11 +322,6 @@ def main():
             start_time = time.time()
 
             tokenizer, trainer = setup_model_and_trainer(dataset_dict, len(le.classes_), config, model_name)
-
-            if not args.checkthis:
-                # Debugging der Daten
-                for batch in trainer.get_train_dataloader():
-                    logging.
 
             if not args.checkthis:
                 trainer.train()
