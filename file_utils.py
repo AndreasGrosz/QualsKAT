@@ -10,28 +10,155 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 from striprtf.striprtf import rtf_to_text
 import docx
+from analysis_utils import analyze_new_article
+
+
 
 def check_environment():
-    # ... (Der Rest der Funktion bleibt unverändert)
+    # Überprüfe, ob die Konfigurationsdatei existiert
+    if not os.path.exists('config.txt'):
+        raise FileNotFoundError("config.txt nicht gefunden. Bitte stellen Sie sicher, dass die Datei im aktuellen Verzeichnis liegt.")
+
+    # Lade die Konfiguration
+    config = configparser.ConfigParser()
+    config.read('config.txt')
+
+    # Überprüfe, ob alle erforderlichen Abschnitte und Schlüssel in der Konfiguration vorhanden sind
+    required_sections = ['Paths', 'Training', 'Model']
+    for section in required_sections:
+        if section not in config:
+            raise KeyError(f"Abschnitt '{section}' fehlt in der config.txt")
+
+    required_keys = {
+        'Paths': ['documents', 'check_this', 'output', 'models'],
+        'Training': ['batch_size', 'learning_rate', 'num_epochs'],
+        'Model': ['model_name']
+    }
+    for section, keys in required_keys.items():
+        for key in keys:
+            if key not in config[section]:
+                raise KeyError(f"Schlüssel '{key}' fehlt im Abschnitt '{section}' der config.txt")
+
+    # Überprüfe, ob die angegebenen Pfade existieren
+    for path_key in ['documents', 'check_this', 'output', 'models']:
+        path = config['Paths'][path_key]
+        if not os.path.exists(path):
+            try:
+                os.makedirs(path)
+                logging.info(f"Verzeichnis '{path}' wurde erstellt.")
+            except Exception as e:
+                raise OSError(f"Konnte Verzeichnis '{path}' nicht erstellen: {str(e)}")
+
+    # Überprüfe, ob es Dokumente im documents-Verzeichnis gibt
+    documents_path = config['Paths']['documents']
+    if not any(os.scandir(documents_path)):
+        raise FileNotFoundError(f"Keine Dateien im Verzeichnis '{documents_path}' gefunden.")
+
+    # Überprüfe, ob die angegebenen Modelle gültig sind
+    model_names = config['Model']['model_name'].split(',')
+    for model_name in model_names:
+        model_name = model_name.strip()
+        try:
+            AutoTokenizer.from_pretrained(model_name)
+            AutoModelForSequenceClassification.from_pretrained(model_name)
+        except Exception as e:
+            raise ValueError(f"Ungültiges oder nicht verfügbares Modell: {model_name}. Fehler: {str(e)}")
+
+    # Überprüfe GPU-Verfügbarkeit
+    if torch.cuda.is_available():
+        logging.info(f"GPU verfügbar: {torch.cuda.get_device_name(0)}")
+    else:
+        logging.warning("Keine GPU verfügbar. Das Training wird auf der CPU durchgeführt und kann sehr lange dauern.")
+
+    return config
 
 def check_hf_token():
-    # ... (Der Rest der Funktion bleibt unverändert)
+    hf_token = os.getenv("HUGGINGFACE_HUB_TOKEN")
+    if hf_token is None:
+        raise ValueError("Hugging Face API token is missing. Please set the environment variable 'HUGGINGFACE_HUB_TOKEN'.")
+    api = HfApi()
+    try:
+        api.whoami(token=hf_token)
+        logging.info("Hugging Face API token is valid.")
+    except HTTPError as e:
+        raise ValueError("Invalid Hugging Face API token. Please check the token and try again.")
+
+
+
+
 
 def check_files(trainer, tokenizer, le, config):
-    # ... (Der Rest der Funktion bleibt unverändert)
+    check_folder = config['Paths']['check_this']
+    if not os.path.exists(check_folder):
+        logging.error(f"Der Ordner '{check_folder}' existiert nicht.")
+        return
+
+    files = [f for f in os.listdir(check_folder) if os.path.isfile(os.path.join(check_folder, f))]
+
+    if not files:
+        logging.info(f"Keine Dateien im Ordner '{check_folder}' gefunden.")
+        return
+
+    results = []
+    for file in files:
+        file_path = os.path.join(check_folder, file)
+        logging.info(f"Analysiere Datei: {file}")
+        result = analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_file)
+        if result:
+            results.append(result)
+            logging.info(f"Ergebnis für {file}: LRH: {result['LRH Wahrscheinlichkeit']}, "
+                         f"Ghostwriter: {result['Ghostwriter Wahrscheinlichkeit']}, "
+                         f"Schlussfolgerung: {result['Schlussfolgerung']}")
+        else:
+            logging.warning(f"Konnte keine Analyse für {file} durchführen.")
+
+    if results:
+        csv_filename = os.path.join(config['Paths']['output'], "CheckThisResults.csv")
+        file_exists = os.path.exists(csv_filename)
+
+        with open(csv_filename, 'a', newline='', encoding='utf-8') as csvfile:
+            fieldnames = results[0].keys()
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+            if not file_exists:
+                writer.writeheader()
+
+            for result in results:
+                writer.writerow(result)
+
+        logging.info(f"Ergebnisse wurden an {csv_filename} angehängt.")
+
+
+    if results:
+        csv_filename = os.path.join(config['Paths']['output'], "CheckThisResults.csv")
+        with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
+            fieldnames = results[0].keys()
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+            for result in results:
+                writer.writerow(result)
+
+        logging.info(f"Ergebnisse wurden in {csv_filename} gespeichert.")
+
+        lrh_count = sum(1 for r in results if r["Schlussfolgerung"] == "Wahrscheinlich LRH")
+        logging.info(f"\nZusammenfassung: {len(results)} Dateien analysiert, {lrh_count} wahrscheinlich von LRH.")
+    else:
+        logging.info("Keine Ergebnisse zur Ausgabe.")
+
 
 def extract_text_from_file(file_path):
-    encodings = ['utf-8', 'iso-8859-1', 'windows-1252']
+    logging.info(f"Versuche Text zu extrahieren aus: {file_path}")
 
     if file_path.endswith('.txt'):
-        for encoding in encodings:
-            try:
-                with open(file_path, 'r', encoding=encoding) as file:
-                    return file.read()
-            except UnicodeDecodeError:
-                continue
-        logging.error(f"Konnte {file_path} mit keinem der versuchten Encodings lesen.")
-        return None
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                text = file.read()
+            logging.info(f"Erfolgreich gelesen: {file_path}")
+            return text
+        except Exception as e:
+            logging.error(f"Fehler beim Lesen von {file_path}: {str(e)}")
+            return None
+
     elif file_path.endswith('.rtf'):
         return handle_rtf_error(file_path)
     elif file_path.endswith('.docx') or file_path.endswith('.doc'):

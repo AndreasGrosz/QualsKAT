@@ -4,8 +4,8 @@ import time
 import os
 from data_processing import create_dataset
 from model_utils import setup_model_and_trainer
-from file_utils import check_environment, check_hf_token, check_files
 from datasets import DatasetDict
+from file_utils import check_environment, check_hf_token, check_files, extract_text_from_file
 
 def main():
     parser = argparse.ArgumentParser(description='LRH Document Classifier')
@@ -38,6 +38,7 @@ def main():
             start_time = time.time()
 
             tokenizer, trainer = setup_model_and_trainer(dataset_dict, len(le.classes_), config, model_name)
+            logging.info(f"Modell {model_name} erfolgreich geladen und Trainer eingerichtet.")
 
             if not args.checkthis:
                 trainer.train()

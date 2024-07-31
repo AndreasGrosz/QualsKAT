@@ -4,15 +4,17 @@ import os
 import logging
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, DataCollatorWithPadding
 from datetime import date
-from file_utils import extract_text_from_file
 
 def get_model_and_tokenizer(model_name, num_labels):
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
     return tokenizer, model
 
+
 def setup_model_and_trainer(dataset_dict, num_labels, config, model_name):
+    logging.info(f"Lade Modell und Tokenizer: {model_name}")
     tokenizer, model = get_model_and_tokenizer(model_name, num_labels)
+    logging.info(f"Modell und Tokenizer geladen: {model_name}")
 
     model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
     os.makedirs(model_save_path, exist_ok=True)
@@ -59,7 +61,9 @@ def compute_metrics(eval_pred):
     predictions = np.argmax(predictions, axis=1)
     return {'accuracy': (predictions == labels).astype(np.float32).mean().item()}
 
+
 def predict_top_n(trainer, tokenizer, text, le, n=3):
+    logging.info(f"Beginne Vorhersage für Text: {text[:50]}...")  # Zeigt die ersten 50 Zeichen
     inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
     with torch.no_grad():
         logits = trainer.model(**inputs).logits
@@ -69,34 +73,9 @@ def predict_top_n(trainer, tokenizer, text, le, n=3):
     for prob, idx in zip(top_n_prob[0], top_n_indices[0]):
         category = le.inverse_transform([idx.item()])[0]
         results.append((category, prob.item()))
+    logging.info(f"Vorhersageergebnisse: {results}")
     return results
 
-def analyze_new_article(file_path, trainer, tokenizer, le):
-    text = extract_text_from_file(file_path)
 
-    if text is None or len(text) == 0:
-        logging.warning(f"Konnte Text aus {file_path} nicht extrahieren oder Text ist leer.")
-        return None
 
-    file_size = len(text.encode('utf-8'))
-    top_predictions = predict_top_n(trainer, tokenizer, text, le, n=5)
-
-    lrh_probability = sum(conf for cat, conf in top_predictions if cat.startswith("LRH"))
-    ghostwriter_probability = sum(conf for cat, conf in top_predictions if cat.startswith("Ghostwriter"))
-
-    threshold = 0.1  # 10% Unterschied als Schwellenwert
-    if abs(lrh_probability - ghostwriter_probability) < threshold:
-        conclusion = "Nicht eindeutig"
-    elif lrh_probability > ghostwriter_probability:
-        conclusion = "Wahrscheinlich LRH"
-    else:
-        conclusion = "Wahrscheinlich Ghostwriter"
-
-    return {
-        "Dateiname": os.path.basename(file_path),
-        "Dateigröße (Bytes)": file_size,
-        "Datum": date.today().strftime("%Y-%m-%d"),
-        "LRH Wahrscheinlichkeit": f"{lrh_probability:.2f}",
-        "Ghostwriter Wahrscheinlichkeit": f"{ghostwriter_probability:.2f}",
-        "Schlussfolgerung": conclusion
-    }
+__all__ = ['get_model_and_tokenizer', 'setup_model_and_trainer', 'predict_top_n']
