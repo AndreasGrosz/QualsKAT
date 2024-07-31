@@ -46,6 +46,9 @@ def main():
         check_hf_token()
 
         dataset, le = create_dataset(config, quick=args.quick)
+        print("Verarbeitete Dokumente:")
+        for item in dataset:
+            print(f"  - {item['filename']}")
 
         if len(dataset) == 0:
             raise ValueError("Der erstellte Datensatz ist leer. Überprüfen Sie die Eingabedaten.")
@@ -69,14 +72,8 @@ def main():
             model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
 
             if args.train:
-                logging.info(f"Trainiere Modell: {model_name}")
-                tokenizer, trainer = setup_model_and_trainer(dataset_dict, len(le.classes_), config, model_name)
                 trainer.train()
-                print("Überprüfe die Struktur des Testdatensatzes vor der Evaluierung:")
-                print(dataset_dict['test'].features)
-                print("\nÜberprüfe die ersten Elemente des Testdatensatzes:")
-                print(dataset_dict['test'][0])
-                results = trainer.evaluate(dataset_dict['test'])
+                results = trainer.evaluate(eval_dataset=tokenized_datasets['test'])
                 logging.info(f"Testergebnisse für {model_name}: {results}")
 
                 # Speichere das Modell

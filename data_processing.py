@@ -32,18 +32,19 @@ def create_dataset(config, quick=False):
     files_and_categories = get_files_and_categories(config)
 
     if quick:
-        # Verwende nur 10% der Daten im Quick-Modus
         sample_size = max(1, int(len(files_and_categories) * 0.1))
         files_and_categories = random.sample(files_and_categories, sample_size)
 
     texts = []
     all_categories = []
+    filenames = []
 
     for file_path, category in files_and_categories:
         text = extract_text_from_file(file_path)
         if text:
             texts.append(text)
             all_categories.append(category)
+            filenames.append(os.path.basename(file_path))
 
     if not texts:
         raise ValueError("Keine Textdaten gefunden. Überprüfen Sie das Dokumentenverzeichnis.")
@@ -53,7 +54,8 @@ def create_dataset(config, quick=False):
 
     dataset_dict = {
         'text': texts,
-        'labels': numeric_categories
+        'labels': numeric_categories,
+        'filename': filenames
     }
 
     return Dataset.from_dict(dataset_dict), le

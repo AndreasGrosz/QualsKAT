@@ -17,9 +17,13 @@ def setup_model_and_trainer(dataset_dict, num_labels, config, model_name, quick=
     def tokenize_function(examples):
         return tokenizer(examples["text"], truncation=True, padding="max_length")
 
-    tokenized_datasets = dataset_dict.map(tokenize_function, batched=True, remove_columns=['text'])
+     tokenized_datasets = dataset_dict.map(tokenize_function, batched=True, remove_columns=dataset_dict["train"].column_names)
 
     # Überprüfen Sie die Struktur der tokenisierten Datensätze
+    print("Spalten nach der Tokenisierung:")
+    print(tokenized_datasets["train"].column_names)
+    print(tokenized_datasets["test"].column_names)
+
     print("Struktur des tokenisierten Trainingsdatensatzes:")
     print(tokenized_datasets['train'].features)
     print("Struktur des tokenisierten Testdatensatzes:")
@@ -61,17 +65,21 @@ def setup_model_and_trainer(dataset_dict, num_labels, config, model_name, quick=
 
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer, padding=True)
 
+    print("Verfügbare Schlüssel in tokenized_datasets:", tokenized_datasets.keys())
+    print("Struktur von tokenized_datasets['train']:", tokenized_datasets['train'].features)
+    print("Struktur von tokenized_datasets['test']:", tokenized_datasets['test'].features)
+
     trainer = Trainer(
         model=model,
         args=training_args,
         train_dataset=tokenized_datasets['train'],
-        eval_dataset=tokenized_datasets['validation'] if 'validation' in tokenized_datasets else tokenized_datasets['test'],
+        eval_dataset=tokenized_datasets['test'],
         tokenizer=tokenizer,
         data_collator=data_collator,
         compute_metrics=compute_metrics
     )
 
-    return tokenizer, trainer
+    return tokenizer, trainer, tokenized_datasets
 
 def compute_metrics(eval_pred):
     predictions, labels = eval_pred
