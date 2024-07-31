@@ -72,6 +72,7 @@ def check_environment():
 
     return config
 
+
 def check_hf_token():
     hf_token = os.getenv("HUGGINGFACE_HUB_TOKEN")
     if hf_token is None:
@@ -82,9 +83,6 @@ def check_hf_token():
         logging.info("Hugging Face API token is valid.")
     except HTTPError as e:
         raise ValueError("Invalid Hugging Face API token. Please check the token and try again.")
-
-
-
 
 
 def check_files(trainer, tokenizer, le, config):
@@ -111,7 +109,6 @@ def check_files(trainer, tokenizer, le, config):
                          f"Schlussfolgerung: {result['Schlussfolgerung']}")
         else:
             logging.warning(f"Konnte keine Analyse für {file} durchführen.")
-
     if results:
         csv_filename = os.path.join(config['Paths']['output'], "CheckThisResults.csv")
         file_exists = os.path.exists(csv_filename)
@@ -172,6 +169,7 @@ def extract_text_from_file(file_path):
         logging.error(f"Unsupported file type: {file_path}")
         return None
 
+
 def extract_text_from_old_doc(file_path):
     try:
         if olefile.isOleFile(file_path):
@@ -190,6 +188,7 @@ def extract_text_from_old_doc(file_path):
     except Exception as e:
         logging.error(f"Error reading old .doc file {file_path}: {str(e)}")
         return None
+
 
 def handle_rtf_error(file_path):
     try:

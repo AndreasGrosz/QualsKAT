@@ -38,7 +38,7 @@ def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_fil
     return {
         "Dateiname": os.path.basename(file_path),
         "Dateigröße (Bytes)": file_size,
-        "Datum": date.today().strftime("%Y-%m-%d"),
+        "Datum": datetime.now().strftime("%d-%m-%y %H:%M"),
         "LRH Wahrscheinlichkeit": f"{lrh_probability:.2f}",
         "Ghostwriter Wahrscheinlichkeit": f"{ghostwriter_probability:.2f}",
         "Schlussfolgerung": conclusion

@@ -1,16 +1,44 @@
-import argparse
-import logging
-import time
 import os
-from data_processing import create_dataset
-from model_utils import setup_model_and_trainer
-from datasets import DatasetDict
+import time
+import logging
+import configparser
+import argparse
+import sys
+import json
+from datetime import date
+import torch
+import numpy as np
+from datasets import Dataset, DatasetDict
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer
+from sklearn.preprocessing import LabelEncoder
+from huggingface_hub import HfApi
+from requests.exceptions import HTTPError
+
+# Importe aus Ihren eigenen Modulen
 from file_utils import check_environment, check_hf_token, check_files, extract_text_from_file
+from data_processing import create_dataset
+from model_utils import setup_model_and_trainer, analyze_new_article
+
 
 def main():
-    parser = argparse.ArgumentParser(description='LRH Document Classifier')
-    parser.add_argument('--checkthis', action='store_true', help='Analyze files in the CheckThis folder')
+    parser = argparse.ArgumentParser(
+        description='LRH Document Classifier',
+        formatter_class=argparse.RawTextHelpFormatter  # Erlaubt Zeilenumbrüche in der Beschreibung
+    )
+    parser.add_argument('--train', action='store_true',
+                        help='Trainiert das Modell mit den Dokumenten im "documents" Ordner.')
+    parser.add_argument('--checkthis', action='store_true',
+                        help='Analysiert Dateien im "CheckThis" Ordner mit einem trainierten Modell.')
+    parser.add_argument('--predict', metavar='FILE',
+                        help='Macht eine Vorhersage für eine einzelne Datei.')
+    parser.add_argument('--help', action='help',
+                        help='Zeigt diese Hilfemeldung an und beendet das Programm.')
+
     args = parser.parse_args()
+
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
 
     try:
         config = check_environment()
@@ -34,30 +62,44 @@ def main():
 
         for model_name in model_names:
             model_name = model_name.strip()
-            logging.info(f"Training model: {model_name}")
+            logging.info(f"Verarbeite Modell: {model_name}")
             start_time = time.time()
 
-            tokenizer, trainer = setup_model_and_trainer(dataset_dict, len(le.classes_), config, model_name)
-            logging.info(f"Modell {model_name} erfolgreich geladen und Trainer eingerichtet.")
+            model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
 
-            if not args.checkthis:
+            if args.train:
+                logging.info(f"Trainiere Modell: {model_name}")
+                tokenizer, trainer = setup_model_and_trainer(dataset_dict, len(le.classes_), config, model_name)
                 trainer.train()
                 results = trainer.evaluate(dataset_dict['test'])
-                logging.info(f"Test results for {model_name}: {results}")
+                logging.info(f"Testergebnisse für {model_name}: {results}")
 
-                # Save the model
-                model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
+                # Speichere das Modell
                 trainer.save_model(model_save_path)
                 tokenizer.save_pretrained(model_save_path)
 
                 end_time = time.time()
-                logging.info(f"Training time for {model_name}: {(end_time - start_time) / 60:.2f} minutes")
-            else:
-                check_files(trainer, tokenizer, le, config)
+                logging.info(f"Trainingszeit für {model_name}: {(end_time - start_time) / 60:.2f} Minuten")
+
+            if args.checkthis or args.predict:
+                logging.info(f"Lade Modell für Analyse: {model_name}")
+                model = AutoModelForSequenceClassification.from_pretrained(model_save_path)
+                tokenizer = AutoTokenizer.from_pretrained(model_save_path)
+                trainer = Trainer(model=model)
+
+                if args.checkthis:
+                    check_files(trainer, tokenizer, le, config)
+
+                if args.predict:
+                    result = analyze_new_article(args.predict, trainer, tokenizer, le)
+                    if result:
+                        print(json.dumps(result, indent=2))
+                    else:
+                        print("Konnte keine Analyse durchführen.")
 
         total_end_time = time.time()
         total_duration = (total_end_time - total_start_time) / 60
-        logging.info(f"Total execution time for all models: {total_duration:.2f} minutes")
+        logging.info(f"Gesamtausführungszeit für alle Modelle: {total_duration:.2f} Minuten")
 
     except Exception as e:
         logging.error(f"Ein kritischer Fehler ist aufgetreten: {str(e)}")
