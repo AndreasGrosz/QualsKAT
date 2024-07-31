@@ -1,10 +1,10 @@
-# In model_utils.py
 import torch
 import numpy as np
 import os
+import logging
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, DataCollatorWithPadding
-
-# Funktionsdefinitionen hier...
+from datetime import date
+from file_utils import extract_text_from_file
 
 def get_model_and_tokenizer(model_name, num_labels):
     tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -100,4 +100,3 @@ def analyze_new_article(file_path, trainer, tokenizer, le):
         "Ghostwriter Wahrscheinlichkeit": f"{ghostwriter_probability:.2f}",
         "Schlussfolgerung": conclusion
     }
-

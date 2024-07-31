@@ -1,13 +1,10 @@
-# In data_processing.py
 import os
 import logging
-from file_utils import extract_text_from_file, handle_rtf_error
 from datasets import Dataset
 from sklearn.preprocessing import LabelEncoder
-import docx2txt
+import docx
 from striprtf.striprtf import rtf_to_text
-
-# Funktionsdefinitionen hier...
+import olefile
 
 def get_files_and_categories(config):
     root_dir = config['Paths']['documents']
@@ -67,14 +64,34 @@ def extract_text_from_file(file_path):
         return None
     elif file_path.endswith('.rtf'):
         return handle_rtf_error(file_path)
-    elif file_path.endswith('.doc') or file_path.endswith('.docx'):
+    elif file_path.endswith('.docx') or file_path.endswith('.doc'):
         try:
-            return docx2txt.process(file_path)
+            doc = docx.Document(file_path)
+            return ' '.join([paragraph.text for paragraph in doc.paragraphs])
         except Exception as e:
-            logging.error(f"Error reading .doc/.docx file {file_path}: {str(e)}")
-            return None
+            logging.warning(f"Could not open {file_path} as a .docx file. Attempting old .doc format extraction.")
+            return extract_text_from_old_doc(file_path)
     else:
         logging.error(f"Unsupported file type: {file_path}")
+        return None
+
+def extract_text_from_old_doc(file_path):
+    try:
+        if olefile.isOleFile(file_path):
+            with olefile.OleFileIO(file_path) as ole:
+                streams = ole.listdir()
+                if ole.exists('WordDocument'):
+                    word_stream = ole.openstream('WordDocument')
+                    text = word_stream.read().decode('utf-16le', errors='ignore')
+                    return ' '.join(text.split())  # Entferne überschüssige Leerzeichen
+                else:
+                    logging.error(f"No WordDocument stream found in {file_path}")
+                    return None
+        else:
+            logging.error(f"{file_path} is not a valid OLE file")
+            return None
+    except Exception as e:
+        logging.error(f"Error reading old .doc file {file_path}: {str(e)}")
         return None
 
 def handle_rtf_error(file_path):

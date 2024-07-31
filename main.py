@@ -1,8 +1,9 @@
 import argparse
 import logging
 import time
+import os
 from data_processing import create_dataset
-from model_utils import setup_model_and_trainer, analyze_new_article
+from model_utils import setup_model_and_trainer
 from file_utils import check_environment, check_hf_token, check_files
 from datasets import DatasetDict
 
