@@ -12,6 +12,18 @@ def get_model_and_tokenizer(model_name, num_labels):
 
 
 def setup_model_and_trainer(dataset_dict, num_labels, config, model_name, quick=False):
+    tokenizer, model = get_model_and_tokenizer(model_name, num_labels)
+
+    def tokenize_function(examples):
+        return tokenizer(examples["text"], truncation=True, padding="max_length")
+
+    tokenized_datasets = dataset_dict.map(tokenize_function, batched=True, remove_columns=['text'])
+
+    # Überprüfen Sie die Struktur der tokenisierten Datensätze
+    print("Struktur des tokenisierten Trainingsdatensatzes:")
+    print(tokenized_datasets['train'].features)
+    print("Struktur des tokenisierten Testdatensatzes:")
+    print(tokenized_datasets['test'].features)
     logging.info(f"Lade Modell und Tokenizer: {model_name}")
     tokenizer, model = get_model_and_tokenizer(model_name, num_labels)
     logging.info(f"Modell und Tokenizer geladen: {model_name}")

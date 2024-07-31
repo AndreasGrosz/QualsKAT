@@ -5,6 +5,8 @@ from sklearn.preprocessing import LabelEncoder
 import docx
 from striprtf.striprtf import rtf_to_text
 import olefile
+import random
+
 
 def get_files_and_categories(config):
     root_dir = config['Paths']['documents']

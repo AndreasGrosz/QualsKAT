@@ -72,26 +72,55 @@ def main():
                 logging.info(f"Trainiere Modell: {model_name}")
                 tokenizer, trainer = setup_model_and_trainer(dataset_dict, len(le.classes_), config, model_name)
                 trainer.train()
-                print("Überprüfe die Struktur des Testdatensatzes:")
+                print("Überprüfe die Struktur des Testdatensatzes vor der Evaluierung:")
+                print(dataset_dict['test'].features)
+                print("\nÜberprüfe die ersten Elemente des Testdatensatzes:")
                 print(dataset_dict['test'][0])
-                print("\nÜberprüfe die Struktur des tokenisierten Testdatensatzes:")
-                print(tokenized_datasets['test'][0])
                 results = trainer.evaluate(dataset_dict['test'])
                 logging.info(f"Testergebnisse für {model_name}: {results}")
 
                 # Speichere das Modell
                 trainer.save_model(model_save_path)
                 tokenizer.save_pretrained(model_save_path)
+                trainer.model.config.save_pretrained(model_save_path)
+
+                logging.info(f"Modell gespeichert in: {model_save_path}")
+                logging.info(f"Inhalt des Modellverzeichnisses:")
+                for file in os.listdir(model_save_path):
+                    logging.info(f" - {file}")
 
                 end_time = time.time()
                 logging.info(f"Trainingszeit für {model_name}: {(end_time - start_time) / 60:.2f} Minuten")
 
             if args.checkthis or args.predict:
                 logging.info(f"Lade Modell für Analyse: {model_name}")
-                model = AutoModelForSequenceClassification.from_pretrained(model_save_path)
-                tokenizer = AutoTokenizer.from_pretrained(model_save_path)
-                trainer = Trainer(model=model)
-
+                if not os.path.exists(os.path.join(model_save_path, 'config.json')):
+                    logging.error(f"config.json nicht gefunden in {model_save_path}")
+                    logging.info("Versuche, das Modell neu zu initialisieren...")
+                    tokenizer, model = get_model_and_tokenizer(model_name, len(le.classes_))
+                    trainer = Trainer(
+                        model=model,
+                        args=training_args,
+                        train_dataset=tokenized_datasets['train'],
+                        eval_dataset=tokenized_datasets['test'],
+                        tokenizer=tokenizer,
+                        data_collator=data_collator,
+                        compute_metrics=compute_metrics
+                    )
+                else:
+                    model = AutoModelForSequenceClassification.from_pretrained(model_save_path)
+                    tokenizer = AutoTokenizer.from_pretrained(model_save_path)
+                    trainer = Trainer(
+                        model=model,
+                        args=training_args,
+                        train_dataset=tokenized_datasets['train'],
+                        eval_dataset=tokenized_datasets['test'],
+                        tokenizer=tokenizer,
+                        data_collator=data_collator,
+                        compute_metrics=compute_metrics
+                    )
+                    print("Überprüfe die Struktur des Eval-Datensatzes im Trainer:")
+                    print(trainer.eval_dataset.features)
                 if args.checkthis:
                     check_files(trainer, tokenizer, le, config)
 
