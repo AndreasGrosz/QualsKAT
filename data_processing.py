@@ -26,8 +26,14 @@ def get_files_and_categories(config):
 
     return files_and_categories
 
-def create_dataset(config):
+def create_dataset(config, quick=False):
     files_and_categories = get_files_and_categories(config)
+
+    if quick:
+        # Verwende nur 10% der Daten im Quick-Modus
+        sample_size = max(1, int(len(files_and_categories) * 0.1))
+        files_and_categories = random.sample(files_and_categories, sample_size)
+
     texts = []
     all_categories = []
 

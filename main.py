@@ -17,7 +17,8 @@ from requests.exceptions import HTTPError
 # Importe aus Ihren eigenen Modulen
 from file_utils import check_environment, check_hf_token, check_files, extract_text_from_file
 from data_processing import create_dataset
-from model_utils import setup_model_and_trainer, analyze_new_article
+from model_utils import setup_model_and_trainer
+from analysis_utils import analyze_new_article
 
 
 def main():
@@ -29,10 +30,10 @@ def main():
                         help='Trainiert das Modell mit den Dokumenten im "documents" Ordner.')
     parser.add_argument('--checkthis', action='store_true',
                         help='Analysiert Dateien im "CheckThis" Ordner mit einem trainierten Modell.')
+    parser.add_argument('--quick', action='store_true',
+                        help='Führt eine schnelle Analyse mit einem Bruchteil der Daten durch.')
     parser.add_argument('--predict', metavar='FILE',
                         help='Macht eine Vorhersage für eine einzelne Datei.')
-    parser.add_argument('--help', action='help',
-                        help='Zeigt diese Hilfemeldung an und beendet das Programm.')
 
     args = parser.parse_args()
 
@@ -44,7 +45,7 @@ def main():
         config = check_environment()
         check_hf_token()
 
-        dataset, le = create_dataset(config)
+        dataset, le = create_dataset(config, quick=args.quick)
 
         if len(dataset) == 0:
             raise ValueError("Der erstellte Datensatz ist leer. Überprüfen Sie die Eingabedaten.")
@@ -71,6 +72,10 @@ def main():
                 logging.info(f"Trainiere Modell: {model_name}")
                 tokenizer, trainer = setup_model_and_trainer(dataset_dict, len(le.classes_), config, model_name)
                 trainer.train()
+                print("Überprüfe die Struktur des Testdatensatzes:")
+                print(dataset_dict['test'][0])
+                print("\nÜberprüfe die Struktur des tokenisierten Testdatensatzes:")
+                print(tokenized_datasets['test'][0])
                 results = trainer.evaluate(dataset_dict['test'])
                 logging.info(f"Testergebnisse für {model_name}: {results}")
 

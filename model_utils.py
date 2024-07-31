@@ -11,7 +11,7 @@ def get_model_and_tokenizer(model_name, num_labels):
     return tokenizer, model
 
 
-def setup_model_and_trainer(dataset_dict, num_labels, config, model_name):
+def setup_model_and_trainer(dataset_dict, num_labels, config, model_name, quick=False):
     logging.info(f"Lade Modell und Tokenizer: {model_name}")
     tokenizer, model = get_model_and_tokenizer(model_name, num_labels)
     logging.info(f"Modell und Tokenizer geladen: {model_name}")
@@ -24,7 +24,7 @@ def setup_model_and_trainer(dataset_dict, num_labels, config, model_name):
         learning_rate=float(config['Training']['learning_rate']),
         per_device_train_batch_size=int(config['Training']['batch_size']),
         per_device_eval_batch_size=int(config['Training']['batch_size']),
-        num_train_epochs=int(config['Training']['num_epochs']),
+        num_train_epochs=1 if quick else int(config['Training']['num_epochs']),
         weight_decay=0.01,
         evaluation_strategy="epoch",
         save_strategy="epoch",
@@ -38,11 +38,16 @@ def setup_model_and_trainer(dataset_dict, num_labels, config, model_name):
         eval_dataset = dataset_dict['validation']
 
     def tokenize_function(examples):
-        return tokenizer(examples["text"], truncation=True, padding="max_length")
+        tokenized = tokenizer(examples["text"], truncation=True, padding="max_length")
+        tokenized["labels"] = examples["labels"]
+        return tokenized
 
-    tokenized_datasets = dataset_dict.map(tokenize_function, batched=True)
+    tokenized_datasets = dataset_dict.map(tokenize_function, batched=True, remove_columns=dataset_dict["train"].column_names)
 
-    data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
+    print("Spalten nach der Tokenisierung:")
+    print(tokenized_datasets["train"].column_names)
+
+    data_collator = DataCollatorWithPadding(tokenizer=tokenizer, padding=True)
 
     trainer = Trainer(
         model=model,

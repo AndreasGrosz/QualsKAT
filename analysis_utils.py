@@ -2,7 +2,7 @@ import logging
 import os
 from datetime import date
 from model_utils import predict_top_n
-
+from datetime import datetime
 
 def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_file):
     logging.info(f"Beginne Analyse von: {file_path}")
