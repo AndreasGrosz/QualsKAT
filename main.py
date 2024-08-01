@@ -17,14 +17,13 @@ from requests.exceptions import HTTPError
 # Importe aus Ihren eigenen Modulen
 from file_utils import check_environment, check_hf_token, check_files, extract_text_from_file
 from data_processing import create_dataset
-from model_utils import setup_model_and_trainer
+from model_utils import setup_model_and_trainer, get_model_and_tokenizer
 from analysis_utils import analyze_new_article
-
 
 def main():
     parser = argparse.ArgumentParser(
         description='LRH Document Classifier',
-        formatter_class=argparse.RawTextHelpFormatter  # Erlaubt Zeilenumbrüche in der Beschreibung
+        formatter_class=argparse.RawTextHelpFormatter
     )
     parser.add_argument('--train', action='store_true',
                         help='Trainiert das Modell mit den Dokumenten im "documents" Ordner.')
@@ -71,6 +70,8 @@ def main():
 
             model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
 
+            tokenizer, trainer, tokenized_datasets = setup_model_and_trainer(dataset_dict, len(le.classes_), config, model_name, quick=args.quick)
+
             if args.train:
                 trainer.train()
                 results = trainer.evaluate(eval_dataset=tokenized_datasets['test'])
@@ -95,29 +96,12 @@ def main():
                     logging.error(f"config.json nicht gefunden in {model_save_path}")
                     logging.info("Versuche, das Modell neu zu initialisieren...")
                     tokenizer, model = get_model_and_tokenizer(model_name, len(le.classes_))
-                    trainer = Trainer(
-                        model=model,
-                        args=training_args,
-                        train_dataset=tokenized_datasets['train'],
-                        eval_dataset=tokenized_datasets['test'],
-                        tokenizer=tokenizer,
-                        data_collator=data_collator,
-                        compute_metrics=compute_metrics
-                    )
+                    trainer = Trainer(model=model)
                 else:
                     model = AutoModelForSequenceClassification.from_pretrained(model_save_path)
                     tokenizer = AutoTokenizer.from_pretrained(model_save_path)
-                    trainer = Trainer(
-                        model=model,
-                        args=training_args,
-                        train_dataset=tokenized_datasets['train'],
-                        eval_dataset=tokenized_datasets['test'],
-                        tokenizer=tokenizer,
-                        data_collator=data_collator,
-                        compute_metrics=compute_metrics
-                    )
-                    print("Überprüfe die Struktur des Eval-Datensatzes im Trainer:")
-                    print(trainer.eval_dataset.features)
+                    trainer = Trainer(model=model)
+
                 if args.checkthis:
                     check_files(trainer, tokenizer, le, config)
 
