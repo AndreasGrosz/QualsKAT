@@ -1,3 +1,5 @@
+from data_processing import extract_text_from_file
+import datetime
 import torch
 import numpy as np
 import os
@@ -64,17 +66,54 @@ def compute_metrics(eval_pred):
     return {'accuracy': (predictions == labels).astype(np.float32).mean().item()}
 
 def predict_top_n(trainer, tokenizer, text, le, n=3):
-    logging.info(f"Beginne Vorhersage für Text: {text[:50]}...")  # Zeigt die ersten 50 Zeichen
     inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
     with torch.no_grad():
         logits = trainer.model(**inputs).logits
     probabilities = torch.nn.functional.softmax(logits, dim=-1)
-    top_n_prob, top_n_indices = torch.topk(probabilities, n)
+    top_n_prob, top_n_indices = torch.topk(probabilities, min(n, probabilities.shape[1]))
     results = []
     for prob, idx in zip(top_n_prob[0], top_n_indices[0]):
         category = le.inverse_transform([idx.item()])[0]
         results.append((category, prob.item()))
-    logging.info(f"Vorhersageergebnisse: {results}")
+    
+    print("Debug - Vorhersagen:")
+    for cat, prob in results:
+        print(f"{cat}: {prob}")
+    
     return results
 
-__all__ = ['get_model_and_tokenizer', 'setup_model_and_trainer', 'predict_top_n']
+def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_file):
+    text = extract_text_from_file(file_path)
+
+    if text is None or len(text) == 0:
+        logging.warning(f"Konnte Text aus {file_path} nicht extrahieren oder Text ist leer.")
+        return None
+
+    file_size = len(text.encode('utf-8'))
+    top_predictions = predict_top_n(trainer, tokenizer, text, le, n=len(le.classes_))
+
+    lrh_probability = sum(prob for cat, prob in top_predictions if cat.startswith("LRH"))
+    ghostwriter_probability = sum(prob for cat, prob in top_predictions if cat.startswith("Ghostwriter"))
+
+    print(f"Debug - LRH Probability: {lrh_probability}")
+    print(f"Debug - Ghostwriter Probability: {ghostwriter_probability}")
+
+    threshold = 0.1  # 10% Unterschied als Schwellenwert
+    if abs(lrh_probability - ghostwriter_probability) < threshold:
+        conclusion = "Nicht eindeutig"
+    elif lrh_probability > ghostwriter_probability:
+        conclusion = "Wahrscheinlich LRH"
+    else:
+        conclusion = "Wahrscheinlich Ghostwriter"
+
+    return {
+        "Dateiname": os.path.basename(file_path),
+        "Dateigröße (Bytes)": file_size,
+        "Datum": datetime.now().strftime("%d-%m-%y %H:%M"),
+        "LRH Wahrscheinlichkeit": f"{lrh_probability:.2f}",
+        "Ghostwriter Wahrscheinlichkeit": f"{ghostwriter_probability:.2f}",
+        "Schlussfolgerung": conclusion
+    }
+
+__all__ = ['get_model_and_tokenizer', 'setup_model_and_trainer', 'predict_top_n', 'analyze_new_article']
+

@@ -1,5 +1,5 @@
+from datetime import datetime
 import os
-from datetime import date
 import olefile
 import csv
 import logging
@@ -124,16 +124,6 @@ def check_files(trainer, tokenizer, le, config):
                 writer.writerow(result)
 
         logging.info(f"Ergebnisse wurden an {csv_filename} angehängt.")
-
-
-    if results:
-        csv_filename = os.path.join(config['Paths']['output'], "CheckThisResults.csv")
-        with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
-            fieldnames = results[0].keys()
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-            for result in results:
-                writer.writerow(result)
 
         logging.info(f"Ergebnisse wurden in {csv_filename} gespeichert.")
 

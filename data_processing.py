@@ -79,12 +79,14 @@ def create_dataset(config, quick=False):
 
     texts = []
     all_categories = []
+    filenames = []  # Neue Liste für Dateinamen
 
     for file_path, category in files_and_categories:
         text = extract_text_from_file(file_path)
         if text:
             texts.append(text)
             all_categories.append(category)
+            filenames.append(os.path.basename(file_path))  # Füge den Dateinamen hinzu
 
     if not texts:
         raise ValueError("Keine Textdaten gefunden. Überprüfen Sie das Dokumentenverzeichnis.")
@@ -98,7 +100,8 @@ def create_dataset(config, quick=False):
 
     dataset_dict = {
         'text': texts,
-        'labels': numeric_categories
+        'labels': numeric_categories,
+        'filename': filenames  # Füge die Dateinamen zum Dataset hinzu
     }
 
     return Dataset.from_dict(dataset_dict), le

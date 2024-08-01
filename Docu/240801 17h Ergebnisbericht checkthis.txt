@@ -1,0 +1,173 @@
+﻿240801 17h Ergebnisbericht checkthis
+Map: 100%|███████████████████████████████████████████████| 1738/1738 [00:19<00:00, 90.30 examples/s] 
+Map: 100%|█████████████████████████████████████████████████| 373/373 [00:05<00:00, 72.17 examples/s] 
+Map: 100%|█████████████████████████████████████████████████| 372/372 [00:05<00:00, 72.93 examples/s] 
+Spalten nach der Tokenisierung: 
+['labels', 'input_ids', 'attention_mask'] 
+['labels', 'input_ids', 'attention_mask'] 
+Struktur des tokenisierten Trainingsdatensatzes: 
+{'labels': Value(dtype='int64', id=None), 'input_ids': Sequence(feature=Value(dtype='int32', id=None
+), length=-1, id=None), 'attention_mask': Sequence(feature=Value(dtype='int8', id=None), length=-1, 
+id=None)} 
+Struktur des tokenisierten Testdatensatzes: 
+{'labels': Value(dtype='int64', id=None), 'input_ids': Sequence(feature=Value(dtype='int32', id=None
+), length=-1, id=None), 'attention_mask': Sequence(feature=Value(dtype='int8', id=None), length=-1, 
+id=None)} 
+/media/res/HDD_AB/projekte/kd0241-py/Q-KAT/AAUNaL/venv/lib/python3.12/site-packages/transformers/tra
+ining_args.py:1525: FutureWarning: `evaluation_strategy` is deprecated and will be removed in versio
+n 4.46 of 珞 Transformers. Use `eval_strategy` instead 
+ warnings.warn( 
+Debug - Vorhersagen: 
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.07496320456266403 
+Ghostwriter-Brian Livingston Cl. XII: 0.052129555493593216 
+Ghostwriter-AVU IA: 0.037582047283649445 
+Ghostwriter-Otto J. Roos - OJP: 0.03656414523720741 
+Ghostwriter-Mary Sue Hubbard GO - MSH: 0.03380102291703224 
+Debug - Vorhersagen: 
+Ghostwriter-RTCU: 0.5424436330795288 
+Ghostwriter-Brian Livingston Cl. XII: 0.10329125821590424 
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.057444795966148376 
+Ghostwriter-RVY: 0.039549436420202255 
+Ghostwriter-Rick Sheehy: 0.02205716446042061 
+Debug - Vorhersagen: 
+Ghostwriter-Brian Livingston Cl. XII: 0.83564293384552 
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.014397569000720978 
+Ghostwriter-RVY: 0.010296964086592197 
+Ghostwriter-RTCU: 0.008992759510874748 
+Ghostwriter-Quentin Hubbard, Class XII CS: 0.008528460748493671 
+Debug - Vorhersagen: 
+Ghostwriter-RVY: 0.7638574242591858 
+Ghostwriter-RTCU: 0.10300767421722412 
+Ghostwriter-Brian Livingston Cl. XII: 0.029050074517726898 
+Ghostwriter-Rick Sheehy: 0.01367107406258583 
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.00733914552256465 
+Debug - Vorhersagen: 
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.06535924971103668 
+Ghostwriter-Brian Livingston Cl. XII: 0.040383752435445786 
+Ghostwriter-AVU IA: 0.03695586696267128 
+Ghostwriter-Otto J. Roos - OJP: 0.03513083606958389 
+Ghostwriter-Mary Sue Hubbard GO - MSH: 0.03393056243658066 
+Debug - Vorhersagen: 
+Ghostwriter-RTCU: 0.8129263520240784 
+Ghostwriter-Brian Livingston Cl. XII: 0.025719381868839264 
+Ghostwriter-RVY: 0.017698997631669044 
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.017419354990124702 
+Ghostwriter-Rick Sheehy: 0.01066441647708416 
+Some weights of RobertaForSequenceClassification were not initialized from the model checkpoint at r
+oberta-base and are newly initialized: ['classifier.dense.bias', 'classifier.dense.weight', 'classif
+ier.out_proj.bias', 'classifier.out_proj.weight'] 
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and 
+inference. 
+Map: 100%|███████████████████████████████████████████████| 1738/1738 [00:20<00:00, 85.36 examples/s] 
+Map: 100%|█████████████████████████████████████████████████| 373/373 [00:04<00:00, 82.19 examples/s] 
+Map: 100%|█████████████████████████████████████████████████| 372/372 [00:04<00:00, 81.60 examples/s] 
+Spalten nach der Tokenisierung: 
+['labels', 'input_ids', 'attention_mask'] 
+['labels', 'input_ids', 'attention_mask'] 
+Struktur des tokenisierten Trainingsdatensatzes: 
+{'labels': Value(dtype='int64', id=None), 'input_ids': Sequence(feature=Value(dtype='int32', id=None
+), length=-1, id=None), 'attention_mask': Sequence(feature=Value(dtype='int8', id=None), length=-1, 
+id=None)} 
+Struktur des tokenisierten Testdatensatzes: 
+{'labels': Value(dtype='int64', id=None), 'input_ids': Sequence(feature=Value(dtype='int32', id=None
+), length=-1, id=None), 'attention_mask': Sequence(feature=Value(dtype='int8', id=None), length=-1, 
+id=None)} 
+/media/res/HDD_AB/projekte/kd0241-py/Q-KAT/AAUNaL/venv/lib/python3.12/site-packages/transformers/tra
+ining_args.py:1525: FutureWarning: `evaluation_strategy` is deprecated and will be removed in versio
+n 4.46 of 珞 Transformers. Use `eval_strategy` instead 
+ warnings.warn( 
+Debug - Vorhersagen: 
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.16389191150665283 
+Ghostwriter-Mary Sue Hubbard GO - MSH: 0.05306465923786163 
+Ghostwriter-AVU IA: 0.046960439532995224 
+Ghostwriter-Otto J. Roos - OJP: 0.04391749948263168 
+Ghostwriter-Quentin Hubbard, Class XII CS: 0.03742458298802376 
+Debug - Vorhersagen: 
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.1556694507598877 
+Ghostwriter-Brian Livingston Cl. XII: 0.08402617275714874 
+Ghostwriter-AVU IA: 0.06800054758787155 
+Ghostwriter-Quentin Hubbard, Class XII CS: 0.056235603988170624 
+Ghostwriter-Mary Sue Hubbard GO - MSH: 0.04008055850863457 
+Debug - Vorhersagen: 
+Ghostwriter-Brian Livingston Cl. XII: 0.9354363679885864 
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.004706716164946556 
+Ghostwriter-Quentin Hubbard, Class XII CS: 0.0034556561149656773 
+Ghostwriter-AVU IA: 0.0033020281698554754 
+Ghostwriter-RTCU: 0.002972586313262582 
+Debug - Vorhersagen: 
+Ghostwriter-Brian Livingston Cl. XII: 0.18862496316432953 
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.1657504290342331 
+Ghostwriter-AVU IA: 0.07455592602491379 
+Ghostwriter-Quentin Hubbard, Class XII CS: 0.047486040741205215 
+Ghostwriter-CBR: 0.03499927744269371 
+Debug - Vorhersagen: 
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.15915466845035553 
+Ghostwriter-Mary Sue Hubbard GO - MSH: 0.052337031811475754 
+Ghostwriter-AVU IA: 0.051249098032712936 
+Ghostwriter-Otto J. Roos - OJP: 0.042180437594652176 
+Ghostwriter-Quentin Hubbard, Class XII CS: 0.037520136684179306 
+Debug - Vorhersagen: 
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.15866899490356445 
+Ghostwriter-Brian Livingston Cl. XII: 0.12248414754867554 
+Ghostwriter-AVU IA: 0.0786973312497139 
+Ghostwriter-Quentin Hubbard, Class XII CS: 0.05661238357424736 
+Ghostwriter-Mary Sue Hubbard GO - MSH: 0.03650008141994476 
+Some weights of AlbertForSequenceClassification were not initialized from the model checkpoint at al
+bert-base-v2 and are newly initialized: ['classifier.bias', 'classifier.weight'] 
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and 
+inference. 
+Map: 100%|███████████████████████████████████████████████| 1738/1738 [00:27<00:00, 63.53 examples/s] 
+Map: 100%|█████████████████████████████████████████████████| 373/373 [00:05<00:00, 65.22 examples/s] 
+Map: 100%|█████████████████████████████████████████████████| 372/372 [00:06<00:00, 60.43 examples/s] 
+Spalten nach der Tokenisierung: 
+['labels', 'input_ids', 'token_type_ids', 'attention_mask'] 
+['labels', 'input_ids', 'token_type_ids', 'attention_mask'] 
+Struktur des tokenisierten Trainingsdatensatzes: 
+{'labels': Value(dtype='int64', id=None), 'input_ids': Sequence(feature=Value(dtype='int32', id=None
+), length=-1, id=None), 'token_type_ids': Sequence(feature=Value(dtype='int8', id=None), length=-1, 
+id=None), 'attention_mask': Sequence(feature=Value(dtype='int8', id=None), length=-1, id=None)} 
+Struktur des tokenisierten Testdatensatzes: 
+{'labels': Value(dtype='int64', id=None), 'input_ids': Sequence(feature=Value(dtype='int32', id=None
+), length=-1, id=None), 'token_type_ids': Sequence(feature=Value(dtype='int8', id=None), length=-1, 
+id=None), 'attention_mask': Sequence(feature=Value(dtype='int8', id=None), length=-1, id=None)} 
+/media/res/HDD_AB/projekte/kd0241-py/Q-KAT/AAUNaL/venv/lib/python3.12/site-packages/transformers/tra
+ining_args.py:1525: FutureWarning: `evaluation_strategy` is deprecated and will be removed in versio
+n 4.46 of 珞 Transformers. Use `eval_strategy` instead 
+ warnings.warn( 
+Debug - Vorhersagen: 
+Ghostwriter-Brian Livingston Cl. XII: 0.1410476267337799 
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.07764361053705215 
+Ghostwriter-.: 0.04747619479894638 
+Ghostwriter-RVY: 0.043325748294591904 
+Ghostwriter-Mary Sue Hubbard GO - MSH: 0.04215692728757858 
+Debug - Vorhersagen: 
+Ghostwriter-Brian Livingston Cl. XII: 0.36934033036231995 
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.04893491789698601 
+Ghostwriter-RVY: 0.03406399115920067 
+Ghostwriter-.: 0.0333058200776577 
+Ghostwriter-RTCU: 0.0296119786798954 
+Debug - Vorhersagen: 
+Ghostwriter-Brian Livingston Cl. XII: 0.8311629891395569 
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.01288154348731041 
+Ghostwriter-RVY: 0.012346548959612846 
+Ghostwriter-RTCU: 0.008531163446605206 
+Ghostwriter-AVU IA: 0.007248699199408293 
+Debug - Vorhersagen: 
+Ghostwriter-Brian Livingston Cl. XII: 0.40884459018707275 
+Ghostwriter-RVY: 0.07960054278373718 
+Ghostwriter-RTCU: 0.06269650161266327 
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.03341108188033104 
+Ghostwriter-.: 0.02851478010416031 
+Debug - Vorhersagen: 
+Ghostwriter-Brian Livingston Cl. XII: 0.11598984152078629 
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.05555875226855278 
+Ghostwriter-.: 0.05128246173262596 
+Ghostwriter-Mary Sue Hubbard GO - MSH: 0.04546638950705528 
+Ghostwriter-RVY: 0.04320131614804268 
+Debug - Vorhersagen: 
+Ghostwriter-Brian Livingston Cl. XII: 0.4183884561061859 
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.05403430759906769 
+Ghostwriter-RVY: 0.03434853255748749 
+Ghostwriter-RTCU: 0.028828013688325882 
+Ghostwriter-.: 0.026666240766644478
+
