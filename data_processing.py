@@ -6,6 +6,37 @@ import docx
 from striprtf.striprtf import rtf_to_text
 import olefile
 import random
+import csv
+
+def extract_categories(config):
+    root_dir = config['Paths']['documents']
+    categories = set()
+
+    for root, _, files in os.walk(root_dir):
+        rel_path = os.path.relpath(root, root_dir)
+        path_parts = rel_path.split(os.sep)
+
+        if path_parts[0] == "LRH":
+            category = f"LRH-{'-'.join(path_parts[1:])}"
+        elif path_parts[0] == "unknown":
+            category = "unknown"
+        else:
+            category = f"Ghostwriter-{path_parts[0]}"
+
+        categories.add(category)
+
+    return sorted(list(categories))
+
+
+def save_categories_to_csv(categories, config):
+    categories_file = os.path.join(config['Paths']['output'], 'categories.csv')
+    with open(categories_file, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        for category in categories:
+            writer.writerow([category])
+
+    print(f"Kategorien wurden in {categories_file} gespeichert.")
+    print(f"Anzahl der Kategorien: {len(categories)}")
 
 
 def get_files_and_categories(config):
@@ -28,6 +59,17 @@ def get_files_and_categories(config):
 
     return files_and_categories
 
+
+def load_categories_from_csv(config):
+    categories_file = os.path.join(config['Paths']['output'], 'categories.csv')
+    if not os.path.exists(categories_file):
+        raise FileNotFoundError(f"Kategorien-Datei nicht gefunden: {categories_file}. Bitte führen Sie zuerst update_categories.py aus.")
+
+    with open(categories_file, 'r', newline='', encoding='utf-8') as f:
+        reader = csv.reader(f)
+        return [row[0] for row in reader]
+
+
 def create_dataset(config, quick=False):
     files_and_categories = get_files_and_categories(config)
 
@@ -37,28 +79,30 @@ def create_dataset(config, quick=False):
 
     texts = []
     all_categories = []
-    filenames = []
 
     for file_path, category in files_and_categories:
         text = extract_text_from_file(file_path)
         if text:
             texts.append(text)
             all_categories.append(category)
-            filenames.append(os.path.basename(file_path))
 
     if not texts:
         raise ValueError("Keine Textdaten gefunden. Überprüfen Sie das Dokumentenverzeichnis.")
 
+    # Laden Sie alle möglichen Kategorien aus der CSV-Datei
+    all_possible_categories = load_categories_from_csv(config)
+
     le = LabelEncoder()
-    numeric_categories = le.fit_transform(all_categories)
+    le.fit(all_possible_categories)  # Fit the encoder with all possible categories
+    numeric_categories = le.transform(all_categories)  # Transform only the categories in the dataset
 
     dataset_dict = {
         'text': texts,
-        'labels': numeric_categories,
-        'filename': filenames
+        'labels': numeric_categories
     }
 
     return Dataset.from_dict(dataset_dict), le
+
 
 def extract_text_from_file(file_path):
     encodings = ['utf-8', 'iso-8859-1', 'windows-1252']
@@ -85,6 +129,7 @@ def extract_text_from_file(file_path):
         logging.error(f"Unsupported file type: {file_path}")
         return None
 
+
 def extract_text_from_old_doc(file_path):
     try:
         if olefile.isOleFile(file_path):
@@ -103,6 +148,7 @@ def extract_text_from_old_doc(file_path):
     except Exception as e:
         logging.error(f"Error reading old .doc file {file_path}: {str(e)}")
         return None
+
 
 def handle_rtf_error(file_path):
     try:
