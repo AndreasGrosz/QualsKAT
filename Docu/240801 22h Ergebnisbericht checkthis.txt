@@ -1,0 +1,338 @@
+python main.py --checkthis
+Some weights of DistilBertForSequenceClassification were not initialized from the model checkpoint at distilbert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight', 'pre_classifier.bias', 'pre_classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+WARNING:root:Keine GPU verfügbar. Das Training wird auf der CPU durchgeführt und kann sehr lange dauern.
+
+Verarbeite Modell: distilbert-base-uncased
+Some weights of DistilBertForSequenceClassification were not initialized from the model checkpoint at distilbert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight', 'pre_classifier.bias', 'pre_classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Map: 100%|██████████████████████████████████████████████| 1735/1735 [00:14<00:00, 117.20 examples/s]
+Map: 100%|█████████████████████████████████████████████████| 372/372 [00:04<00:00, 84.47 examples/s]
+Map: 100%|█████████████████████████████████████████████████| 372/372 [00:05<00:00, 62.24 examples/s]
+/media/res/HDD_AB/projekte/kd0241-py/Q-KAT/AAUNaL/venv/lib/python3.12/site-packages/transformers/training_args.py:1525: FutureWarning: `evaluation_strategy` is deprecated and will be removed in version 4.46 of 🤗 Transformers. Use `eval_strategy` instead
+  warnings.warn(
+Verarbeite Modell: distilbert-base-uncased
+LRH Probability: 0.0838
+Ghostwriter Probability: 0.9162
+Debug - Alle Kategorien und Wahrscheinlichkeiten:
+Ghostwriter-AVU IA: 0.0227
+Ghostwriter-Andreas Gross: 0.0376
+Ghostwriter-Anna Nordlof, Int Cross Check Br Dir Int HQ: 0.0192
+Ghostwriter-BDCS: 0.0160
+Ghostwriter-BW: 0.0197
+Ghostwriter-Brian Livingston Cl. XII: 0.0221
+Ghostwriter-CBR: 0.0521
+Ghostwriter-David Mayo  Cl. XII: 0.0310
+Ghostwriter-David Miscavige: 0.0216
+Ghostwriter-Jeff Walker  Cl. XII: 0.0203
+Ghostwriter-Jill Steinberg Cl. XII: 0.0212
+Ghostwriter-Jim Dincalci LRH Medical Researcher
+: 0.0205
+Ghostwriter-Joan Robertson, CS-4: 0.0249
+Ghostwriter-John Eastment Cl. XII: 0.0283
+Ghostwriter-Julie Gillespie: 0.0180
+Ghostwriter-Ken Urquhart: 0.0214
+Ghostwriter-Kima Jason, Snr MO Flag: 0.0192
+Ghostwriter-Maggie Sibersky, LRH Comps IC: 0.0179
+Ghostwriter-Mary Sue Hubbard GO - MSH: 0.0181
+Ghostwriter-Merril Mayo: 0.0338
+Ghostwriter-Molly Harlow: 0.0223
+Ghostwriter-Norman Starkey: 0.0258
+Ghostwriter-Otto J. Roos - OJP: 0.0227
+Ghostwriter-Pat Brice LRH Comps Unit IC: 0.0366
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.0183
+Ghostwriter-Paulette Cohen: 0.0750
+Ghostwriter-Peggy Eastment: 0.0155
+Ghostwriter-Quentin Hubbard, Class XII CS: 0.0210
+Ghostwriter-RTCU: 0.0297
+Ghostwriter-RTRC: 0.0302
+Ghostwriter-RVY: 0.0306
+Ghostwriter-Ray Mithoff  Cl. XII: 0.0238
+Ghostwriter-Rick Sheehy: 0.0229
+Ghostwriter-Ron Shaffran, CS-4 Class XII: 0.0231
+Ghostwriter-Sheryl Weigand: 0.0133
+Ghostwriter-Tony Dunleavy, CS 2: 0.0201
+LRH-Books: 0.0178
+LRH-Fiction: 0.0221
+LRH-Fiction-1940er: 0.0190
+LRH-Fiction-BE: 0.0249
+
+Vorhersagen für 770320 FOOTPLATES USE FORBIDDEN.txt:
+Ghostwriter-AVU IA: 0.0227
+Ghostwriter-Andreas Gross: 0.0376
+Ghostwriter-Anna Nordlof, Int Cross Check Br Dir Int HQ: 0.0192
+Ghostwriter-BDCS: 0.0160
+Ghostwriter-BW: 0.0197
+LRH Gesamtwahrscheinlichkeit: 0.0838
+Ghostwriter Gesamtwahrscheinlichkeit: 0.9162
+ERROR:root:Unsupported file type: CheckThis/AGs Buchprojekt 1972.odt
+WARNING:root:Konnte Text aus CheckThis/AGs Buchprojekt 1972.odt nicht extrahieren oder Text ist leer.
+WARNING:root:Konnte keine Analyse für AGs Buchprojekt 1972.odt durchführen.
+LRH Probability: 0.0279
+Ghostwriter Probability: 0.9721
+Debug - Alle Kategorien und Wahrscheinlichkeiten:
+Ghostwriter-AVU IA: 0.0070
+Ghostwriter-Andreas Gross: 0.0107
+Ghostwriter-Anna Nordlof, Int Cross Check Br Dir Int HQ: 0.0049
+Ghostwriter-BDCS: 0.0056
+Ghostwriter-BW: 0.0051
+Ghostwriter-Brian Livingston Cl. XII: 0.0060
+Ghostwriter-CBR: 0.1033
+Ghostwriter-David Mayo  Cl. XII: 0.0122
+Ghostwriter-David Miscavige: 0.0065
+Ghostwriter-Jeff Walker  Cl. XII: 0.0050
+Ghostwriter-Jill Steinberg Cl. XII: 0.0070
+Ghostwriter-Jim Dincalci LRH Medical Researcher
+: 0.0049
+Ghostwriter-Joan Robertson, CS-4: 0.0059
+Ghostwriter-John Eastment Cl. XII: 0.0076
+Ghostwriter-Julie Gillespie: 0.0058
+Ghostwriter-Ken Urquhart: 0.0058
+Ghostwriter-Kima Jason, Snr MO Flag: 0.0066
+Ghostwriter-Maggie Sibersky, LRH Comps IC: 0.0050
+Ghostwriter-Mary Sue Hubbard GO - MSH: 0.0065
+Ghostwriter-Merril Mayo: 0.0088
+Ghostwriter-Molly Harlow: 0.0069
+Ghostwriter-Norman Starkey: 0.0076
+Ghostwriter-Otto J. Roos - OJP: 0.0055
+Ghostwriter-Pat Brice LRH Comps Unit IC: 0.0067
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.0063
+Ghostwriter-Paulette Cohen: 0.0574
+Ghostwriter-Peggy Eastment: 0.0056
+Ghostwriter-Quentin Hubbard, Class XII CS: 0.0058
+Ghostwriter-RTCU: 0.0134
+Ghostwriter-RTRC: 0.5424
+Ghostwriter-RVY: 0.0076
+Ghostwriter-Ray Mithoff  Cl. XII: 0.0395
+Ghostwriter-Rick Sheehy: 0.0044
+Ghostwriter-Ron Shaffran, CS-4 Class XII: 0.0221
+Ghostwriter-Sheryl Weigand: 0.0055
+Ghostwriter-Tony Dunleavy, CS 2: 0.0053
+LRH-Books: 0.0076
+LRH-Fiction: 0.0057
+LRH-Fiction-1940er: 0.0068
+LRH-Fiction-BE: 0.0079
+
+Vorhersagen für ME Vol 5 PART THIRTY-SIX preface.txt:
+Ghostwriter-AVU IA: 0.0070
+Ghostwriter-Andreas Gross: 0.0107
+Ghostwriter-Anna Nordlof, Int Cross Check Br Dir Int HQ: 0.0049
+Ghostwriter-BDCS: 0.0056
+Ghostwriter-BW: 0.0051
+LRH Gesamtwahrscheinlichkeit: 0.0279
+Ghostwriter Gesamtwahrscheinlichkeit: 0.9721
+LRH Probability: 0.0138
+Ghostwriter Probability: 0.9862
+Debug - Alle Kategorien und Wahrscheinlichkeiten:
+Ghostwriter-AVU IA: 0.0037
+Ghostwriter-Andreas Gross: 0.0082
+Ghostwriter-Anna Nordlof, Int Cross Check Br Dir Int HQ: 0.0030
+Ghostwriter-BDCS: 0.0026
+Ghostwriter-BW: 0.0025
+Ghostwriter-Brian Livingston Cl. XII: 0.0023
+Ghostwriter-CBR: 0.8356
+Ghostwriter-David Mayo  Cl. XII: 0.0052
+Ghostwriter-David Miscavige: 0.0037
+Ghostwriter-Jeff Walker  Cl. XII: 0.0028
+Ghostwriter-Jill Steinberg Cl. XII: 0.0040
+Ghostwriter-Jim Dincalci LRH Medical Researcher
+: 0.0031
+Ghostwriter-Joan Robertson, CS-4: 0.0032
+Ghostwriter-John Eastment Cl. XII: 0.0040
+Ghostwriter-Julie Gillespie: 0.0035
+Ghostwriter-Ken Urquhart: 0.0024
+Ghostwriter-Kima Jason, Snr MO Flag: 0.0026
+Ghostwriter-Maggie Sibersky, LRH Comps IC: 0.0031
+Ghostwriter-Mary Sue Hubbard GO - MSH: 0.0034
+Ghostwriter-Merril Mayo: 0.0042
+Ghostwriter-Molly Harlow: 0.0026
+Ghostwriter-Norman Starkey: 0.0038
+Ghostwriter-Otto J. Roos - OJP: 0.0033
+Ghostwriter-Pat Brice LRH Comps Unit IC: 0.0038
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.0032
+Ghostwriter-Paulette Cohen: 0.0144
+Ghostwriter-Peggy Eastment: 0.0024
+Ghostwriter-Quentin Hubbard, Class XII CS: 0.0031
+Ghostwriter-RTCU: 0.0085
+Ghostwriter-RTRC: 0.0090
+Ghostwriter-RVY: 0.0042
+Ghostwriter-Ray Mithoff  Cl. XII: 0.0103
+Ghostwriter-Rick Sheehy: 0.0027
+Ghostwriter-Ron Shaffran, CS-4 Class XII: 0.0072
+Ghostwriter-Sheryl Weigand: 0.0024
+Ghostwriter-Tony Dunleavy, CS 2: 0.0019
+LRH-Books: 0.0028
+LRH-Fiction: 0.0032
+LRH-Fiction-1940er: 0.0035
+LRH-Fiction-BE: 0.0043
+
+Vorhersagen für 840724 Confidential - The L-RDs.txt:
+Ghostwriter-AVU IA: 0.0037
+Ghostwriter-Andreas Gross: 0.0082
+Ghostwriter-Anna Nordlof, Int Cross Check Br Dir Int HQ: 0.0030
+Ghostwriter-BDCS: 0.0026
+Ghostwriter-BW: 0.0025
+LRH Gesamtwahrscheinlichkeit: 0.0138
+Ghostwriter Gesamtwahrscheinlichkeit: 0.9862
+ERROR:root:Unsupported file type: CheckThis/FSB 20200714 I OT-III - The Most Obvious Flaw on the Solo Levels.odt
+WARNING:root:Konnte Text aus CheckThis/FSB 20200714 I OT-III - The Most Obvious Flaw on the Solo Levels.odt nicht extrahieren oder Text ist leer.
+WARNING:root:Konnte keine Analyse für FSB 20200714 I OT-III - The Most Obvious Flaw on the Solo Levels.odt durchführen.
+LRH Probability: 0.0094
+Ghostwriter Probability: 0.9906
+Debug - Alle Kategorien und Wahrscheinlichkeiten:
+Ghostwriter-AVU IA: 0.0020
+Ghostwriter-Andreas Gross: 0.0038
+Ghostwriter-Anna Nordlof, Int Cross Check Br Dir Int HQ: 0.0016
+Ghostwriter-BDCS: 0.0024
+Ghostwriter-BW: 0.0013
+Ghostwriter-Brian Livingston Cl. XII: 0.0023
+Ghostwriter-CBR: 0.0291
+Ghostwriter-David Mayo  Cl. XII: 0.0046
+Ghostwriter-David Miscavige: 0.0030
+Ghostwriter-Jeff Walker  Cl. XII: 0.0012
+Ghostwriter-Jill Steinberg Cl. XII: 0.0021
+Ghostwriter-Jim Dincalci LRH Medical Researcher
+: 0.0022
+Ghostwriter-Joan Robertson, CS-4: 0.0019
+Ghostwriter-John Eastment Cl. XII: 0.0035
+Ghostwriter-Julie Gillespie: 0.0028
+Ghostwriter-Ken Urquhart: 0.0022
+Ghostwriter-Kima Jason, Snr MO Flag: 0.0029
+Ghostwriter-Maggie Sibersky, LRH Comps IC: 0.0021
+Ghostwriter-Mary Sue Hubbard GO - MSH: 0.0024
+Ghostwriter-Merril Mayo: 0.0026
+Ghostwriter-Molly Harlow: 0.0022
+Ghostwriter-Norman Starkey: 0.0029
+Ghostwriter-Otto J. Roos - OJP: 0.0016
+Ghostwriter-Pat Brice LRH Comps Unit IC: 0.0023
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.0016
+Ghostwriter-Paulette Cohen: 0.0073
+Ghostwriter-Peggy Eastment: 0.0020
+Ghostwriter-Quentin Hubbard, Class XII CS: 0.0016
+Ghostwriter-RTCU: 0.0045
+Ghostwriter-RTRC: 0.1030
+Ghostwriter-RVY: 0.0026
+Ghostwriter-Ray Mithoff  Cl. XII: 0.7639
+Ghostwriter-Rick Sheehy: 0.0014
+Ghostwriter-Ron Shaffran, CS-4 Class XII: 0.0137
+Ghostwriter-Sheryl Weigand: 0.0017
+Ghostwriter-Tony Dunleavy, CS 2: 0.0023
+LRH-Books: 0.0024
+LRH-Fiction: 0.0018
+LRH-Fiction-1940er: 0.0030
+LRH-Fiction-BE: 0.0022
+
+Vorhersagen für Mission_Earth_05_part_36 o preface.txt:
+Ghostwriter-AVU IA: 0.0020
+Ghostwriter-Andreas Gross: 0.0038
+Ghostwriter-Anna Nordlof, Int Cross Check Br Dir Int HQ: 0.0016
+Ghostwriter-BDCS: 0.0024
+Ghostwriter-BW: 0.0013
+LRH Gesamtwahrscheinlichkeit: 0.0094
+Ghostwriter Gesamtwahrscheinlichkeit: 0.9906
+LRH Probability: 0.0884
+Ghostwriter Probability: 0.9116
+Debug - Alle Kategorien und Wahrscheinlichkeiten:
+Ghostwriter-AVU IA: 0.0222
+Ghostwriter-Andreas Gross: 0.0370
+Ghostwriter-Anna Nordlof, Int Cross Check Br Dir Int HQ: 0.0204
+Ghostwriter-BDCS: 0.0165
+Ghostwriter-BW: 0.0208
+Ghostwriter-Brian Livingston Cl. XII: 0.0247
+Ghostwriter-CBR: 0.0404
+Ghostwriter-David Mayo  Cl. XII: 0.0301
+Ghostwriter-David Miscavige: 0.0238
+Ghostwriter-Jeff Walker  Cl. XII: 0.0211
+Ghostwriter-Jill Steinberg Cl. XII: 0.0210
+Ghostwriter-Jim Dincalci LRH Medical Researcher
+: 0.0215
+Ghostwriter-Joan Robertson, CS-4: 0.0272
+Ghostwriter-John Eastment Cl. XII: 0.0279
+Ghostwriter-Julie Gillespie: 0.0189
+Ghostwriter-Ken Urquhart: 0.0235
+Ghostwriter-Kima Jason, Snr MO Flag: 0.0201
+Ghostwriter-Maggie Sibersky, LRH Comps IC: 0.0196
+Ghostwriter-Mary Sue Hubbard GO - MSH: 0.0185
+Ghostwriter-Merril Mayo: 0.0339
+Ghostwriter-Molly Harlow: 0.0228
+Ghostwriter-Norman Starkey: 0.0273
+Ghostwriter-Otto J. Roos - OJP: 0.0227
+Ghostwriter-Pat Brice LRH Comps Unit IC: 0.0351
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.0196
+Ghostwriter-Paulette Cohen: 0.0654
+Ghostwriter-Peggy Eastment: 0.0173
+Ghostwriter-Quentin Hubbard, Class XII CS: 0.0220
+Ghostwriter-RTCU: 0.0278
+Ghostwriter-RTRC: 0.0253
+Ghostwriter-RVY: 0.0322
+Ghostwriter-Ray Mithoff  Cl. XII: 0.0247
+Ghostwriter-Rick Sheehy: 0.0225
+Ghostwriter-Ron Shaffran, CS-4 Class XII: 0.0236
+Ghostwriter-Sheryl Weigand: 0.0148
+Ghostwriter-Tony Dunleavy, CS 2: 0.0194
+LRH-Books: 0.0178
+LRH-Fiction: 0.0236
+LRH-Fiction-1940er: 0.0207
+LRH-Fiction-BE: 0.0263
+
+Vorhersagen für 770124 TECH CORRECTION ROUND-UP.txt:
+Ghostwriter-AVU IA: 0.0222
+Ghostwriter-Andreas Gross: 0.0370
+Ghostwriter-Anna Nordlof, Int Cross Check Br Dir Int HQ: 0.0204
+Ghostwriter-BDCS: 0.0165
+Ghostwriter-BW: 0.0208
+LRH Gesamtwahrscheinlichkeit: 0.0884
+Ghostwriter Gesamtwahrscheinlichkeit: 0.9116
+LRH Probability: 0.0138
+Ghostwriter Probability: 0.9862
+Debug - Alle Kategorien und Wahrscheinlichkeiten:
+Ghostwriter-AVU IA: 0.0044
+Ghostwriter-Andreas Gross: 0.0041
+Ghostwriter-Anna Nordlof, Int Cross Check Br Dir Int HQ: 0.0027
+Ghostwriter-BDCS: 0.0030
+Ghostwriter-BW: 0.0025
+Ghostwriter-Brian Livingston Cl. XII: 0.0033
+Ghostwriter-CBR: 0.0257
+Ghostwriter-David Mayo  Cl. XII: 0.0048
+Ghostwriter-David Miscavige: 0.0032
+Ghostwriter-Jeff Walker  Cl. XII: 0.0026
+Ghostwriter-Jill Steinberg Cl. XII: 0.0035
+Ghostwriter-Jim Dincalci LRH Medical Researcher
+: 0.0027
+Ghostwriter-Joan Robertson, CS-4: 0.0030
+Ghostwriter-John Eastment Cl. XII: 0.0039
+Ghostwriter-Julie Gillespie: 0.0032
+Ghostwriter-Ken Urquhart: 0.0032
+Ghostwriter-Kima Jason, Snr MO Flag: 0.0031
+Ghostwriter-Maggie Sibersky, LRH Comps IC: 0.0027
+Ghostwriter-Mary Sue Hubbard GO - MSH: 0.0032
+Ghostwriter-Merril Mayo: 0.0047
+Ghostwriter-Molly Harlow: 0.0033
+Ghostwriter-Norman Starkey: 0.0032
+Ghostwriter-Otto J. Roos - OJP: 0.0029
+Ghostwriter-Pat Brice LRH Comps Unit IC: 0.0031
+Ghostwriter-Paulette Ausley, LRH Tech Expeditor: 0.0025
+Ghostwriter-Paulette Cohen: 0.0174
+Ghostwriter-Peggy Eastment: 0.0037
+Ghostwriter-Quentin Hubbard, Class XII CS: 0.0034
+Ghostwriter-RTCU: 0.0044
+Ghostwriter-RTRC: 0.8129
+Ghostwriter-RVY: 0.0037
+Ghostwriter-Ray Mithoff  Cl. XII: 0.0177
+Ghostwriter-Rick Sheehy: 0.0022
+Ghostwriter-Ron Shaffran, CS-4 Class XII: 0.0107
+Ghostwriter-Sheryl Weigand: 0.0031
+Ghostwriter-Tony Dunleavy, CS 2: 0.0028
+LRH-Books: 0.0038
+LRH-Fiction: 0.0027
+LRH-Fiction-1940er: 0.0031
+LRH-Fiction-BE: 0.0042
+
+Vorhersagen für 501101 THE INTENSIVE PROCESSING PROCEDURE.txt:
+Ghostwriter-AVU IA: 0.0044
+Ghostwriter-Andreas Gross: 0.0041
+Ghostwriter-Anna Nordlof, Int Cross Check Br Dir Int HQ: 0.0027
+Ghostwriter-BDCS: 0.0030
+Ghostwriter-BW: 0.0025
+LRH Gesamtwahrscheinlichkeit: 0.0138
+Ghostwriter Gesamtwahrscheinlichkeit: 0.9862

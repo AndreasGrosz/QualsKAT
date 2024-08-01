@@ -1,0 +1,103 @@
+240801-2052$res@res-T590:AAUNaL\python main.py --checkthis
+Some weights of DistilBertForSequenceClassification were not initialized from the model checkpoint at distilbert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight', 'pre_classifier.bias', 'pre_classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+WARNING:root:Keine GPU verfügbar. Das Training wird auf der CPU durchgeführt und kann sehr lange dauern.
+WARNING:root:Could not open documents/unknown/041119 Fritz Moser macht Non-Ex für Andreas Buttler unter Scientologen.doc as a .docx file. Attempting old .doc format extraction.
+WARNING:root:Could not open documents/unknown/1964 - Ron changes thw Bridge.doc as a .docx file. Attempting old .doc format extraction.
+WARNING:root:Could not open documents/LRH/data/Tech/1980-1986/lecture/RON'S JOURNAL 37 LRHED348 Int E130383.doc as a .docx file. Attempting old .doc format extraction.
+WARNING:root:Could not open documents/CBR/WBR 1986/Tb11theg.rai.doc as a .docx file. Attempting old .doc format extraction.
+ERROR:root:documents/CBR/WBR 1986/Tb11theg.rai.doc is not a valid OLE file
+
+Verarbeite Modell: distilbert-base-uncased
+Some weights of DistilBertForSequenceClassification were not initialized from the model checkpoint at distilbert-base-uncased and are newly initialized: ['classifier.bias', 'classifier.weight', 'pre_classifier.bias', 'pre_classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Map: 100%|██████████████████████████████████████████████| 1737/1737 [00:15<00:00, 108.68 examples/s]
+Map: 100%|█████████████████████████████████████████████████| 373/373 [00:04<00:00, 88.88 examples/s]
+Map: 100%|█████████████████████████████████████████████████| 372/372 [00:03<00:00, 95.55 examples/s]
+/media/res/HDD_AB/projekte/kd0241-py/Q-KAT/AAUNaL/venv/lib/python3.12/site-packages/transformers/training_args.py:1525: FutureWarning: `evaluation_strategy` is deprecated and will be removed in version 4.46 of 🤗 Transformers. Use `eval_strategy` instead
+  warnings.warn(
+Verarbeite Modell: distilbert-base-uncased
+LRH Probability: 0.0838
+Ghostwriter Probability: 0.9162
+LRH Probability: 0.0838
+Ghostwriter Probability: 0.9162
+
+Vorhersagen für 770320 FOOTPLATES USE FORBIDDEN.txt:
+Ghostwriter-Paulette Cohen: 0.0750
+Ghostwriter-CBR: 0.0521
+Ghostwriter-Andreas Gross: 0.0376
+Ghostwriter-Pat Brice LRH Comps Unit IC: 0.0366
+Ghostwriter-Merril Mayo: 0.0338
+LRH Gesamtwahrscheinlichkeit: 0.0838
+Ghostwriter Gesamtwahrscheinlichkeit: 0.9162
+ERROR:root:Unsupported file type: CheckThis/AGs Buchprojekt 1972.odt
+WARNING:root:Konnte Text aus CheckThis/AGs Buchprojekt 1972.odt nicht extrahieren oder Text ist leer.
+WARNING:root:Konnte keine Analyse für AGs Buchprojekt 1972.odt durchführen.
+LRH Probability: 0.0279
+Ghostwriter Probability: 0.9721
+LRH Probability: 0.0279
+Ghostwriter Probability: 0.9721
+
+Vorhersagen für ME Vol 5 PART THIRTY-SIX preface.txt:
+Ghostwriter-RTRC: 0.5424
+Ghostwriter-CBR: 0.1033
+Ghostwriter-Paulette Cohen: 0.0574
+Ghostwriter-Ray Mithoff  Cl. XII: 0.0395
+Ghostwriter-Ron Shaffran, CS-4 Class XII: 0.0221
+LRH Gesamtwahrscheinlichkeit: 0.0279
+Ghostwriter Gesamtwahrscheinlichkeit: 0.9721
+LRH Probability: 0.0138
+Ghostwriter Probability: 0.9862
+LRH Probability: 0.0138
+Ghostwriter Probability: 0.9862
+
+Vorhersagen für 840724 Confidential - The L-RDs.txt:
+Ghostwriter-CBR: 0.8356
+Ghostwriter-Paulette Cohen: 0.0144
+Ghostwriter-Ray Mithoff  Cl. XII: 0.0103
+Ghostwriter-RTRC: 0.0090
+Ghostwriter-RTCU: 0.0085
+LRH Gesamtwahrscheinlichkeit: 0.0138
+Ghostwriter Gesamtwahrscheinlichkeit: 0.9862
+ERROR:root:Unsupported file type: CheckThis/FSB 20200714 I OT-III - The Most Obvious Flaw on the Solo Levels.odt
+WARNING:root:Konnte Text aus CheckThis/FSB 20200714 I OT-III - The Most Obvious Flaw on the Solo Levels.odt nicht extrahieren oder Text ist leer.
+WARNING:root:Konnte keine Analyse für FSB 20200714 I OT-III - The Most Obvious Flaw on the Solo Levels.odt durchführen.
+LRH Probability: 0.0094
+Ghostwriter Probability: 0.9906
+LRH Probability: 0.0094
+Ghostwriter Probability: 0.9906
+
+Vorhersagen für Mission_Earth_05_part_36 o preface.txt:
+Ghostwriter-Ray Mithoff  Cl. XII: 0.7639
+Ghostwriter-RTRC: 0.1030
+Ghostwriter-CBR: 0.0291
+Ghostwriter-Ron Shaffran, CS-4 Class XII: 0.0137
+Ghostwriter-Paulette Cohen: 0.0073
+LRH Gesamtwahrscheinlichkeit: 0.0094
+Ghostwriter Gesamtwahrscheinlichkeit: 0.9906
+LRH Probability: 0.0884
+Ghostwriter Probability: 0.9116
+LRH Probability: 0.0884
+Ghostwriter Probability: 0.9116
+
+Vorhersagen für 770124 TECH CORRECTION ROUND-UP.txt:
+Ghostwriter-Paulette Cohen: 0.0654
+Ghostwriter-CBR: 0.0404
+Ghostwriter-Andreas Gross: 0.0370
+Ghostwriter-Pat Brice LRH Comps Unit IC: 0.0351
+Ghostwriter-Merril Mayo: 0.0339
+LRH Gesamtwahrscheinlichkeit: 0.0884
+Ghostwriter Gesamtwahrscheinlichkeit: 0.9116
+LRH Probability: 0.0138
+Ghostwriter Probability: 0.9862
+LRH Probability: 0.0138
+Ghostwriter Probability: 0.9862
+
+Vorhersagen für 501101 THE INTENSIVE PROCESSING PROCEDURE.txt:
+Ghostwriter-RTRC: 0.8129
+Ghostwriter-CBR: 0.0257
+Ghostwriter-Ray Mithoff  Cl. XII: 0.0177
+Ghostwriter-Paulette Cohen: 0.0174
+Ghostwriter-Ron Shaffran, CS-4 Class XII: 0.0107
+LRH Gesamtwahrscheinlichkeit: 0.0138
+Ghostwriter Gesamtwahrscheinlichkeit: 0.9862

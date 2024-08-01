@@ -1,3 +1,5 @@
+from datetime import datetime
+import warnings
 from data_processing import extract_text_from_file
 import datetime
 import torch
@@ -5,15 +7,21 @@ import numpy as np
 import os
 import logging
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, DataCollatorWithPadding
-from datetime import date
+
+warnings.filterwarnings("ignore", message="Some weights of")
 
 def get_model_and_tokenizer(model_name, num_labels):
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
     return tokenizer, model
 
-def setup_model_and_trainer(dataset_dict, num_labels, config, model_name, quick=False):
+def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
+    num_labels = len(le.classes_)
     tokenizer, model = get_model_and_tokenizer(model_name, num_labels)
+
+    # Speichern Sie die Kategorie-zu-Label-Zuordnung in der Modellkonfiguration
+    model.config.label2id = {label: i for i, label in enumerate(le.classes_)}
+    model.config.id2label = {i: label for i, label in enumerate(le.classes_)}
 
     def tokenize_function(examples):
         tokenized = tokenizer(examples["text"], truncation=True, padding="max_length")
@@ -21,16 +29,6 @@ def setup_model_and_trainer(dataset_dict, num_labels, config, model_name, quick=
         return tokenized
 
     tokenized_datasets = dataset_dict.map(tokenize_function, batched=True, remove_columns=dataset_dict["train"].column_names)
-
-    print("Spalten nach der Tokenisierung:")
-    print(tokenized_datasets["train"].column_names)
-    print(tokenized_datasets["test"].column_names)
-
-    print("Struktur des tokenisierten Trainingsdatensatzes:")
-    print(tokenized_datasets['train'].features)
-    print("Struktur des tokenisierten Testdatensatzes:")
-    print(tokenized_datasets['test'].features)
-
     model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
     os.makedirs(model_save_path, exist_ok=True)
 
@@ -65,22 +63,34 @@ def compute_metrics(eval_pred):
     predictions = np.argmax(predictions, axis=1)
     return {'accuracy': (predictions == labels).astype(np.float32).mean().item()}
 
-def predict_top_n(trainer, tokenizer, text, le, n=3):
+def predict_top_n(trainer, tokenizer, text, le, n=None):
     inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
     with torch.no_grad():
         logits = trainer.model(**inputs).logits
-    probabilities = torch.nn.functional.softmax(logits, dim=-1)
-    top_n_prob, top_n_indices = torch.topk(probabilities, min(n, probabilities.shape[1]))
+    probabilities = torch.nn.functional.softmax(logits, dim=-1)[0]
+
     results = []
-    for prob, idx in zip(top_n_prob[0], top_n_indices[0]):
-        category = le.inverse_transform([idx.item()])[0]
+    for idx, prob in enumerate(probabilities):
+        category = le.inverse_transform([idx])[0]
         results.append((category, prob.item()))
-    
-    print("Debug - Vorhersagen:")
-    for cat, prob in results:
-        print(f"{cat}: {prob}")
-    
-    return results
+
+    if n is None:
+        n = len(le.classes_)
+
+    sorted_results = sorted(results, key=lambda x: x[1], reverse=True)[:n]
+
+    lrh_probability = sum(prob for cat, prob in results if cat.startswith("LRH"))
+    ghostwriter_probability = sum(prob for cat, prob in results if cat.startswith("Ghostwriter"))
+    unknown_probability = sum(prob for cat, prob in results if cat == "unknown")
+
+    total_prob = lrh_probability + ghostwriter_probability + unknown_probability
+    if total_prob > 0:
+        lrh_probability /= total_prob
+        ghostwriter_probability /= total_prob
+        unknown_probability /= total_prob
+
+    return sorted_results, lrh_probability, ghostwriter_probability, unknown_probability
+
 
 def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_file):
     text = extract_text_from_file(file_path)
@@ -91,12 +101,30 @@ def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_fil
 
     file_size = len(text.encode('utf-8'))
     top_predictions = predict_top_n(trainer, tokenizer, text, le, n=len(le.classes_))
+    
+    print("Debug - top_predictions structure:", top_predictions)
+    
+    # Angepasste Berechnung der Wahrscheinlichkeiten
+    if isinstance(top_predictions, dict):
+        lrh_probability = sum(conf for cat, conf in top_predictions.items() if cat.startswith("LRH"))
+        ghostwriter_probability = sum(conf for cat, conf in top_predictions.items() if cat.startswith("Ghostwriter"))
+    elif isinstance(top_predictions, list):
+        if all(isinstance(item, tuple) and len(item) == 2 for item in top_predictions):
+            lrh_probability = sum(conf for cat, conf in top_predictions if cat.startswith("LRH"))
+            ghostwriter_probability = sum(conf for cat, conf in top_predictions if cat.startswith("Ghostwriter"))
+        else:
+            logging.error(f"Unerwartetes Format für top_predictions: {top_predictions}")
+            return None
+    else:
+        logging.error(f"Unerwartetes Format für top_predictions: {top_predictions}")
+        return None
 
-    lrh_probability = sum(prob for cat, prob in top_predictions if cat.startswith("LRH"))
-    ghostwriter_probability = sum(prob for cat, prob in top_predictions if cat.startswith("Ghostwriter"))
+    print(f"Debug - Vorhersagen für {os.path.basename(file_path)}:")
+    for category, prob in (top_predictions.items() if isinstance(top_predictions, dict) else top_predictions)[:5]:
+        print(f"{category}: {prob:.4f}")
 
-    print(f"Debug - LRH Probability: {lrh_probability}")
-    print(f"Debug - Ghostwriter Probability: {ghostwriter_probability}")
+    print(f"LRH Gesamtwahrscheinlichkeit: {lrh_probability:.4f}")
+    print(f"Ghostwriter Gesamtwahrscheinlichkeit: {ghostwriter_probability:.4f}")
 
     threshold = 0.1  # 10% Unterschied als Schwellenwert
     if abs(lrh_probability - ghostwriter_probability) < threshold:
@@ -108,12 +136,9 @@ def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_fil
 
     return {
         "Dateiname": os.path.basename(file_path),
-        "Dateigröße (Bytes)": file_size,
+        "Dateigröße": file_size,
         "Datum": datetime.now().strftime("%d-%m-%y %H:%M"),
-        "LRH Wahrscheinlichkeit": f"{lrh_probability:.2f}",
-        "Ghostwriter Wahrscheinlichkeit": f"{ghostwriter_probability:.2f}",
+        "LRH": f"{lrh_probability:.2f}",
+        "Ghostwriter": f"{ghostwriter_probability:.2f}",
         "Schlussfolgerung": conclusion
     }
-
-__all__ = ['get_model_and_tokenizer', 'setup_model_and_trainer', 'predict_top_n', 'analyze_new_article']
-

@@ -3,8 +3,11 @@ import os
 from datetime import date
 from model_utils import predict_top_n
 from datetime import datetime
+from colorama import Fore, Style
+
 
 def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_file):
+    print(f"\nAnalysiere Datei: {os.path.basename(file_path)}")
     logging.info(f"Beginne Analyse von: {file_path}")
 
     text = extract_text_from_file(file_path)
@@ -16,16 +19,22 @@ def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_fil
     logging.info(f"Extrahierter Text aus {file_path} (erste 50 Zeichen): {text[:50]}...")
 
     try:
-        top_predictions = predict_top_n(trainer, tokenizer, text, le, n=5)
+        top_predictions, lrh_probability, ghostwriter_probability = predict_top_n(trainer, tokenizer, text, le, n=len(le.classes_))
     except Exception as e:
         logging.error(f"Fehler bei der Vorhersage für {file_path}: {str(e)}")
         return None
 
     file_size = len(text.encode('utf-8'))
-    logging.info(f"Dateigröße: {file_size} Bytes")
 
-    lrh_probability = sum(conf for cat, conf in top_predictions if cat.startswith("LRH"))
-    ghostwriter_probability = sum(conf for cat, conf in top_predictions if cat.startswith("Ghostwriter"))
+    print("")
+    print(f"{Fore.RED}Vorhersagen für {os.path.basename(file_path)}:{Style.RESET_ALL}")
+
+    # Zeige nur die Top 5 Vorhersagen
+    for category, prob in top_predictions[:5]:
+        print(f"{category}: {prob:.4f}")
+
+    print(f"LRH Gesamtwahrscheinlichkeit: {lrh_probability:.4f}")
+    print(f"Ghostwriter Gesamtwahrscheinlichkeit: {ghostwriter_probability:.4f}")
 
     threshold = 0.1  # 10% Unterschied als Schwellenwert
     if abs(lrh_probability - ghostwriter_probability) < threshold:
@@ -37,10 +46,10 @@ def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_fil
 
     return {
         "Dateiname": os.path.basename(file_path),
-        "Dateigröße (Bytes)": file_size,
+        "Dateigröße": file_size,
         "Datum": datetime.now().strftime("%d-%m-%y %H:%M"),
-        "LRH Wahrscheinlichkeit": f"{lrh_probability:.2f}",
-        "Ghostwriter Wahrscheinlichkeit": f"{ghostwriter_probability:.2f}",
+        "LRH": f"{lrh_probability:.4f}",
+        "Ghostwriter": f"{ghostwriter_probability:.4f}",
         "Schlussfolgerung": conclusion
     }
 

@@ -85,7 +85,7 @@ def check_hf_token():
         raise ValueError("Invalid Hugging Face API token. Please check the token and try again.")
 
 
-def check_files(trainer, tokenizer, le, config):
+def check_files(trainer, tokenizer, le, config, model_name):
     check_folder = config['Paths']['check_this']
     if not os.path.exists(check_folder):
         logging.error(f"Der Ordner '{check_folder}' existiert nicht.")
@@ -103,10 +103,12 @@ def check_files(trainer, tokenizer, le, config):
         logging.info(f"Analysiere Datei: {file}")
         result = analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_file)
         if result:
+            result['Model'] = model_name  # Füge Modellname hinzu
             results.append(result)
-            logging.info(f"Ergebnis für {file}: LRH: {result['LRH Wahrscheinlichkeit']}, "
-                         f"Ghostwriter: {result['Ghostwriter Wahrscheinlichkeit']}, "
-                         f"Schlussfolgerung: {result['Schlussfolgerung']}")
+            logging.info(f"Ergebnis für {file}: "
+                     f"LRH: {result['LRH']}, "
+                     f"Ghostwriter: {result['Ghostwriter']}, "
+                     f"Schlussfolgerung: {result['Schlussfolgerung']}")
         else:
             logging.warning(f"Konnte keine Analyse für {file} durchführen.")
     if results:

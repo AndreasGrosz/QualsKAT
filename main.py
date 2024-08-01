@@ -5,6 +5,7 @@ import configparser
 import argparse
 import sys
 import json
+from colorama import Fore, Style
 from datetime import date
 import torch
 import numpy as np
@@ -19,6 +20,8 @@ from file_utils import check_environment, check_hf_token, check_files, extract_t
 from data_processing import create_dataset
 from model_utils import setup_model_and_trainer, get_model_and_tokenizer
 from analysis_utils import analyze_new_article
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename='classifier.log')
 
 def main():
     parser = argparse.ArgumentParser(
@@ -50,10 +53,10 @@ def main():
             sys.exit(1)
 
         dataset, le = create_dataset(config, quick=args.quick)
-        print("Verarbeitete Dokumente:")
+        """        print("Verarbeitete Dokumente:")
         for item in dataset:
             print(f"  - {item['filename']}")
-
+        """
         if len(dataset) == 0:
             raise ValueError("Der erstellte Datensatz ist leer. Überprüfen Sie die Eingabedaten.")
 
@@ -68,54 +71,45 @@ def main():
         model_names = config['Model']['model_name'].split(',')
         total_start_time = time.time()
 
-        for model_name in model_names:
-            model_name = model_name.strip()
-            logging.info(f"Verarbeite Modell: {model_name}")
-            start_time = time.time()
+    for model_name in model_names:
+        model_name = model_name.strip()
+        print(f"{Fore.GREEN}Verarbeite Modell: {model_name}{Style.RESET_ALL}")
 
-            model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
+        model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
 
-            tokenizer, trainer, tokenized_datasets = setup_model_and_trainer(dataset_dict, len(le.classes_), config, model_name, quick=args.quick)
+        if args.train:
+            tokenizer, trainer, tokenized_datasets = setup_model_and_trainer(dataset_dict, le, config, model_name, quick=args.quick)
+            trainer.train()
+            results = trainer.evaluate(eval_dataset=tokenized_datasets['test'])
+            logging.info(f"Testergebnisse für {model_name}: {results}")
 
-            if args.train:
-                trainer.train()
-                results = trainer.evaluate(eval_dataset=tokenized_datasets['test'])
-                logging.info(f"Testergebnisse für {model_name}: {results}")
+            trainer.save_model(model_save_path)
+            tokenizer.save_pretrained(model_save_path)
 
-                # Speichere das Modell
-                trainer.save_model(model_save_path)
-                tokenizer.save_pretrained(model_save_path)
-                trainer.model.config.save_pretrained(model_save_path)
+        if args.checkthis or args.predict:
+            model = AutoModelForSequenceClassification.from_pretrained(model_save_path)
+            tokenizer = AutoTokenizer.from_pretrained(model_save_path)
 
-                logging.info(f"Modell gespeichert in: {model_save_path}")
-                logging.info(f"Inhalt des Modellverzeichnisses:")
-                for file in os.listdir(model_save_path):
-                    logging.info(f" - {file}")
+            # Laden der Kategorie-zu-Label-Zuordnung
+            label2id = model.config.label2id
+            id2label = model.config.id2label
+            print("Modellkategorien:", id2label)
 
-                end_time = time.time()
-                logging.info(f"Trainingszeit für {model_name}: {(end_time - start_time) / 60:.2f} Minuten")
+            # Erstellen eines neuen LabelEncoders mit den geladenen Kategorien
+            le = LabelEncoder()
+            le.classes_ = np.array(list(label2id.keys()))
 
-            if args.checkthis or args.predict:
-                logging.info(f"Lade Modell für Analyse: {model_name}")
-                if not os.path.exists(os.path.join(model_save_path, 'config.json')):
-                    logging.error(f"config.json nicht gefunden in {model_save_path}")
-                    logging.info("Versuche, das Modell neu zu initialisieren...")
-                    tokenizer, model = get_model_and_tokenizer(model_name, len(le.classes_))
-                    trainer = Trainer(model=model)
+            trainer = Trainer(model=model)
+
+            if args.checkthis:
+                check_files(trainer, tokenizer, le, config, model_name)
+
+            if args.predict:
+                result = analyze_new_article(args.predict, trainer, tokenizer, le, extract_text_from_file)
+                if result:
+                    print(json.dumps(result, indent=2))
                 else:
-                    model = AutoModelForSequenceClassification.from_pretrained(model_save_path)
-                    tokenizer = AutoTokenizer.from_pretrained(model_save_path)
-                    trainer = Trainer(model=model)
-
-                if args.checkthis:
-                    check_files(trainer, tokenizer, le, config)
-
-                if args.predict:
-                    result = analyze_new_article(args.predict, trainer, tokenizer, le)
-                    if result:
-                        print(json.dumps(result, indent=2))
-                    else:
-                        print("Konnte keine Analyse durchführen.")
+                    print("Konnte keine Analyse durchführen.")
 
         total_end_time = time.time()
         total_duration = (total_end_time - total_start_time) / 60
