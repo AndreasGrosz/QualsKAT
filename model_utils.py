@@ -89,8 +89,7 @@ def predict_top_n(trainer, tokenizer, text, le, n=None):
         ghostwriter_probability /= total_prob
         unknown_probability /= total_prob
 
-    return sorted_results, lrh_probability, ghostwriter_probability, unknown_probability
-
+    return sorted_results, lrh_probability, ghostwriter_probability
 
 def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_file):
     text = extract_text_from_file(file_path)
@@ -103,6 +102,7 @@ def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_fil
     top_predictions = predict_top_n(trainer, tokenizer, text, le, n=len(le.classes_))
     
     print("Debug - top_predictions structure:", top_predictions)
+    logging.info("Debug - top_predictions structure:", top_predictions)
     
     # Angepasste Berechnung der Wahrscheinlichkeiten
     if isinstance(top_predictions, dict):
@@ -119,12 +119,16 @@ def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_fil
         logging.error(f"Unerwartetes Format für top_predictions: {top_predictions}")
         return None
 
-    print(f"Debug - Vorhersagen für {os.path.basename(file_path)}:")
+    print(f"Vorhersagen für {os.path.basename(file_path)}:")
+    loggin.info(f"Vorhersagen für {os.path.basename(file_path)}:")
     for category, prob in (top_predictions.items() if isinstance(top_predictions, dict) else top_predictions)[:5]:
         print(f"{category}: {prob:.4f}")
+        loggin.info(f"{category}: {prob:.4f}")
 
     print(f"LRH Gesamtwahrscheinlichkeit: {lrh_probability:.4f}")
     print(f"Ghostwriter Gesamtwahrscheinlichkeit: {ghostwriter_probability:.4f}")
+    loggin.info(f"LRH Gesamtwahrscheinlichkeit: {lrh_probability:.4f}")
+    loggin.info(f"Ghostwriter Gesamtwahrscheinlichkeit: {ghostwriter_probability:.4f}")
 
     threshold = 0.1  # 10% Unterschied als Schwellenwert
     if abs(lrh_probability - ghostwriter_probability) < threshold:

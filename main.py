@@ -1,5 +1,6 @@
 import os
 import time
+from datetime import date
 import logging
 import configparser
 import argparse
@@ -24,6 +25,10 @@ from analysis_utils import analyze_new_article
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename='classifier.log')
 
 def main():
+
+    logging.info("")
+    logging.error("Programmstart")
+    logging.error("=============")
     parser = argparse.ArgumentParser(
         description='LRH Document Classifier',
         formatter_class=argparse.RawTextHelpFormatter
@@ -50,6 +55,7 @@ def main():
         categories_file = os.path.join(config['Paths']['output'], 'categories.csv')
         if not os.path.exists(categories_file):
             print("Kategorien-Datei nicht gefunden. Bitte führen Sie zuerst update_categories.py aus.")
+            logging.error("Kategorien-Datei nicht gefunden. Bitte führen Sie zuerst update_categories.py aus.")
             sys.exit(1)
 
         dataset, le = create_dataset(config, quick=args.quick)
@@ -69,7 +75,7 @@ def main():
 
         for model_name in model_names:
             model_name = model_name.strip()
-            print(f"{Fore.GREEN}Verarbeite Modell: {model_name}{Style.RESET_ALL}")
+            logging.info(f"Verarbeite Modell: {model_name}{Style.RESET_ALL}")
 
             model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
 
@@ -90,6 +96,7 @@ def main():
                 label2id = model.config.label2id
                 id2label = model.config.id2label
                 print("Modellkategorien:", id2label)
+                logging.info("Modellkategorien:", id2label)
 
                 # Erstellen eines neuen LabelEncoders mit den geladenen Kategorien
                 le = LabelEncoder()
@@ -104,13 +111,16 @@ def main():
                     result = analyze_new_article(args.predict, trainer, tokenizer, le, extract_text_from_file)
                     if result:
                         print(json.dumps(result, indent=2))
+                        logging.info(json.dumps(result, indent=2))
                     else:
                         print("Konnte keine Analyse durchführen.")
+                        logging.info("Konnte keine Analyse durchführen.")
 
-            total_end_time = time.time()
-            total_duration = (total_end_time - total_start_time) / 60
-            logging.info(f"Gesamtausführungszeit für alle Modelle: {total_duration:.2f} Minuten")
-
+        total_end_time = time.time()
+        total_duration = (total_end_time - total_start_time) / 60
+        logging.error(f"Gesamtausführungszeit für alle Modelle: {total_duration:.2f} Minuten")
+        logging.error("---------------------------------------")
+        logging.error("Programmende")
     except Exception as e:
         logging.error(f"Ein kritischer Fehler ist aufgetreten: {str(e)}")
         raise

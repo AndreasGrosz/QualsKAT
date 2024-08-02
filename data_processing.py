@@ -37,6 +37,8 @@ def save_categories_to_csv(categories, config):
 
     print(f"Kategorien wurden in {categories_file} gespeichert.")
     print(f"Anzahl der Kategorien: {len(categories)}")
+    logging.info(f"Kategorien wurden in {categories_file} gespeichert.")
+    logging.info(f"Anzahl der Kategorien: {len(categories)}")
 
 
 def get_files_and_categories(config):

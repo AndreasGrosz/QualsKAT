@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 import os
 import olefile
@@ -86,6 +87,7 @@ def check_hf_token():
 
 
 def check_files(trainer, tokenizer, le, config, model_name):
+    start_time = time.time()
     check_folder = config['Paths']['check_this']
     if not os.path.exists(check_folder):
         logging.error(f"Der Ordner '{check_folder}' existiert nicht.")
@@ -103,14 +105,13 @@ def check_files(trainer, tokenizer, le, config, model_name):
         logging.info(f"Analysiere Datei: {file}")
         result = analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_file)
         if result:
-            result['Model'] = model_name  # Füge Modellname hinzu
+            result['Model'] = model_name
             results.append(result)
-            logging.info(f"Ergebnis für {file}: "
-                     f"LRH: {result['LRH']}, "
-                     f"Ghostwriter: {result['Ghostwriter']}, "
-                     f"Schlussfolgerung: {result['Schlussfolgerung']}")
-        else:
-            logging.warning(f"Konnte keine Analyse für {file} durchführen.")
+
+    end_time = time.time()
+    total_duration = end_time - start_time
+    logging.info(f"Gesamtausführungszeit für Modell {model_name}: {total_duration:.2f} Sekunden")
+
     if results:
         csv_filename = os.path.join(config['Paths']['output'], "CheckThisResults.csv")
         file_exists = os.path.exists(csv_filename)
@@ -126,6 +127,26 @@ def check_files(trainer, tokenizer, le, config, model_name):
                 writer.writerow(result)
 
         logging.info(f"Ergebnisse wurden an {csv_filename} angehängt.")
+    else:
+        logging.info("Keine Ergebnisse zur Ausgabe.")
+
+    end_time = time.time()
+    total_duration = end_time - start_time
+    logging.info(f"Gesamtausführungszeit für Modell {model_name}: {total_duration:.2f} Sekunden")
+
+    if results:
+        csv_filename = os.path.join(config['Paths']['output'], "CheckThisResults.csv")
+        file_exists = os.path.exists(csv_filename)
+
+        with open(csv_filename, 'a', newline='', encoding='utf-8') as csvfile:
+            fieldnames = results[0].keys()
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+            if not file_exists:
+                writer.writeheader()
+
+            for result in results:
+                writer.writerow(result)
 
         logging.info(f"Ergebnisse wurden in {csv_filename} gespeichert.")
 
@@ -136,7 +157,7 @@ def check_files(trainer, tokenizer, le, config, model_name):
 
 
 def extract_text_from_file(file_path):
-    logging.info(f"Versuche Text zu extrahieren aus: {file_path}")
+    #logging.info(f"Versuche Text zu extrahieren aus: {file_path}")
 
     if file_path.endswith('.txt'):
         try:
