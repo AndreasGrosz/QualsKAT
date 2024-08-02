@@ -70,9 +70,9 @@ def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_fil
 
     # Ermittle die Kategorie mit der höchsten Wahrscheinlichkeit
     if lrh_max > ghostwriter_max:
-        max_category = "LRH"
+        max_category = [cat for cat, prob in top_predictions if prob == lrh_max][0]
     else:
-        max_category = "Ghostwriter"
+        max_category = [cat for cat, prob in top_predictions if prob == ghostwriter_max][0]
 
     print(f"Schlussfolgerung: {max_category}")
     logging.info(f"Schlussfolgerung: {max_category}")

@@ -11,6 +11,7 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 from striprtf.striprtf import rtf_to_text
 import docx
+import pdfplumber
 from analysis_utils import analyze_new_article
 
 
@@ -157,7 +158,6 @@ def check_files(trainer, tokenizer, le, config, model_name):
 
 
 def extract_text_from_file(file_path):
-    #logging.info(f"Versuche Text zu extrahieren aus: {file_path}")
 
     if file_path.endswith('.txt'):
         try:
@@ -171,6 +171,14 @@ def extract_text_from_file(file_path):
 
     elif file_path.endswith('.rtf'):
         return handle_rtf_error(file_path)
+    elif file_path.endswith('.pdf'):
+        try:
+            with pdfplumber.open(file_path) as pdf:
+                text = "\n".join([page.extract_text() for page in pdf.pages])
+            return text
+        except Exception as e:
+            logging.error(f"Fehler beim Lesen der PDF-Datei {file_path}: {str(e)}")
+            return None
     elif file_path.endswith('.docx') or file_path.endswith('.doc'):
         try:
             doc = docx.Document(file_path)
