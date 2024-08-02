@@ -4,7 +4,8 @@ from datetime import date
 from model_utils import predict_top_n
 from datetime import datetime
 from colorama import Fore, Style
-
+from sklearn.preprocessing import LabelEncoder
+import numpy as np
 
 def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_file):
     text = extract_text_from_file(file_path)
@@ -18,7 +19,6 @@ def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_fil
     # Erstelle einen neuen LabelEncoder und passe ihn an die Kategorien aus dem Modell an
     le = LabelEncoder()
     le.classes_ = np.array(list(trainer.model.config.id2label.values()))
-
     try:
         top_predictions, lrh_probability, ghostwriter_probability = predict_top_n(trainer, tokenizer, text, le, n=len(le.classes_))
     except KeyError as e:

@@ -1,13 +1,14 @@
-def analyze_new_article(file_path, trainer, tokenizer, label2id, id2label, extract_text_from_file):
-    # ... (bestehender Code)
+def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_file):
+    text = extract_text_from_file(file_path)
 
-    try:
-        top_predictions, lrh_probability, ghostwriter_probability = predict_top_n(trainer, tokenizer, text, label2id, id2label, n=len(label2id))
-    except KeyError as e:
-        logging.error(f"Unbekannte Kategorie in der Vorhersage für {file_path}: {str(e)}")
-        # Verwende eine Standardkategorie oder überspringe den Eintrag
-        lrh_probability = "Nicht verfügbar"
-        ghostwriter_probability = "Nicht verfügbar"
-        top_predictions = []
+    if text is None or len(text) == 0:
+        logging.warning(f"Konnte Text aus {file_path} nicht extrahieren oder Text ist leer.")
+        return None
+
+    file_size = len(text.encode('utf-8'))
+
+    # Erstelle einen neuen LabelEncoder und passe ihn an die Kategorien aus dem Modell an
+    le = LabelEncoder()
+    le.classes_ = np.array(list(trainer.model.config.id2label.values()))
 
     # ... (restlicher Code)
