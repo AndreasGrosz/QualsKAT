@@ -1,0 +1,30 @@
+﻿HUBBARD COMMUNICATIONS OFFICE 
+Saint Hill Manor, East Grinstead, Sussex
+HCO BULLETIN OF 13 OCTOBER 1969
+ISSUE II
+Revised 16 August 1983
+Class VIIIs
+AOs
+Solo OT III Course
+Solo C/Ses
+(Revised to delete references to running R3R on an OT, 
+and change „date“ to „date/locate“)
+
+
+SECRET
+
+OT III ERRORS
+
+
+Among OT III errors are:
+A BT run on Inc I fails to blow.
+There are three reasons:
+(a) 	Auditor is trying to run a cluster with an Incident I. The right thing to do is get the character of the incident that made it a cluster, date/locate it and then run Inc Is on those left when it breaks up.
+(b) 	There is an earlier Incident I on the same BT. Find it and run it. The BT has a chain of them all by himself.
+(c) 	Another BT is copying the Inc I just run so it looks like it didn’t blow. Failure to ever run Inc II can also cause a bog.
+An LDN OT III given by an OT III Review Auditor also handles bogged OT III preOTs.
+
+
+L. RON HUBBARD 
+FOUNDER
+LRH 

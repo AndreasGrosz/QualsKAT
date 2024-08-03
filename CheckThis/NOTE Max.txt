@@ -1,0 +1,8 @@
+﻿NOTE Max
+
+Reference for that you run an incident R3R on a BT:
+
+Instructions, 12.8.69
+Additional Tech Data, 15.2.68
+Running OT III, 4.5.68/12.4.70
+
