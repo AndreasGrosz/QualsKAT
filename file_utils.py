@@ -61,8 +61,13 @@ def check_environment():
     for model_name in model_names:
         model_name = model_name.strip()
         try:
-            AutoTokenizer.from_pretrained(model_name)
-            AutoModelForSequenceClassification.from_pretrained(model_name)
+            # online:
+            #AutoTokenizer.from_pretrained(model_name)
+            #AutoModelForSequenceClassification.from_pretrained(model_name)
+
+            # offline:
+            AutoTokenizer.from_pretrained(os.path.join("fresh-models", model_name))
+            AutoModelForSequenceClassification.from_pretrained(os.path.join("fresh-models", model_name))
         except Exception as e:
             raise ValueError(f"Ungültiges oder nicht verfügbares Modell: {model_name}. Fehler: {str(e)}")
 

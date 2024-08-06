@@ -93,8 +93,13 @@ def main():
                 tokenizer.save_pretrained(model_save_path)
 
             if args.checkthis or args.predict:
+                # online
                 model = AutoModelForSequenceClassification.from_pretrained(model_save_path)
                 tokenizer = AutoTokenizer.from_pretrained(model_save_path)
+
+                # offline
+                model = AutoModelForSequenceClassification.from_pretrained(os.path.join("fresh-models", model_name))
+                tokenizer = AutoTokenizer.from_pretrained(os.path.join("fresh-models", model_name))
 
                 # Laden der Kategorie-zu-Label-Zuordnung
                 label2id = model.config.label2id
