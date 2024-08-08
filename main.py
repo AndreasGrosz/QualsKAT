@@ -35,7 +35,7 @@ def main():
     logging.error("=============")
     device = get_device()
     logging.info(f"Verwende Gerät: {device}")
-
+    os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
     parser = argparse.ArgumentParser(
         description='LRH Document Classifier',
         formatter_class=argparse.RawTextHelpFormatter

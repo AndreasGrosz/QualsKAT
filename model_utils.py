@@ -75,6 +75,9 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
         eval_steps=int(config['Evaluation']['eval_steps']),
         save_steps=int(config['Evaluation']['save_steps']),
         load_best_model_at_end=True,
+        fp16=True,  # Aktiviert Mixed Precision Training
+        gradient_accumulation_steps=4,  # Gradient Accumulation
+        gradient_checkpointing=True,  # Aktiviert Gradient Checkpointing
     )
 
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
