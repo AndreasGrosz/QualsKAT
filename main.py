@@ -22,7 +22,7 @@ from data_processing import create_dataset
 from model_utils import setup_model_and_trainer, get_model_and_tokenizer
 from analysis_utils import analyze_new_article
 from file_utils import get_device
-
+from experiment_logger import log_experiment
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename='classifier.log')
 
