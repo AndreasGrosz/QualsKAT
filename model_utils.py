@@ -43,8 +43,22 @@ def get_optimal_batch_size(model, max_sequence_length, device):
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, DataCollatorWithPadding
 
 
+
 def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
-    # ... (vorheriger Code bleibt unverändert)
+    num_labels = len(le.classes_)
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
+
+    model.config.label2id = {label: i for i, label in enumerate(le.classes_)}
+    model.config.id2label = {i: label for i, label in enumerate(le.classes_)}
+
+    def tokenize_function(examples):
+        return tokenizer(examples["text"], truncation=True, padding="max_length")
+
+    tokenized_datasets = dataset_dict.map(tokenize_function, batched=True, remove_columns=dataset_dict["train"].column_names)
+
+    model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
+    os.makedirs(model_save_path, exist_ok=True)
 
     training_args = TrainingArguments(
         output_dir=model_save_path,
@@ -69,14 +83,13 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
     trainer = Trainer(
         model=model,
         args=training_args,
-        train_dataset=dataset_dict['train'],
-        eval_dataset=dataset_dict['test'],
+        train_dataset=tokenized_datasets['train'],
+        eval_dataset=tokenized_datasets['test'],
         tokenizer=tokenizer,
         data_collator=data_collator,
     )
 
-    return tokenizer, trainer, dataset_dict
-
+    return tokenizer, trainer, tokenized_datasets
 
 
 def compute_metrics(eval_pred):
