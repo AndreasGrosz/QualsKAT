@@ -68,17 +68,14 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
         evaluation_strategy="epoch",
         save_strategy="epoch",
         load_best_model_at_end=True,
-        fp16=True,
+        fp16=torch.cuda.is_available(),
         gradient_accumulation_steps=4,
-        gradient_checkpointing=True,
         logging_dir=os.path.join(model_save_path, 'logs'),
         logging_steps=100,
         save_total_limit=2,
+        remove_unused_columns=False,  # Wichtig für benutzerdefinierte Datasets
+        gradient_checkpointing=True,  # Aktiviert Gradient Checkpointing
     )
-
-    # Setze die Warnung für das Checkpointing
-    import warnings
-    warnings.filterwarnings("ignore", message="torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly.")
 
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
@@ -92,6 +89,7 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
     )
 
     return tokenizer, trainer, tokenized_datasets
+
 
 def compute_metrics(eval_pred):
     predictions, labels = eval_pred
