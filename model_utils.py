@@ -65,7 +65,7 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
         per_device_eval_batch_size=4,
         num_train_epochs=1 if quick else int(config['Training']['num_epochs']),
         weight_decay=0.01,
-        eval_strategy="epoch",
+        evaluation_strategy="epoch",
         save_strategy="epoch",
         load_best_model_at_end=True,
         fp16=True,
@@ -74,8 +74,11 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
         logging_dir=os.path.join(model_save_path, 'logs'),
         logging_steps=100,
         save_total_limit=2,
-        use_reentrant=False,  # Explizit setzen, um die Warnung zu vermeiden
     )
+
+    # Setze die Warnung für das Checkpointing
+    import warnings
+    warnings.filterwarnings("ignore", message="torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly.")
 
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
@@ -89,7 +92,6 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
     )
 
     return tokenizer, trainer, tokenized_datasets
-
 
 def compute_metrics(eval_pred):
     predictions, labels = eval_pred
