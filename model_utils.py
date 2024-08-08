@@ -42,42 +42,26 @@ def get_optimal_batch_size(model, max_sequence_length, device):
 
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, DataCollatorWithPadding
 
+
 def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
-    num_labels = len(le.classes_)
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
-
-    model.config.label2id = {label: i for i, label in enumerate(le.classes_)}
-    model.config.id2label = {i: label for i, label in enumerate(le.classes_)}
-
-    def tokenize_function(examples):
-        result = tokenizer(examples["text"], truncation=True, padding="max_length")
-        result["labels"] = examples["labels"]
-        return result
-
-    tokenized_datasets = dataset_dict.map(tokenize_function, batched=True, remove_columns=dataset_dict["train"].column_names)
-
-    model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
-    os.makedirs(model_save_path, exist_ok=True)
+    # ... (vorheriger Code bleibt unverändert)
 
     training_args = TrainingArguments(
         output_dir=model_save_path,
         learning_rate=float(config['Training']['learning_rate']),
-        per_device_train_batch_size=int(config['Training']['batch_size']),
-        per_device_eval_batch_size=int(config['Training']['batch_size']),
+        per_device_train_batch_size=4,  # Reduzierte Batch-Größe
+        per_device_eval_batch_size=4,   # Reduzierte Batch-Größe
         num_train_epochs=1 if quick else int(config['Training']['num_epochs']),
-        weight_decay=float(config['Training']['weight_decay']),
-        warmup_steps=int(config['Training']['warmup_steps']),
-        gradient_accumulation_steps=int(config['Training']['gradient_accumulation_steps']),
-        fp16=config['Optimization'].getboolean('fp16'),
-        max_grad_norm=float(config['Optimization']['max_grad_norm']),
-        evaluation_strategy="steps",
-        eval_steps=int(config['Evaluation']['eval_steps']),
-        save_steps=int(config['Evaluation']['save_steps']),
+        weight_decay=0.01,
+        evaluation_strategy="epoch",
+        save_strategy="epoch",
         load_best_model_at_end=True,
         fp16=True,  # Aktiviert Mixed Precision Training
         gradient_accumulation_steps=4,  # Gradient Accumulation
         gradient_checkpointing=True,  # Aktiviert Gradient Checkpointing
+        logging_dir=os.path.join(model_save_path, 'logs'),
+        logging_steps=100,
+        save_total_limit=2,  # Behält nur die besten 2 Checkpoints
     )
 
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
@@ -85,14 +69,13 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
     trainer = Trainer(
         model=model,
         args=training_args,
-        train_dataset=tokenized_datasets['train'],
-        eval_dataset=tokenized_datasets['test'],
+        train_dataset=dataset_dict['train'],
+        eval_dataset=dataset_dict['test'],
         tokenizer=tokenizer,
         data_collator=data_collator,
-        compute_metrics=compute_metrics
     )
 
-    return tokenizer, trainer, tokenized_datasets
+    return tokenizer, trainer, dataset_dict
 
 
 
@@ -102,9 +85,10 @@ def compute_metrics(eval_pred):
     return {'accuracy': (predictions == labels).astype(np.float32).mean().item()}
 
 
-
 def predict_top_n(trainer, tokenizer, text, le, n=None):
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True).to(device)
+    trainer.model.to(device)
     with torch.no_grad():
         logits = trainer.model(**inputs).logits
     probabilities = torch.nn.functional.softmax(logits, dim=-1)[0]
@@ -114,9 +98,10 @@ def predict_top_n(trainer, tokenizer, text, le, n=None):
         category = le.inverse_transform([idx])[0]
         results.append((category, prob.item()))
 
-    return sorted(results, key=lambda x: x[1], reverse=True)
+    if n is None:
+        n = len(le.classes_)
 
-
+    return sorted(results, key=lambda x: x[1], reverse=True)[:n]
 
 
 def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_file):
