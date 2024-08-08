@@ -50,16 +50,18 @@ def get_files_and_categories(config):
         for file in files:
             if any(file.endswith(fmt) for fmt in supported_formats):
                 file_path = os.path.join(root, file)
-                categories = os.path.relpath(root, root_dir).split(os.sep)
-                if categories[0] == "LRH":
-                    category = f"LRH-{'-'.join(categories[1:])}"
-                elif categories[0] == "unknown":
-                    category = "unknown"
+                rel_path = os.path.relpath(root, root_dir)
+
+                # Binäre Klassifikation
+                if rel_path.startswith("LRH"):
+                    category = "LRH"
                 else:
-                    category = f"Ghostwriter-{categories[0]}"
+                    category = "Nicht-LRH"
+
                 files_and_categories.append((file_path, category))
 
     return files_and_categories
+
 
 
 def load_categories_from_csv(config):
@@ -72,6 +74,11 @@ def load_categories_from_csv(config):
         return [row[0] for row in reader]
 
 
+import os
+import random
+from datasets import Dataset
+from sklearn.preprocessing import LabelEncoder
+
 def create_dataset(config, quick=False):
     files_and_categories = get_files_and_categories(config)
 
@@ -80,34 +87,30 @@ def create_dataset(config, quick=False):
         files_and_categories = random.sample(files_and_categories, sample_size)
 
     texts = []
-    all_categories = []
-    filenames = []  # Neue Liste für Dateinamen
+    labels = []
+    filenames = []
 
     for file_path, category in files_and_categories:
         text = extract_text_from_file(file_path)
         if text:
             texts.append(text)
-            all_categories.append(category)
-            filenames.append(os.path.basename(file_path))  # Füge den Dateinamen hinzu
+            labels.append(category)
+            filenames.append(os.path.basename(file_path))
 
     if not texts:
         raise ValueError("Keine Textdaten gefunden. Überprüfen Sie das Dokumentenverzeichnis.")
 
-    # Laden Sie alle möglichen Kategorien aus der CSV-Datei
-    all_possible_categories = load_categories_from_csv(config)
-
     le = LabelEncoder()
-    le.fit(all_possible_categories)  # Fit the encoder with all possible categories
-    numeric_categories = le.transform(all_categories)  # Transform only the categories in the dataset
+    le.fit(["LRH", "Nicht-LRH"])
+    numeric_labels = le.transform(labels)
 
     dataset_dict = {
         'text': texts,
-        'labels': numeric_categories,
-        'filename': filenames  # Füge die Dateinamen zum Dataset hinzu
+        'labels': numeric_labels,
+        'filename': filenames
     }
 
     return Dataset.from_dict(dataset_dict), le
-
 
 def extract_text_from_file(file_path):
     encodings = ['utf-8', 'iso-8859-1', 'windows-1252']

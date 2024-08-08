@@ -14,4 +14,4 @@ num_epochs = 3
 # model_name = roberta-base                              braucht mehr RAM
 # model_name = microsoft/deberta-base     bislang ungetestet. vermutlich brauchen sie mehr RAM
 # model_name = albert-base-v2
-model_name = distilbert-base-uncased,albert-base-v2
+model_name = distilbert-base-uncased

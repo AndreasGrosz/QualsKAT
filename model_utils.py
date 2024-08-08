@@ -40,28 +40,31 @@ def get_optimal_batch_size(model, max_sequence_length, device):
         return 8  # Ein vernünftiger Standardwert für CPUs
 
 
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, DataCollatorWithPadding
+
 def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
-    device = get_device()
     num_labels = len(le.classes_)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
 
-    # Speichern Sie die Kategorie-zu-Label-Zuordnung in der Modellkonfiguration
     model.config.label2id = {label: i for i, label in enumerate(le.classes_)}
     model.config.id2label = {i: label for i, label in enumerate(le.classes_)}
 
     def tokenize_function(examples):
-        return tokenizer(examples["text"], truncation=True, padding="max_length")
+        result = tokenizer(examples["text"], truncation=True, padding="max_length")
+        result["labels"] = examples["labels"]
+        return result
 
     tokenized_datasets = dataset_dict.map(tokenize_function, batched=True, remove_columns=dataset_dict["train"].column_names)
+
     model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
     os.makedirs(model_save_path, exist_ok=True)
 
     training_args = TrainingArguments(
         output_dir=model_save_path,
         learning_rate=float(config['Training']['learning_rate']),
-        per_device_train_batch_size=optimal_batch_size,
-        per_device_eval_batch_size=optimal_batch_size,
+        per_device_train_batch_size=int(config['Training']['batch_size']),
+        per_device_eval_batch_size=int(config['Training']['batch_size']),
         num_train_epochs=1 if quick else int(config['Training']['num_epochs']),
         weight_decay=0.01,
         evaluation_strategy="epoch",
@@ -78,21 +81,22 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
         eval_dataset=tokenized_datasets['test'],
         tokenizer=tokenizer,
         data_collator=data_collator,
-        compute_metrics=compute_metrics,
-        optimizers=(optimizer, None)
+        compute_metrics=compute_metrics
     )
 
     return tokenizer, trainer, tokenized_datasets
+
+
 
 def compute_metrics(eval_pred):
     predictions, labels = eval_pred
     predictions = np.argmax(predictions, axis=1)
     return {'accuracy': (predictions == labels).astype(np.float32).mean().item()}
 
+
+
 def predict_top_n(trainer, tokenizer, text, le, n=None):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True).to(device)
-    trainer.model.to(device)
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
     with torch.no_grad():
         logits = trainer.model(**inputs).logits
     probabilities = torch.nn.functional.softmax(logits, dim=-1)[0]
@@ -102,22 +106,10 @@ def predict_top_n(trainer, tokenizer, text, le, n=None):
         category = le.inverse_transform([idx])[0]
         results.append((category, prob.item()))
 
-    if n is None:
-        n = len(le.classes_)
+    return sorted(results, key=lambda x: x[1], reverse=True)
 
-    sorted_results = sorted(results, key=lambda x: x[1], reverse=True)[:n]
 
-    lrh_probability = sum(prob for cat, prob in results if cat.startswith("LRH"))
-    ghostwriter_probability = sum(prob for cat, prob in results if cat.startswith("Ghostwriter"))
-    unknown_probability = sum(prob for cat, prob in results if cat == "unknown")
 
-    total_prob = lrh_probability + ghostwriter_probability + unknown_probability
-    if total_prob > 0:
-        lrh_probability /= total_prob
-        ghostwriter_probability /= total_prob
-        unknown_probability /= total_prob
-
-    return sorted_results, lrh_probability, ghostwriter_probability
 
 def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_file):
     text = extract_text_from_file(file_path)
