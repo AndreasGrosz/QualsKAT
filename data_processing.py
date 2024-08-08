@@ -63,7 +63,6 @@ def get_files_and_categories(config):
     return files_and_categories
 
 
-
 def load_categories_from_csv(config):
     categories_file = os.path.join(config['Paths']['output'], 'categories.csv')
     if not os.path.exists(categories_file):
@@ -73,11 +72,6 @@ def load_categories_from_csv(config):
         reader = csv.reader(f)
         return [row[0] for row in reader]
 
-
-import os
-import random
-from datasets import Dataset
-from sklearn.preprocessing import LabelEncoder
 
 def create_dataset(config, quick=False):
     files_and_categories = get_files_and_categories(config)
@@ -101,8 +95,7 @@ def create_dataset(config, quick=False):
         raise ValueError("Keine Textdaten gefunden. Überprüfen Sie das Dokumentenverzeichnis.")
 
     le = LabelEncoder()
-    le.fit(["LRH", "Nicht-LRH"])
-    numeric_labels = le.transform(labels)
+    numeric_labels = le.fit_transform(labels)
 
     dataset_dict = {
         'text': texts,
@@ -111,6 +104,7 @@ def create_dataset(config, quick=False):
     }
 
     return Dataset.from_dict(dataset_dict), le
+
 
 def extract_text_from_file(file_path):
     encodings = ['utf-8', 'iso-8859-1', 'windows-1252']
