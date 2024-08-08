@@ -4,14 +4,25 @@ check_this = CheckThis
 output = output
 models = models
 
+[Model]
+# models für power-pc
+model_name = distilbert-base-uncased,roberta-large,roberta-base,microsoft/deberta-base,albert-base-v2
+
+# models für CPU
+#model_name = distilbert-base-uncased, albert-base-v2
+
 [Training]
 batch_size = 16
 learning_rate = 2e-5
 num_epochs = 3
+weight_decay = 0.01
+warmup_steps = 500
+gradient_accumulation_steps = 4
 
-[Model]
-# model_name = roberta-large
-# model_name = roberta-base                              braucht mehr RAM
-# model_name = microsoft/deberta-base     bislang ungetestet. vermutlich brauchen sie mehr RAM
-# model_name = albert-base-v2
-model_name = distilbert-base-uncased
+[Optimization]
+fp16 = True
+max_grad_norm = 1.0
+
+[Evaluation]
+eval_steps = 500
+save_steps = 1000

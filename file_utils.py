@@ -15,25 +15,20 @@ import pdfplumber
 from analysis_utils import analyze_new_article
 
 
-
 def check_environment():
     device = get_device()
     if device.type == "cuda":
         logging.info(f"GPU verfügbar: {torch.cuda.get_device_name(0)}")
         logging.info(f"Verfügbarer GPU-Speicher: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
-    elif device.type == "mps":
-        logging.info("Apple Silicon GPU verfügbar")
     else:
         logging.warning("Keine GPU verfügbar. Das Training wird auf der CPU durchgeführt und kann sehr lange dauern.")
-    # Überprüfe, ob die Konfigurationsdatei existiert
+
     if not os.path.exists('config.txt'):
         raise FileNotFoundError("config.txt nicht gefunden. Bitte stellen Sie sicher, dass die Datei im aktuellen Verzeichnis liegt.")
 
-    # Lade die Konfiguration
     config = configparser.ConfigParser()
     config.read('config.txt')
 
-    # Überprüfe, ob alle erforderlichen Abschnitte und Schlüssel in der Konfiguration vorhanden sind
     required_sections = ['Paths', 'Training', 'Model']
     for section in required_sections:
         if section not in config:
@@ -49,7 +44,6 @@ def check_environment():
             if key not in config[section]:
                 raise KeyError(f"Schlüssel '{key}' fehlt im Abschnitt '{section}' der config.txt")
 
-    # Überprüfe, ob die angegebenen Pfade existieren
     for path_key in ['documents', 'check_this', 'output', 'models']:
         path = config['Paths'][path_key]
         if not os.path.exists(path):
@@ -59,33 +53,39 @@ def check_environment():
             except Exception as e:
                 raise OSError(f"Konnte Verzeichnis '{path}' nicht erstellen: {str(e)}")
 
-    # Überprüfe, ob es Dokumente im documents-Verzeichnis gibt
     documents_path = config['Paths']['documents']
     if not any(os.scandir(documents_path)):
         raise FileNotFoundError(f"Keine Dateien im Verzeichnis '{documents_path}' gefunden.")
 
-    # Überprüfe, ob die angegebenen Modelle gültig sind
     model_names = config['Model']['model_name'].split(',')
     for model_name in model_names:
         model_name = model_name.strip()
+        if not model_name:
+            logging.warning("Leerer Modellname in der Konfiguration gefunden. Bitte überprüfen Sie die config.txt")
+            continue
         try:
-            # online:
-            #AutoTokenizer.from_pretrained(model_name)
-            #AutoModelForSequenceClassification.from_pretrained(model_name)
+            model_path = os.path.join("fresh-models", model_name)
+            if not os.path.exists(model_path):
+                raise ValueError(f"Modellverzeichnis nicht gefunden: {model_path}")
 
-            # offline:
-            AutoTokenizer.from_pretrained(os.path.join("fresh-models", model_name))
-            AutoModelForSequenceClassification.from_pretrained(os.path.join("fresh-models", model_name))
+            config_path = os.path.join(model_path, "config.json")
+            if not os.path.exists(config_path):
+                raise ValueError(f"config.json nicht gefunden in: {model_path}")
+
+            AutoTokenizer.from_pretrained(model_path)
+            AutoModelForSequenceClassification.from_pretrained(model_path)
+            logging.info(f"Modell erfolgreich geladen: {model_name}")
         except Exception as e:
+            logging.error(f"Fehler beim Laden des Modells {model_name}: {str(e)}")
             raise ValueError(f"Ungültiges oder nicht verfügbares Modell: {model_name}. Fehler: {str(e)}")
 
-    # Überprüfe GPU-Verfügbarkeit
     if torch.cuda.is_available():
         logging.info(f"GPU verfügbar: {torch.cuda.get_device_name(0)}")
     else:
         logging.warning("Keine GPU verfügbar. Das Training wird auf der CPU durchgeführt und kann sehr lange dauern.")
 
     return config
+
 
 
 def check_hf_token():
