@@ -11,7 +11,7 @@ CheckThis/
 
 # Andere zu ignorierende Dateien:
 sync_data.sh
-config.txt
+
 
 
 # Ignore Python cache files

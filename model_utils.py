@@ -63,15 +63,18 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
     training_args = TrainingArguments(
         output_dir=model_save_path,
         learning_rate=float(config['Training']['learning_rate']),
-        per_device_train_batch_size=4,  # Reduzierte Batch-Größe
-        per_device_eval_batch_size=4,   # Reduzierte Batch-Größe
+        per_device_train_batch_size=int(config['Training']['batch_size']),
+        per_device_eval_batch_size=int(config['Training']['batch_size']),
         num_train_epochs=1 if quick else int(config['Training']['num_epochs']),
-        weight_decay=0.01,
-        evaluation_strategy="epoch",
-        save_strategy="epoch",
+        weight_decay=float(config['Training']['weight_decay']),
+        warmup_steps=int(config['Training']['warmup_steps']),
+        gradient_accumulation_steps=int(config['Training']['gradient_accumulation_steps']),
+        fp16=config['Optimization'].getboolean('fp16'),
+        max_grad_norm=float(config['Optimization']['max_grad_norm']),
+        evaluation_strategy="steps",
+        eval_steps=int(config['Evaluation']['eval_steps']),
+        save_steps=int(config['Evaluation']['save_steps']),
         load_best_model_at_end=True,
-        fp16=True,  # Aktiviert Mixed Precision Training
-        gradient_accumulation_steps=4,  # Fügt Gradient Accumulation hinzu
     )
 
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
