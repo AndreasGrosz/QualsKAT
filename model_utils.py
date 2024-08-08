@@ -3,30 +3,55 @@ import warnings
 from data_processing import extract_text_from_file
 import datetime
 import torch
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, DataCollatorWithPadding
 import numpy as np
 import os
 import logging
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, DataCollatorWithPadding
+from torch.utils.data import DataLoader
+from accelerate import Accelerator
+
 
 warnings.filterwarnings("ignore", message="Some weights of")
+
 
 def get_model_and_tokenizer(model_name, num_labels):
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
     return tokenizer, model
 
+
+def get_device():
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        return torch.device("mps")
+    else:
+        return torch.device("cpu")
+
+def get_optimal_batch_size(model, max_sequence_length, device):
+    if device.type == "cuda":
+        mem = torch.cuda.get_device_properties(device).total_memory
+        model_mem = sum(p.numel() * p.element_size() for p in model.parameters())
+        sequence_mem = model.config.hidden_size * max_sequence_length * 4  # 4 bytes per float
+        max_batch_size = (mem - model_mem) // (sequence_mem * 2)  # Factor of 2 for safety
+        return max(1, min(64, max_batch_size))  # Cap at 64 for stability
+    else:
+        return 8  # Ein vernünftiger Standardwert für CPUs
+
+
 def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
+    device = get_device()
     num_labels = len(le.classes_)
-    tokenizer, model = get_model_and_tokenizer(model_name, num_labels)
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
 
     # Speichern Sie die Kategorie-zu-Label-Zuordnung in der Modellkonfiguration
     model.config.label2id = {label: i for i, label in enumerate(le.classes_)}
     model.config.id2label = {i: label for i, label in enumerate(le.classes_)}
 
     def tokenize_function(examples):
-        tokenized = tokenizer(examples["text"], truncation=True, padding="max_length")
-        tokenized["labels"] = examples["labels"]
-        return tokenized
+        return tokenizer(examples["text"], truncation=True, padding="max_length")
 
     tokenized_datasets = dataset_dict.map(tokenize_function, batched=True, remove_columns=dataset_dict["train"].column_names)
     model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
@@ -35,8 +60,8 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
     training_args = TrainingArguments(
         output_dir=model_save_path,
         learning_rate=float(config['Training']['learning_rate']),
-        per_device_train_batch_size=int(config['Training']['batch_size']),
-        per_device_eval_batch_size=int(config['Training']['batch_size']),
+        per_device_train_batch_size=optimal_batch_size,
+        per_device_eval_batch_size=optimal_batch_size,
         num_train_epochs=1 if quick else int(config['Training']['num_epochs']),
         weight_decay=0.01,
         evaluation_strategy="epoch",
@@ -53,7 +78,8 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
         eval_dataset=tokenized_datasets['test'],
         tokenizer=tokenizer,
         data_collator=data_collator,
-        compute_metrics=compute_metrics
+        compute_metrics=compute_metrics,
+        optimizers=(optimizer, None)
     )
 
     return tokenizer, trainer, tokenized_datasets
@@ -64,7 +90,9 @@ def compute_metrics(eval_pred):
     return {'accuracy': (predictions == labels).astype(np.float32).mean().item()}
 
 def predict_top_n(trainer, tokenizer, text, le, n=None):
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True).to(device)
+    trainer.model.to(device)
     with torch.no_grad():
         logits = trainer.model(**inputs).logits
     probabilities = torch.nn.functional.softmax(logits, dim=-1)[0]

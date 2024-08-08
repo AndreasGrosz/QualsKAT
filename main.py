@@ -22,13 +22,18 @@ from data_processing import create_dataset
 from model_utils import setup_model_and_trainer, get_model_and_tokenizer
 from analysis_utils import analyze_new_article
 
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename='classifier.log')
+
 
 def main():
 
     logging.info("")
     logging.error("Programmstart")
     logging.error("=============")
+    device = get_device()
+    logging.info(f"Verwende Gerät: {device}")
+
     parser = argparse.ArgumentParser(
         description='LRH Document Classifier',
         formatter_class=argparse.RawTextHelpFormatter

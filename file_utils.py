@@ -17,6 +17,14 @@ from analysis_utils import analyze_new_article
 
 
 def check_environment():
+    device = get_device()
+    if device.type == "cuda":
+        logging.info(f"GPU verfügbar: {torch.cuda.get_device_name(0)}")
+        logging.info(f"Verfügbarer GPU-Speicher: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
+    elif device.type == "mps":
+        logging.info("Apple Silicon GPU verfügbar")
+    else:
+        logging.warning("Keine GPU verfügbar. Das Training wird auf der CPU durchgeführt und kann sehr lange dauern.")
     # Überprüfe, ob die Konfigurationsdatei existiert
     if not os.path.exists('config.txt'):
         raise FileNotFoundError("config.txt nicht gefunden. Bitte stellen Sie sicher, dass die Datei im aktuellen Verzeichnis liegt.")
@@ -225,4 +233,10 @@ def handle_rtf_error(file_path):
         logging.error(f"Error reading .rtf file {file_path}: {str(e)}")
         return None
 
-# Die Funktionen predict_top_n und analyze_new_article wurden in model_utils.py verschoben
+def get_device():
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        return torch.device("mps")
+    else:
+        return torch.device("cpu")
