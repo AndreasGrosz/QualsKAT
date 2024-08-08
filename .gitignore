@@ -9,6 +9,9 @@ fresh-models/
 output/
 
 # Andere zu ignorierende Dateien:
+sync_data.sh
+config.txt
+
 
 # Ignore Python cache files
 __pycache__/
@@ -27,6 +30,11 @@ venv/
 Thumbs.db
 .~lock.*
 AGs zur python-Programmierungen.odt
+dummy.py
+kate-swp
+bfg.jar
+*.odt
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
