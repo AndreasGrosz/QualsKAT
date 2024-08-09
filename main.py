@@ -25,6 +25,10 @@ from file_utils import get_device
 from experiment_logger import log_experiment
 
 
+# Aktualisiere den GradScaler
+if hasattr(torch.cuda.amp, 'GradScaler'):
+    torch.cuda.amp.GradScaler = lambda **kwargs: torch.amp.GradScaler('cuda', **kwargs)
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename='classifier.log')
 
 def main():

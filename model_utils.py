@@ -29,6 +29,7 @@ def get_device():
     else:
         return torch.device("cpu")
 
+
 def get_optimal_batch_size(model, max_sequence_length, device):
     if device.type == "cuda":
         mem = torch.cuda.get_device_properties(device).total_memory
@@ -40,7 +41,7 @@ def get_optimal_batch_size(model, max_sequence_length, device):
         return 8  # Ein vernünftiger Standardwert für CPUs
 
 
-def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
+ def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
     num_labels = len(le.classes_)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
@@ -56,25 +57,28 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
     model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
     os.makedirs(model_save_path, exist_ok=True)
 
+    # Überprüfen, ob es sich um ein ALBERT-Modell handelt
+    is_albert = "albert" in model_name.lower()
+
     training_args = TrainingArguments(
         output_dir=model_save_path,
         learning_rate=float(config['Training']['learning_rate']),
-        per_device_train_batch_size=2,  # Reduzierte Batch-Größe
-        per_device_eval_batch_size=2,   # Reduzierte Batch-Größe
+        per_device_train_batch_size=2,
+        per_device_eval_batch_size=2,
         num_train_epochs=1 if quick else int(config['Training']['num_epochs']),
         weight_decay=0.01,
-        evaluation_strategy="steps",
+        eval_strategy="steps",  # Geändert von evaluation_strategy zu eval_strategy
         eval_steps=100,
         save_strategy="steps",
         save_steps=100,
         load_best_model_at_end=True,
         fp16=torch.cuda.is_available(),
-        gradient_accumulation_steps=8,  # Erhöhte Gradient Accumulation
+        gradient_accumulation_steps=8,
         logging_dir=os.path.join(model_save_path, 'logs'),
         logging_steps=50,
         save_total_limit=2,
         remove_unused_columns=False,
-        gradient_checkpointing=True,
+        gradient_checkpointing=not is_albert,  # Deaktiviere für ALBERT-Modelle
         optim="adamw_torch",
     )
 
