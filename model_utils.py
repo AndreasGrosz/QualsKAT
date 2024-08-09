@@ -40,7 +40,7 @@ def get_optimal_batch_size(model, max_sequence_length, device):
         return 8  # Ein vernünftiger Standardwert für CPUs
 
 
-def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
+setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
     num_labels = len(le.classes_)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
@@ -49,9 +49,7 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
     model.config.id2label = {i: label for i, label in enumerate(le.classes_)}
 
     def tokenize_function(examples):
-        result = tokenizer(examples["text"], truncation=True, padding="max_length")
-        result["labels"] = examples["labels"]
-        return result
+        return tokenizer(examples["text"], truncation=True, padding="max_length", max_length=512)
 
     tokenized_datasets = dataset_dict.map(tokenize_function, batched=True, remove_columns=["text", "filename"])
 
@@ -61,20 +59,23 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
     training_args = TrainingArguments(
         output_dir=model_save_path,
         learning_rate=float(config['Training']['learning_rate']),
-        per_device_train_batch_size=4,
-        per_device_eval_batch_size=4,
+        per_device_train_batch_size=2,  # Reduzierte Batch-Größe
+        per_device_eval_batch_size=2,   # Reduzierte Batch-Größe
         num_train_epochs=1 if quick else int(config['Training']['num_epochs']),
         weight_decay=0.01,
-        evaluation_strategy="epoch",
-        save_strategy="epoch",
+        evaluation_strategy="steps",
+        eval_steps=100,
+        save_strategy="steps",
+        save_steps=100,
         load_best_model_at_end=True,
         fp16=torch.cuda.is_available(),
-        gradient_accumulation_steps=4,
+        gradient_accumulation_steps=8,  # Erhöhte Gradient Accumulation
         logging_dir=os.path.join(model_save_path, 'logs'),
-        logging_steps=100,
+        logging_steps=50,
         save_total_limit=2,
-        remove_unused_columns=False,  # Wichtig für benutzerdefinierte Datasets
-        gradient_checkpointing=True,  # Aktiviert Gradient Checkpointing
+        remove_unused_columns=False,
+        gradient_checkpointing=True,
+        optim="adamw_torch",
     )
 
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)

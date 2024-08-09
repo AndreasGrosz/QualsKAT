@@ -24,18 +24,25 @@ from analysis_utils import analyze_new_article
 from file_utils import get_device
 from experiment_logger import log_experiment
 
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename='classifier.log')
 
-os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
-
 def main():
-
     logging.info("")
     logging.error("Programmstart")
     logging.error("=============")
+
+    # Setze einen festen Seed für Reproduzierbarkeit
+    set_seed(42)
+
     device = get_device()
     logging.info(f"Verwende Gerät: {device}")
-    os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
+
+    # Aktiviere die Speichereffizienz von PyTorch
+    if device.type == "cuda":
+        torch.cuda.empty_cache()
+        torch.backends.cudnn.benchmark = True
+
     parser = argparse.ArgumentParser(
         description='LRH Document Classifier',
         formatter_class=argparse.RawTextHelpFormatter
@@ -140,6 +147,7 @@ def main():
         logging.error(f"Gesamtausführungszeit für alle Modelle: {total_duration:.2f} Minuten")
         logging.error("---------------------------------------")
         logging.error("Programmende")
+
     except Exception as e:
         logging.error(f"Ein kritischer Fehler ist aufgetreten: {str(e)}")
         raise
