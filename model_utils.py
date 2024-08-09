@@ -40,7 +40,7 @@ def get_optimal_batch_size(model, max_sequence_length, device):
         return 8  # Ein vernünftiger Standardwert für CPUs
 
 
-setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
+def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
     num_labels = len(le.classes_)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
