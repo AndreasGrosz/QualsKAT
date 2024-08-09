@@ -11,7 +11,7 @@ from datetime import date
 import torch
 import numpy as np
 from datasets import Dataset, DatasetDict
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, set_seed
 from sklearn.preprocessing import LabelEncoder
 from huggingface_hub import HfApi
 from requests.exceptions import HTTPError
