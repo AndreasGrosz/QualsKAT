@@ -141,7 +141,29 @@ def main():
                 trainer = Trainer(model=model)
 
                 if args.checkthis:
-                    check_files(trainer, tokenizer, le, config, model_name)
+                    models = {}
+                    for model_name in model_names:
+                        model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
+                        model = AutoModelForSequenceClassification.from_pretrained(model_save_path)
+                        tokenizer = AutoTokenizer.from_pretrained(model_save_path)
+                        le = LabelEncoder()
+                        le.classes_ = np.array(list(model.config.id2label.values()))
+                        models[model_name] = (model, tokenizer, le)
+
+                    check_folder = config['Paths']['check_this']
+                    files = [f for f in os.listdir(check_folder) if os.path.isfile(os.path.join(check_folder, f))]
+
+                    for file in tqdm(files, desc="Analysiere Dateien"):
+                        file_path = os.path.join(check_folder, file)
+                        results = analyze_document(file_path, models, extract_text_from_file)
+
+                        if results:
+                            print(f"\nVorhersagen für {file}:")
+                            for model_name, predictions in results:
+                                print(f"Modell: {model_name}")
+                                for category, prob in sorted(predictions, key=lambda x: x[0]):
+                                    print(f"{category}: {prob*100:.1f}%")
+                                print()  # Leerzeile zwischen den Modellen
 
                 if args.predict:
                     result = analyze_new_article(args.predict, trainer, tokenizer, le, extract_text_from_file)

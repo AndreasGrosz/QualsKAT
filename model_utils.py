@@ -10,9 +10,26 @@ import logging
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, DataCollatorWithPadding
 from torch.utils.data import DataLoader
 from accelerate import Accelerator
+from tqdm import tqdm
 
 
 warnings.filterwarnings("ignore", message="Some weights of")
+
+def predict_for_model(model, tokenizer, text, le):
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
+    inputs = {k: v.to(model.device) for k, v in inputs.items()}
+
+    with torch.no_grad():
+        outputs = model(**inputs)
+        logits = outputs.logits
+
+    probabilities = torch.nn.functional.softmax(logits, dim=-1)[0]
+    results = []
+    for idx, prob in enumerate(probabilities):
+        category = le.inverse_transform([idx])[0]
+        results.append((category, prob.item()))
+
+    return sorted(results, key=lambda x: x[1], reverse=True)
 
 
 def get_model_and_tokenizer(model_name, num_labels):
@@ -125,7 +142,8 @@ def predict_top_n(trainer, tokenizer, text, le, n=None):
 def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_file):
     top_predictions = predict_top_n(trainer, tokenizer, text, le, n=5)  # Top 5 Vorhersagen
 
-    print(f"Vorhersagen für {os.path.basename(file_path)}:")
+    print(f"")
+    print(f"Vorhersagen für    {os.path.basename(file_path)}:")
     for category, prob in top_predictions:
         print(f"{category}: {prob:.4f}")
 
