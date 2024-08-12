@@ -22,7 +22,7 @@ def analyze_documents_csv(check_folder, models, extract_text_from_file):
     header = ['Filename', 'r-base', 'ms-deberta', 'distilb', 'r-large', 'albert', 'Mittelwert']
     print(','.join(header))
 
-    for file in files:
+    for file in tqdm(files, desc="Analysiere Dateien"):
         file_path = os.path.join(check_folder, file)
         text = extract_text_from_file(file_path)
 
