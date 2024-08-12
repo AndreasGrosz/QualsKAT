@@ -144,11 +144,21 @@ def main():
 
                 if args.checkthis:
                     models = {
-                        'r-base': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-base')), AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-base')), LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
-                        'ms-deberta': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'microsoft/deberta-base')), AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'microsoft/deberta-base')), LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
-                        'distilb': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'distilbert-base-uncased')), AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'distilbert-base-uncased')), LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
-                        'r-large': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-large')), AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-large')), LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
-                        'albert': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'albert-base-v2')), AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'albert-base-v2')), LabelEncoder().fit(['Nicht-LRH', 'LRH']))
+                        'r-base': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-base')),
+                                AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-base')),
+                                LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
+                        'ms-deberta': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'microsoft_deberta-base')),
+                                    AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'microsoft_deberta-base')),
+                                    LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
+                        'distilb': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'distilbert-base-uncased')),
+                                    AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'distilbert-base-uncased')),
+                                    LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
+                        'r-large': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-large')),
+                                    AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-large')),
+                                    LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
+                        'albert': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'albert-base-v2')),
+                                AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'albert-base-v2')),
+                                LabelEncoder().fit(['Nicht-LRH', 'LRH']))
                     }
 
                     check_folder = config['Paths']['check_this']
