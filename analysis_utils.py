@@ -4,7 +4,7 @@ import torch
 import gc
 
 from datetime import date
-from model_utils import predict_top_n
+from model_utils import predict_top_n, predict_for_model
 from datetime import datetime
 from colorama import Fore, Style
 from sklearn.preprocessing import LabelEncoder

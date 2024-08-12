@@ -23,7 +23,7 @@ from file_utils import check_environment, check_hf_token, check_files, extract_t
 from data_processing import create_dataset, load_categories_from_csv
 from model_utils import setup_model_and_trainer, get_model_and_tokenizer
 from analysis_utils import analyze_new_article, analyze_document
-from file_utils import get_device
+from file_utils import get_device, extract_text_from_file
 from experiment_logger import log_experiment
 
 # Aktualisiere den GradScaler
