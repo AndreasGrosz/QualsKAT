@@ -4,6 +4,7 @@ import torch
 import gc
 import csv
 import sys
+from tqdm import tqdm
 
 from datetime import date
 from model_utils import predict_top_n, predict_for_model
