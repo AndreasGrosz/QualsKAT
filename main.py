@@ -81,8 +81,11 @@ def main():
 
         model_names = config['Model']['model_name'].split(',')
 
+        total_start_time = time.time()
+        training_performed = False
+
         if args.train:
-            total_start_time = time.time()
+            training_performed = True
             for model_name in model_names:
                 model_name = model_name.strip()
                 logging.info(f"Trainiere Modell: {model_name}")
@@ -146,9 +149,10 @@ def main():
                 print("Konnte keine Analyse durchführen.")
                 logging.info("Konnte keine Analyse durchführen.")
 
-        total_end_time = time.time()
-        total_duration = (total_end_time - total_start_time) / 60
-        logging.error(f"Gesamtausführungszeit für alle Modelle: {total_duration:.2f} Minuten")
+        if training_performed:
+            total_end_time = time.time()
+            total_duration = (total_end_time - total_start_time) / 60
+            logging.error(f"Gesamtausführungszeit für alle Modelle: {total_duration:.2f} Minuten")
         logging.error("---------------------------------------")
         logging.error("Programmende")
 
