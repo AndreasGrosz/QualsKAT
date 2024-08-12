@@ -18,12 +18,11 @@ from requests.exceptions import HTTPError
 
 # Importe aus Ihren eigenen Modulen
 from file_utils import check_environment, check_hf_token, check_files, extract_text_from_file
-from data_processing import create_dataset
+from data_processing import create_dataset, load_categories_from_csv
 from model_utils import setup_model_and_trainer, get_model_and_tokenizer
 from analysis_utils import analyze_new_article
 from file_utils import get_device
 from experiment_logger import log_experiment
-
 
 # Aktualisiere den GradScaler
 if hasattr(torch.cuda.amp, 'GradScaler'):
@@ -76,6 +75,10 @@ def main():
             logging.error("Kategorien-Datei nicht gefunden. Bitte führen Sie zuerst update_categories.py aus.")
             sys.exit(1)
 
+        categories = load_categories_from_csv(config)
+        if len(categories) == 0:
+            raise ValueError("Keine Kategorien gefunden. Bitte überprüfen Sie die categories.csv Datei.")
+
         dataset, le = create_dataset(config, quick=args.quick)
         if len(dataset) == 0:
             raise ValueError("Der erstellte Datensatz ist leer. Überprüfen Sie die Eingabedaten.")
@@ -98,7 +101,15 @@ def main():
             model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
 
             if args.train:
-                tokenizer, trainer, tokenized_datasets = setup_model_and_trainer(dataset_dict, le, config, model_name, quick=args.quick)
+                num_labels = len(categories)
+                model = AutoModelForSequenceClassification.from_pretrained(
+                    model_name,
+                    num_labels=num_labels,
+                    id2label={i: cat for i, cat in enumerate(categories)},
+                    label2id={cat: i for i, cat in enumerate(categories)}
+                )
+
+                tokenizer, trainer, tokenized_datasets = setup_model_and_trainer(dataset_dict, le, config, model_name, model, quick=args.quick)
                 trainer.train()
                 results = trainer.evaluate(eval_dataset=tokenized_datasets['test'])
                 logging.info(f"Testergebnisse für {model_name}: {results}")
@@ -107,26 +118,21 @@ def main():
                 log_experiment(config, model_name, results, config['Paths']['output'])
 
                 logging.info(f"Trainings- und Evaluationsergebnisse:")
-                for epoch_results in results:
-                    logging.info(f"{epoch_results}")
+                for key, value in results.items():
+                    logging.info(f"{key}: {value}")
                 logging.info(f"Gesamtausführungszeit für Modell {model_name}: {(time.time() - total_start_time) / 60:.2f} Minuten")
                 trainer.save_model(model_save_path)
                 tokenizer.save_pretrained(model_save_path)
 
             if args.checkthis or args.predict:
-                # online
                 model = AutoModelForSequenceClassification.from_pretrained(model_save_path)
                 tokenizer = AutoTokenizer.from_pretrained(model_save_path)
-
-                # offline
-                model = AutoModelForSequenceClassification.from_pretrained(os.path.join("fresh-models", model_name))
-                tokenizer = AutoTokenizer.from_pretrained(os.path.join("fresh-models", model_name))
 
                 # Laden der Kategorie-zu-Label-Zuordnung
                 label2id = model.config.label2id
                 id2label = model.config.id2label
                 print("Modellkategorien:", id2label)
-                logging.info("Modellkategorien:", id2label)
+                logging.info("Modellkategorien: %s", id2label)
 
                 # Erstellen eines neuen LabelEncoders mit den geladenen Kategorien
                 le = LabelEncoder()

@@ -41,8 +41,7 @@ def get_optimal_batch_size(model, max_sequence_length, device):
         return 8  # Ein vernünftiger Standardwert für CPUs
 
 
-def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
-    num_labels = len(le.classes_)
+def setup_model_and_trainer(dataset_dict, le, config, model_name, model, quick=False):
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
 
@@ -84,6 +83,7 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, quick=False):
 
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
+
     trainer = Trainer(
         model=model,
         args=training_args,
@@ -103,13 +103,8 @@ def compute_metrics(eval_pred):
 
 
 def predict_top_n(trainer, tokenizer, text, le, n=None):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True).to(device)
-    trainer.model.to(device)
-    with torch.no_grad():
-        logits = trainer.model(**inputs).logits
+    # ... (bestehender Code) ...
     probabilities = torch.nn.functional.softmax(logits, dim=-1)[0]
-
     results = []
     for idx, prob in enumerate(probabilities):
         category = le.inverse_transform([idx])[0]
@@ -118,61 +113,21 @@ def predict_top_n(trainer, tokenizer, text, le, n=None):
     if n is None:
         n = len(le.classes_)
 
-    return sorted(results, key=lambda x: x[1], reverse=True)[:n]
-
-
-def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_file):
-    text = extract_text_from_file(file_path)
-
-    if text is None or len(text) == 0:
-        logging.warning(f"Konnte Text aus {file_path} nicht extrahieren oder Text ist leer.")
-        return None
-
-    file_size = len(text.encode('utf-8'))
-    top_predictions = predict_top_n(trainer, tokenizer, text, le, n=len(le.classes_))
-    
-    print("Debug - top_predictions structure:", top_predictions)
-    logging.info("Debug - top_predictions structure:", top_predictions)
-    
-    # Angepasste Berechnung der Wahrscheinlichkeiten
-    if isinstance(top_predictions, dict):
-        lrh_probability = sum(conf for cat, conf in top_predictions.items() if cat.startswith("LRH"))
-        ghostwriter_probability = sum(conf for cat, conf in top_predictions.items() if cat.startswith("Ghostwriter"))
-    elif isinstance(top_predictions, list):
-        if all(isinstance(item, tuple) and len(item) == 2 for item in top_predictions):
-            lrh_probability = sum(conf for cat, conf in top_predictions if cat.startswith("LRH"))
-            ghostwriter_probability = sum(conf for cat, conf in top_predictions if cat.startswith("Ghostwriter"))
-        else:
-            logging.error(f"Unerwartetes Format für top_predictions: {top_predictions}")
-            return None
-    else:
-        logging.error(f"Unerwartetes Format für top_predictions: {top_predictions}")
-        return None
+    return sorted(results, key=lambda x: x[1], reverse=True)[:n]def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_file):
+    # ... (bestehender Code) ...
+    top_predictions = predict_top_n(trainer, tokenizer, text, le, n=5)  # Top 5 Vorhersagen
 
     print(f"Vorhersagen für {os.path.basename(file_path)}:")
-    loggin.info(f"Vorhersagen für {os.path.basename(file_path)}:")
-    for category, prob in (top_predictions.items() if isinstance(top_predictions, dict) else top_predictions)[:5]:
+    for category, prob in top_predictions:
         print(f"{category}: {prob:.4f}")
-        loggin.info(f"{category}: {prob:.4f}")
 
-    print(f"LRH Gesamtwahrscheinlichkeit: {lrh_probability:.4f}")
-    print(f"Ghostwriter Gesamtwahrscheinlichkeit: {ghostwriter_probability:.4f}")
-    loggin.info(f"LRH Gesamtwahrscheinlichkeit: {lrh_probability:.4f}")
-    loggin.info(f"Ghostwriter Gesamtwahrscheinlichkeit: {ghostwriter_probability:.4f}")
-
-    threshold = 0.1  # 10% Unterschied als Schwellenwert
-    if abs(lrh_probability - ghostwriter_probability) < threshold:
-        conclusion = "Nicht eindeutig"
-    elif lrh_probability > ghostwriter_probability:
-        conclusion = "Wahrscheinlich LRH"
-    else:
-        conclusion = "Wahrscheinlich Ghostwriter"
+    # Berechnen Sie hier die Gesamtwahrscheinlichkeiten für übergeordnete Kategorien
+    # z.B. LRH, Ghostwriter, etc.
 
     return {
         "Dateiname": os.path.basename(file_path),
         "Dateigröße": file_size,
         "Datum": datetime.now().strftime("%d-%m-%y %H:%M"),
-        "LRH": f"{lrh_probability:.2f}",
-        "Ghostwriter": f"{ghostwriter_probability:.2f}",
-        "Schlussfolgerung": conclusion
+        "Top_Vorhersagen": dict(top_predictions[:5]),
+        "Schlussfolgerung": "Komplexe Schlussfolgerung basierend auf den Top-Vorhersagen"
     }
