@@ -5,6 +5,7 @@ import gc
 import csv
 import sys
 from tqdm import tqdm
+from statistics import mean
 
 from datetime import date
 from model_utils import predict_top_n, predict_for_model
@@ -17,26 +18,45 @@ import numpy as np
 def analyze_documents_csv(check_folder, models, extract_text_from_file):
     files = [f for f in os.listdir(check_folder) if os.path.isfile(os.path.join(check_folder, f))]
 
-    # CSV-Header ausgeben
-    print("Doc-Name,Modell,LRH-%,non-LRH-%")
+    # CSV-Header
+    header = ['Filename', 'r-base', 'ms-deberta', 'distilb', 'r-large', 'albert', 'Mittelwert']
+    print(','.join(header))
 
-    for file in tqdm(files, desc="Analysiere Dateien"):
+    for file in files:
         file_path = os.path.join(check_folder, file)
-        results = analyze_document(file_path, models, extract_text_from_file)
+        text = extract_text_from_file(file_path)
 
-        if results:
-            for model_name, predictions in results:
-                lrh_prob = next((prob for cat, prob in predictions if cat == "LRH"), 0)
-                non_lrh_prob = next((prob for cat, prob in predictions if cat == "Nicht-LRH"), 0)
+        if text is None or len(text) == 0:
+            print(f'"{file}",N/A,N/A,N/A,N/A,N/A,N/A')
+            continue
 
-                # CSV-Zeile ausgeben
-                print(f"{file},{model_name},{lrh_prob*100:.1f},{non_lrh_prob*100:.1f}")
-        else:
-            # Wenn keine Ergebnisse, trotzdem eine Zeile ausgeben
-            print(f"{file},Keine Ergebnisse,0.0,0.0")
+        results = []
+        for model_name, (model, tokenizer, le) in models.items():
+            confidence = calculate_lrh_confidence(model, tokenizer, text, le)
+            results.append(confidence)
 
-    sys.stdout.flush()  # Stellen Sie sicher, dass alle Ausgaben geschrieben wurden
-    return
+        avg_confidence = mean(results)
+
+        # CSV-Zeile ausgeben
+        output = [f'"{file}"'] + [f"{conf:.1f}" for conf in results] + [f"{avg_confidence:.1f}"]
+        print(','.join(output))
+
+    sys.stdout.flush()
+
+def calculate_lrh_confidence(model, tokenizer, text, le):
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
+    inputs = {k: v.to(model.device) for k, v in inputs.items()}
+
+    with torch.no_grad():
+        outputs = model(**inputs)
+        logits = outputs.logits
+
+    probabilities = torch.nn.functional.softmax(logits, dim=-1)[0]
+    lrh_index = le.transform(['LRH'])[0]
+    lrh_probability = probabilities[lrh_index].item()
+
+    return lrh_probability * 100  # Umwandlung in Prozent
+
 
 
 def analyze_document(file_path, models, extract_text_from_file):

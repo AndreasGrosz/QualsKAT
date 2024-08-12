@@ -143,17 +143,18 @@ def main():
                 trainer = Trainer(model=model)
 
                 if args.checkthis:
-                    models = {}
-                    for model_name in model_names:
-                        model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
-                        model = AutoModelForSequenceClassification.from_pretrained(model_save_path)
-                        tokenizer = AutoTokenizer.from_pretrained(model_save_path)
-                        le = LabelEncoder()
-                        le.classes_ = np.array(list(model.config.id2label.values()))
-                        models[model_name] = (model, tokenizer, le)
+                    models = {
+                        'r-base': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-base')), AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-base')), LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
+                        'ms-deberta': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'microsoft/deberta-base')), AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'microsoft/deberta-base')), LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
+                        'distilb': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'distilbert-base-uncased')), AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'distilbert-base-uncased')), LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
+                        'r-large': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-large')), AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-large')), LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
+                        'albert': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'albert-base-v2')), AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'albert-base-v2')), LabelEncoder().fit(['Nicht-LRH', 'LRH']))
+                    }
 
                     check_folder = config['Paths']['check_this']
                     analyze_documents_csv(check_folder, models, extract_text_from_file)
+
+                    """"
 
                     files = [f for f in os.listdir(check_folder) if os.path.isfile(os.path.join(check_folder, f))]
 
@@ -168,7 +169,7 @@ def main():
                                 for category, prob in sorted(predictions, key=lambda x: x[0]):
                                     print(f"{category}: {prob*100:.1f}%")
                                 print()  # Leerzeile zwischen den Modellen
-
+                """
                 if args.predict:
                     result = analyze_new_article(args.predict, trainer, tokenizer, le, extract_text_from_file)
                     if result:
