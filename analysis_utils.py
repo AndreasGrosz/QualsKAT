@@ -2,6 +2,8 @@ import logging
 import os
 import torch
 import gc
+import csv
+import sys
 
 from datetime import date
 from model_utils import predict_top_n, predict_for_model
@@ -9,6 +11,31 @@ from datetime import datetime
 from colorama import Fore, Style
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
+
+
+def analyze_documents_csv(check_folder, models, extract_text_from_file):
+    files = [f for f in os.listdir(check_folder) if os.path.isfile(os.path.join(check_folder, f))]
+
+    # CSV-Header ausgeben
+    print("Doc-Name,Modell,LRH-%,non-LRH-%")
+
+    for file in tqdm(files, desc="Analysiere Dateien"):
+        file_path = os.path.join(check_folder, file)
+        results = analyze_document(file_path, models, extract_text_from_file)
+
+        if results:
+            for model_name, predictions in results:
+                lrh_prob = next((prob for cat, prob in predictions if cat == "LRH"), 0)
+                non_lrh_prob = next((prob for cat, prob in predictions if cat == "Nicht-LRH"), 0)
+
+                # CSV-Zeile ausgeben
+                print(f"{file},{model_name},{lrh_prob*100:.1f},{non_lrh_prob*100:.1f}")
+        else:
+            # Wenn keine Ergebnisse, trotzdem eine Zeile ausgeben
+            print(f"{file},Keine Ergebnisse,0.0,0.0")
+
+    sys.stdout.flush()  # Stellen Sie sicher, dass alle Ausgaben geschrieben wurden
+    return
 
 
 def analyze_document(file_path, models, extract_text_from_file):

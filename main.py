@@ -22,7 +22,7 @@ from requests.exceptions import HTTPError
 from file_utils import check_environment, check_hf_token, check_files, extract_text_from_file
 from data_processing import create_dataset, load_categories_from_csv
 from model_utils import setup_model_and_trainer, get_model_and_tokenizer
-from analysis_utils import analyze_new_article, analyze_document
+from analysis_utils import analyze_new_article, analyze_document, analyze_documents_csv
 from file_utils import get_device, extract_text_from_file
 from experiment_logger import log_experiment
 
@@ -153,6 +153,8 @@ def main():
                         models[model_name] = (model, tokenizer, le)
 
                     check_folder = config['Paths']['check_this']
+                    analyze_documents_csv(check_folder, models, extract_text_from_file)
+
                     files = [f for f in os.listdir(check_folder) if os.path.isfile(os.path.join(check_folder, f))]
 
                     for file in tqdm(files, desc="Analysiere Dateien"):
