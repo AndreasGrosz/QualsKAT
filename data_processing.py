@@ -12,7 +12,11 @@ def extract_categories(config):
     root_dir = config['Paths']['documents']
     categories = set()
 
-    for root, _, files in os.walk(root_dir):
+    for root, dirs, files in os.walk(root_dir):
+        # Überspringe leere Ordner
+        if not files:
+            continue
+
         rel_path = os.path.relpath(root, root_dir)
         path_parts = rel_path.split(os.sep)
 

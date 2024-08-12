@@ -338,3 +338,118 @@ Diese Kennzahlen geben dir einen guten Überblick über die Leistung und Effizie
 Mit diesen detaillierten Kennzahlen hast du eine solide Grundlage, um informierte Entscheidungen über den Einsatz der Modelle in deiner Anwendung zu treffen.
 
  
+## 9.8.24 Vergleich der Models auf dem Power-PC
+
+Basierend auf den vollständigen Trainingsergebnissen können wir nun eine detailliertere Analyse für jedes Modell durchführen. Hier ist eine Zusammenfassung der Ergebnisse für alle fünf Modelle:
+
+DistilBERT (distilbert-base-uncased):
+
+Eval Loss: 0.03939051181077957
+Trainingszeit: 2.28 Minuten
+Samples/Sekunde: 211.847
+
+
+RoBERTa Large (roberta-large):
+
+Eval Loss: 0.03179258108139038
+Trainingszeit: 15.85 Minuten
+Samples/Sekunde: 32.42
+
+
+RoBERTa Base (roberta-base):
+
+Eval Loss: 0.060943350195884705
+Trainingszeit: 20.48 Minuten
+Samples/Sekunde: 100.13
+
+
+DeBERTa Base (microsoft/deberta-base):
+
+Eval Loss: 0.03793901205062866
+Trainingszeit: 28.59 Minuten
+Samples/Sekunde: 58.281
+
+
+ALBERT (albert-base-v2):
+
+Eval Loss: 0.04202970862388611
+Trainingszeit: 31.97 Minuten
+Samples/Sekunde: 92.999
+
+
+
+Auswertung:
+
+Beste Genauigkeit (niedrigster Eval Loss):
+
+RoBERTa Large (0.03179)
+DeBERTa Base (0.03794)
+DistilBERT (0.03939)
+ALBERT (0.04203)
+RoBERTa Base (0.06094)
+
+
+Schnellstes Training:
+
+DistilBERT (2.28 Minuten)
+RoBERTa Large (15.85 Minuten)
+RoBERTa Base (20.48 Minuten)
+DeBERTa Base (28.59 Minuten)
+ALBERT (31.97 Minuten)
+
+
+Höchste Verarbeitungsgeschwindigkeit (Samples/Sekunde):
+
+DistilBERT (211.847)
+RoBERTa Base (100.13)
+ALBERT (92.999)
+DeBERTa Base (58.281)
+RoBERTa Large (32.42)
+
+
+
+Fazit:
+
+RoBERTa Large zeigt die beste Genauigkeit, ist aber relativ langsam in der Verarbeitung.
+DistilBERT bietet eine gute Balance zwischen Genauigkeit und Geschwindigkeit. Es ist das schnellste Modell mit der höchsten Verarbeitungsgeschwindigkeit und erreicht die drittbeste Genauigkeit.
+DeBERTa Base zeigt die zweitbeste Genauigkeit, ist aber vergleichsweise langsam im Training.
+ALBERT und RoBERTa Base zeigen etwas schlechtere Genauigkeit, wobei RoBERTa Base die schlechteste Leistung in Bezug auf den Eval Loss zeigt.
+
+Empfehlung:
+Für Ihr Ziel, zwischen LRH-Texten und Nicht-LRH-Texten zu unterscheiden, würde ich folgende Empfehlungen geben:
+
+Wenn Genauigkeit absolute Priorität hat und Rechenzeit kein Problem ist, wählen Sie RoBERTa Large.
+Für den besten Kompromiss zwischen Genauigkeit und Geschwindigkeit empfehle ich DistilBERT. Es bietet eine sehr gute Genauigkeit bei deutlich kürzerer Trainingszeit und höherer Verarbeitungsgeschwindigkeit.
+Wenn Sie etwas mehr Genauigkeit als DistilBERT möchten und bereit sind, mehr Rechenzeit zu investieren, ist DeBERTa Base eine gute Wahl.
+
+Letztendlich hängt die Wahl des besten Modells von Ihren spezifischen Anforderungen an Genauigkeit, Trainingszeit und Inferenzgeschwindigkeit ab. DistilBERT scheint jedoch in diesem Fall eine besonders attraktive Option zu sein, da es eine sehr gute Leistung bei deutlich geringerem Ressourcenaufwand bietet.
+
+
+## 9.8.24-2 Vergleich der Models auf dem Power-PC
+Ich habe die Trainingsdokumente bereinigt und nochmal einen Train-Lauf gemacht:
+
+hier das Ergebnis: Kannst Du mir das tabellarisch darstellen:Certainly! I'll create a table summarizing the fine-tuning results for the five models based on the information provided. Here's a tabular representation of the results:
+
+| Model            | Train Loss | Train Runtime | Train Samples/s | Eval Loss | Eval Runtime |
+|------------------|------------|---------------|-----------------|-----------|--------------|
+| DistilBERT       |     6.6%   |     2.1 min   |      41.3       |    1.0%   |   0.0 min    |
+| RoBERTa (large)  |     5.4%   |    13.1 min   |       6.7       |    0.1%   |   0.2 min    |
+| RoBERTa (base)   |     7.1%   |     4.4 min   |      20.1       |    0.8%   |   0.1 min    |
+| DeBERTa          |     5.6%   |     7.8 min   |      11.3       |    2.4%   |   0.1 min    |
+| ALBERT           |     5.4%   |     3.1 min   |      27.9       |    0.1%   |   0.1 min    |
+
+Notes:
+
+The evaluation loss reported is from the last evaluation epoch for each model.
+Train and eval runtimes are in seconds.
+The "Train Samples/s" column represents the number of training samples processed per second.
+
+This table allows for easy comparison of the models' performance and efficiency. RoBERTa (large) had the lowest eval loss but took the longest to train, while ALBERT achieved a good balance between low eval loss and fast training time. CopyRetryAGbitte weiter auf Deutsch. Was bedeutet eval loss für meine zwecke EditEntschuldigung für den Wechsel ins Englische. Ich fahre auf Deutsch fort.
+Der "eval loss" (Evaluierungsverlust) ist für Ihre Zwecke sehr wichtig. Er gibt an, wie gut das Modell auf Daten abschneidet, die es während des Trainings nicht gesehen hat. Ein niedrigerer eval loss deutet auf eine bessere Generalisierungsfähigkeit des Modells hin. Das bedeutet:
+
+Bessere Klassifizierung: Das Modell wird wahrscheinlich neue, ungesehene Dokumente genauer als "Autor 0" oder "Anderes" einordnen können.
+Weniger Overfitting: Ein niedriger eval loss im Vergleich zum Trainingsverlust zeigt, dass das Modell nicht nur die Trainingsdaten auswendig gelernt hat, sondern tatsächlich relevante Merkmale erfasst hat.
+Robustheit: Modelle mit niedrigerem eval loss sind oft robuster gegenüber leichten Variationen in den Eingabedaten.
+Vertrauenswürdigkeit: Sie können mehr Vertrauen in die Vorhersagen des Modells haben, wenn es einen niedrigen eval loss aufweist.
+
+Basierend auf den eval loss Werten scheinen RoBERTa (large) und ALBERT am besten zu generalisieren, gefolgt von DistilBERT. Diese Modelle könnten für Ihre Aufgabe der Autorenerkennung am geeignetsten sein.
