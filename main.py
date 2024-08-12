@@ -71,12 +71,6 @@ def main():
         config = check_environment()
         check_hf_token()
 
-        categories_file = os.path.join(config['Paths']['output'], 'categories.csv')
-        if not os.path.exists(categories_file):
-            print("Kategorien-Datei nicht gefunden. Bitte führen Sie zuerst update_categories.py aus.")
-            logging.error("Kategorien-Datei nicht gefunden. Bitte führen Sie zuerst update_categories.py aus.")
-            sys.exit(1)
-
         categories = load_categories_from_csv(config)
         if len(categories) == 0:
             raise ValueError("Keine Kategorien gefunden. Bitte überprüfen Sie die categories.csv Datei.")
@@ -85,24 +79,16 @@ def main():
         if len(dataset) == 0:
             raise ValueError("Der erstellte Datensatz ist leer. Überprüfen Sie die Eingabedaten.")
 
-        train_testvalid = dataset.train_test_split(test_size=0.3)
-        test_valid = train_testvalid['test'].train_test_split(test_size=0.5)
-        dataset_dict = DatasetDict({
-            'train': train_testvalid['train'],
-            'test': test_valid['test'],
-            'validation': test_valid['train']
-        })
-
         model_names = config['Model']['model_name'].split(',')
-        total_start_time = time.time()
 
-        for model_name in model_names:
-            model_name = model_name.strip()
-            logging.info(f"Verarbeite Modell: {model_name}")
+        if args.train:
+            total_start_time = time.time()
+            for model_name in model_names:
+                model_name = model_name.strip()
+                logging.info(f"Trainiere Modell: {model_name}")
 
-            model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
+                model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
 
-            if args.train:
                 num_labels = len(categories)
                 model = AutoModelForSequenceClassification.from_pretrained(
                     model_name,
@@ -111,83 +97,54 @@ def main():
                     label2id={cat: i for i, cat in enumerate(categories)}
                 )
 
-                tokenizer, trainer, tokenized_datasets = setup_model_and_trainer(dataset_dict, le, config, model_name, model, quick=args.quick)
+                tokenizer, trainer, tokenized_datasets = setup_model_and_trainer(dataset, le, config, model_name, model, quick=args.quick)
                 trainer.train()
                 results = trainer.evaluate(eval_dataset=tokenized_datasets['test'])
                 logging.info(f"Testergebnisse für {model_name}: {results}")
 
-                # Logging des Experiments
                 log_experiment(config, model_name, results, config['Paths']['output'])
 
                 logging.info(f"Trainings- und Evaluationsergebnisse:")
                 for key, value in results.items():
                     logging.info(f"{key}: {value}")
-                logging.info(f"Gesamtausführungszeit für Modell {model_name}: {(time.time() - total_start_time) / 60:.2f} Minuten")
+                logging.info(f"Ausführungszeit für Modell {model_name}: {(time.time() - total_start_time) / 60:.2f} Minuten")
                 trainer.save_model(model_save_path)
                 tokenizer.save_pretrained(model_save_path)
 
-            if args.checkthis or args.predict:
-                model = AutoModelForSequenceClassification.from_pretrained(model_save_path)
-                tokenizer = AutoTokenizer.from_pretrained(model_save_path)
+            total_end_time = time.time()
+            total_duration = (total_end_time - total_start_time) / 60
+            logging.info(f"Gesamtausführungszeit für alle Modelle: {total_duration:.2f} Minuten")
 
-                # Laden der Kategorie-zu-Label-Zuordnung
-                label2id = model.config.label2id
-                id2label = model.config.id2label
-                print("Modellkategorien:", id2label)
-                logging.info("Modellkategorien: %s", id2label)
+        if args.checkthis:
+            models = {
+                'r-base': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-base')),
+                           AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-base')),
+                           LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
+                'ms-deberta': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'microsoft_deberta-base')),
+                               AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'microsoft_deberta-base')),
+                               LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
+                'distilb': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'distilbert-base-uncased')),
+                            AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'distilbert-base-uncased')),
+                            LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
+                'r-large': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-large')),
+                            AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-large')),
+                            LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
+                'albert': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'albert-base-v2')),
+                           AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'albert-base-v2')),
+                           LabelEncoder().fit(['Nicht-LRH', 'LRH']))
+            }
 
-                # Erstellen eines neuen LabelEncoders mit den geladenen Kategorien
-                le = LabelEncoder()
-                le.classes_ = np.array(list(label2id.keys()))
+            check_folder = config['Paths']['check_this']
+            analyze_documents_csv(check_folder, models, extract_text_from_file)
 
-                trainer = Trainer(model=model)
-
-                if args.checkthis:
-                    models = {
-                        'r-base': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-base')),
-                                AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-base')),
-                                LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
-                        'ms-deberta': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'microsoft_deberta-base')),
-                                    AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'microsoft_deberta-base')),
-                                    LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
-                        'distilb': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'distilbert-base-uncased')),
-                                    AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'distilbert-base-uncased')),
-                                    LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
-                        'r-large': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-large')),
-                                    AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-large')),
-                                    LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
-                        'albert': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'albert-base-v2')),
-                                AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'albert-base-v2')),
-                                LabelEncoder().fit(['Nicht-LRH', 'LRH']))
-                    }
-
-                    check_folder = config['Paths']['check_this']
-                    analyze_documents_csv(check_folder, models, extract_text_from_file)
-
-                    """"
-
-                    files = [f for f in os.listdir(check_folder) if os.path.isfile(os.path.join(check_folder, f))]
-
-                    for file in tqdm(files, desc="Analysiere Dateien"):
-                        file_path = os.path.join(check_folder, file)
-                        results = analyze_document(file_path, models, extract_text_from_file)
-
-                        if results:
-                            print(f"\nVorhersagen für {file}:")
-                            for model_name, predictions in results:
-                                print(f"Modell: {model_name}")
-                                for category, prob in sorted(predictions, key=lambda x: x[0]):
-                                    print(f"{category}: {prob*100:.1f}%")
-                                print()  # Leerzeile zwischen den Modellen
-                """
-                if args.predict:
-                    result = analyze_new_article(args.predict, trainer, tokenizer, le, extract_text_from_file)
-                    if result:
-                        print(json.dumps(result, indent=2))
-                        logging.info(json.dumps(result, indent=2))
-                    else:
-                        print("Konnte keine Analyse durchführen.")
-                        logging.info("Konnte keine Analyse durchführen.")
+        if args.predict:
+            result = analyze_new_article(args.predict, trainer, tokenizer, le, extract_text_from_file)
+            if result:
+                print(json.dumps(result, indent=2))
+                logging.info(json.dumps(result, indent=2))
+            else:
+                print("Konnte keine Analyse durchführen.")
+                logging.info("Konnte keine Analyse durchführen.")
 
         total_end_time = time.time()
         total_duration = (total_end_time - total_start_time) / 60
