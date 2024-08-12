@@ -43,7 +43,7 @@ def get_optimal_batch_size(model, max_sequence_length, device):
 
 def setup_model_and_trainer(dataset_dict, le, config, model_name, model, quick=False):
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels = len(le.classes_))
 
     model.config.label2id = {label: i for i, label in enumerate(le.classes_)}
     model.config.id2label = {i: label for i, label in enumerate(le.classes_)}
