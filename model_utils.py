@@ -103,7 +103,6 @@ def compute_metrics(eval_pred):
 
 
 def predict_top_n(trainer, tokenizer, text, le, n=None):
-    # ... (bestehender Code) ...
     probabilities = torch.nn.functional.softmax(logits, dim=-1)[0]
     results = []
     for idx, prob in enumerate(probabilities):
@@ -113,8 +112,10 @@ def predict_top_n(trainer, tokenizer, text, le, n=None):
     if n is None:
         n = len(le.classes_)
 
-    return sorted(results, key=lambda x: x[1], reverse=True)[:n]def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_file):
-    # ... (bestehender Code) ...
+    return sorted(results, key=lambda x: x[1], reverse=True)[:n]
+
+
+def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_file):
     top_predictions = predict_top_n(trainer, tokenizer, text, le, n=5)  # Top 5 Vorhersagen
 
     print(f"Vorhersagen für {os.path.basename(file_path)}:")
