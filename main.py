@@ -152,7 +152,7 @@ def main():
                     print("Versuche, das Training zu beenden...")
                     trainer.state.global_step = trainer.args.max_steps  # Force training to end
                     trainer.is_in_train = False
-                    else:
+                else:
                         raise
 
                 total_steps = get_total_steps(trainer)
