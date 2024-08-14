@@ -27,7 +27,7 @@ from analysis_utils import analyze_new_article, analyze_document, analyze_docume
 from file_utils import get_device, extract_text_from_file
 from experiment_logger import log_experiment
 
-# Aktualisiere den GradScaler
+
 if hasattr(torch.cuda.amp, 'GradScaler'):
     torch.cuda.amp.GradScaler = lambda **kwargs: torch.amp.GradScaler('cuda', **kwargs)
 
@@ -81,7 +81,9 @@ def main():
         if len(dataset) == 0:
             raise ValueError("Der erstellte Datensatz ist leer. Überprüfen Sie die Eingabedaten.")
 
-        model_names = config['Models']['model_name'].split(',')
+        # models_to_process = get_models_for_task(config, 'train' if args.train else 'check')
+
+
 
         total_start_time = time.time()
         training_performed = False
@@ -94,11 +96,11 @@ def main():
 
         if args.train:
             training_performed = True
-            models_to_train = get_models_for_task(config, 'train')
+            models_to_process = get_models_for_task(config, 'train')
 
         if current_checksum != stored_checksum:
             logging.info("Änderungen im documents-Ordner erkannt. Starte vollständiges Neutraining.")
-            for hf_name, short_name in models_to_train:
+            for hf_name, short_name in models_to_process:
                 logging.info(f"Trainiere Modell: {hf_name} ({short_name})")
 
                 model_save_path = os.path.join(config['Paths']['models'], short_name)
@@ -125,7 +127,7 @@ def main():
             update_config_checksum(config, current_checksum)
         else:
             logging.info("Keine Änderungen erkannt. Vervollständige Training für neue Modelle.")
-            for hf_name, short_name in models_to_train:
+            for hf_name, short_name in models_to_process:
                 model_save_path = os.path.join(config['Paths']['models'], short_name)
                 if not os.path.exists(model_save_path):
                     logging.info(f"Trainiere neues Modell: {hf_name} ({short_name})")
@@ -156,19 +158,37 @@ def main():
         if args.checkthis:
             models_to_check = get_models_for_task(config, 'check')
             for hf_name, short_name in models_to_check:
+                model_save_path = os.path.join(config['Paths']['models'], short_name)
+                num_labels = len(categories)
+                model, tokenizer = get_model_and_tokenizer(hf_name, num_labels, categories, config)
+
+                # Laden des trainierten Modells
+                model.load_state_dict(torch.load(os.path.join(model_save_path, 'pytorch_model.bin')))
 
                 check_folder = config['Paths']['check_this']
-                analyze_documents_csv(check_folder, models, extract_text_from_file)
-                pass
+                analyze_documents_csv(check_folder, {short_name: (model, tokenizer, le)}, extract_text_from_file)
 
         if args.predict:
-            result = analyze_new_article(args.predict, trainer, tokenizer, le, extract_text_from_file)
-            if result:
-                print(json.dumps(result, indent=2))
-                logging.info(json.dumps(result, indent=2))
+            models_to_check = get_models_for_task(config, 'check')
+            if models_to_check:
+                hf_name, short_name = models_to_check[0]  # Verwende das erste verfügbare Modell
+                model_save_path = os.path.join(config['Paths']['models'], short_name)
+                num_labels = len(categories)
+                model, tokenizer = get_model_and_tokenizer(hf_name, num_labels, categories, config)
+
+                # Laden des trainierten Modells
+                model.load_state_dict(torch.load(os.path.join(model_save_path, 'pytorch_model.bin')))
+
+                result = analyze_new_article(args.predict, model, tokenizer, le, extract_text_from_file)
+                if result:
+                    print(json.dumps(result, indent=2))
+                    logging.info(json.dumps(result, indent=2))
+                else:
+                    print("Konnte keine Analyse durchführen.")
+                    logging.info("Konnte keine Analyse durchführen.")
             else:
-                print("Konnte keine Analyse durchführen.")
-                logging.info("Konnte keine Analyse durchführen.")
+                print("Keine Modelle für die Vorhersage verfügbar.")
+                logging.info("Keine Modelle für die Vorhersage verfügbar.")
 
         if training_performed:
             total_end_time = time.time()
