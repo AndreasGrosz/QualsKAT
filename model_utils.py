@@ -115,24 +115,18 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
 
     training_args = TrainingArguments(
         output_dir=model_save_path,
-        learning_rate=float(config['Training']['learning_rate']),
-        per_device_train_batch_size=2,
-        per_device_eval_batch_size=2,
         num_train_epochs=1 if quick else int(config['Training']['num_epochs']),
+        per_device_train_batch_size=int(config['Training']['batch_size']),
+        per_device_eval_batch_size=int(config['Training']['batch_size']),
+        warmup_steps=100,
         weight_decay=0.01,
-        evaluation_strategy="steps",
-        eval_steps=100,
-        save_strategy="steps",
-        save_steps=100,
-        load_best_model_at_end=True,
-        fp16=torch.cuda.is_available(),
-        gradient_accumulation_steps=8,
         logging_dir=os.path.join(model_save_path, 'logs'),
-        logging_steps=50,
-        save_total_limit=2,
-        remove_unused_columns=False,
-        gradient_checkpointing=use_gradient_checkpointing,
-        optim="adamw_torch",
+        logging_steps=10,
+        evaluation_strategy="steps" if not quick else "no",
+        save_strategy="steps" if not quick else "no",
+        eval_steps=100 if not quick else None,
+        save_steps=100 if not quick else None,
+        load_best_model_at_end=True if not quick else False,
     )
 
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)

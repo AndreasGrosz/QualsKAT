@@ -46,7 +46,7 @@ def get_total_steps(trainer):
 
 def print_training_progress(epoch, step, total_steps, loss, grad_norm, learning_rate, start_time):
     elapsed_time = time.time() - start_time
-    estimated_total_time = elapsed_time / step * total_steps
+    estimated_total_time = elapsed_time / (step + 1) * total_steps
     remaining_time = estimated_total_time - elapsed_time
 
     print(f"\n{Fore.CYAN}{'='*60}")
@@ -55,7 +55,6 @@ def print_training_progress(epoch, step, total_steps, loss, grad_norm, learning_
     print(f"{Fore.BLUE}Learning Rate: {learning_rate:.6f}")
     print(f"{Fore.MAGENTA}Elapsed Time: {elapsed_time/60:.2f} min | Remaining Time: {remaining_time/60:.2f} min")
     print(f"{Fore.CYAN}{'='*60}\n")
-
 
 
 def main():
@@ -148,11 +147,11 @@ def main():
 
                 try:
                     trainer.train()
-                except ValueError as e:
-                    if "does not support gradient checkpointing" in str(e):
-                        print(f"{Fore.RED}Gradient checkpointing nicht unterstützt für {hf_name}. Training ohne Gradient Checkpointing wird fortgesetzt.")
-                        trainer.args.gradient_checkpointing = False
-                        trainer.train()
+                except Exception as e:
+                    print(f"Fehler während des Trainings: {str(e)}")
+                    print("Versuche, das Training zu beenden...")
+                    trainer.state.global_step = trainer.args.max_steps  # Force training to end
+                    trainer.is_in_train = False
                     else:
                         raise
 
@@ -160,24 +159,41 @@ def main():
                 start_time = time.time()
 
                 try:
+                    print(f"\n{Fore.CYAN}Starte Training für {hf_name}")
+                    train_dataloader = trainer.get_train_dataloader()
+                    total_steps = len(train_dataloader) * int(config['Training']['num_epochs'])
+
                     for epoch in range(int(config['Training']['num_epochs'])):
-                        for step, batch in enumerate(trainer.get_train_dataloader()):
-                            loss = trainer.training_step(batch, step)
+                        for step, batch in enumerate(train_dataloader):
+                            loss = trainer.training_step(model, batch)
+
                             if step % 10 == 0:  # Print every 10 steps
+                                global_step = epoch * len(train_dataloader) + step
                                 print_training_progress(
-                                    epoch + step/total_steps,
-                                    step,
+                                    epoch + step/len(train_dataloader),
+                                    global_step,
                                     total_steps,
                                     loss.item(),
-                                    trainer.model.named_parameters().grad.norm().item(),
+                                    model.named_parameters().grad.norm().item(),
                                     trainer.lr_scheduler.get_last_lr()[0],
                                     start_time
                                 )
-                except ValueError as e:
-                    if "does not support gradient checkpointing" in str(e):
-                        print(f"{Fore.RED}Gradient checkpointing nicht unterstützt für {hf_name}. Training ohne Gradient Checkpointing wird fortgesetzt.")
-                        trainer.args.gradient_checkpointing = False
-                        trainer.train()
+
+                        # Evaluation am Ende jeder Epoche
+                        eval_results = trainer.evaluate()
+                        print(f"\n{Fore.GREEN}Evaluationsergebnisse nach Epoche {epoch+1}:")
+                        for key, value in eval_results.items():
+                            print(f"{Fore.CYAN}{key}: {value}")
+
+                    print(f"\n{Fore.GREEN}Training abgeschlossen.")
+                except Exception as e:
+                    print(f"{Fore.RED}Fehler während des Trainings: {str(e)}")
+                    print(f"{Fore.YELLOW}Versuche, das Training zu beenden...")
+                    if hasattr(trainer, 'state'):
+                        trainer.state.global_step = total_steps  # Force training to end
+                    if hasattr(trainer, 'is_in_train'):
+                        trainer.is_in_train = False
+
                     else:
                         raise
 
@@ -302,6 +318,9 @@ def main():
             total_end_time = time.time()
             total_duration = (total_end_time - total_start_time) / 60
             logging.error(f"Gesamtausführungszeit für alle Modelle: {total_duration:.2f} Minuten")
+
+        print(f"Training abgeschlossen. Finale Loss: {trainer.state.log_history[-1]['loss']}")
+        print(f"Anzahl der durchgeführten Schritte: {trainer.state.global_step}")
         logging.error("---------------------------------------")
         logging.error("Programmende")
 
