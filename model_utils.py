@@ -116,27 +116,28 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
     training_args = TrainingArguments(
         output_dir=model_save_path,
         learning_rate=float(config['Training']['learning_rate']),
-        per_device_train_batch_size=batch_size,
-        per_device_eval_batch_size=batch_size,
+        per_device_train_batch_size=int(config['Training']['batch_size']),
+        per_device_eval_batch_size=int(config['Training']['batch_size']),
         num_train_epochs=1 if quick else int(config['Training']['num_epochs']),
-        weight_decay=0.01,
+        weight_decay=float(config['Training']['weight_decay']),
         evaluation_strategy="steps",
-        eval_steps=100,
+        eval_steps=int(config['Evaluation']['eval_steps']),
         save_strategy="steps",
-        save_steps=100,
+        save_steps=int(config['Evaluation']['save_steps']),
         load_best_model_at_end=True,
-        fp16=torch.cuda.is_available() and not is_xlnet,
-        gradient_accumulation_steps=8,
+        fp16=config['Optimization'].getboolean('fp16') and torch.cuda.is_available(),
+        gradient_accumulation_steps=int(config['Training']['gradient_accumulation_steps']),
         logging_dir=os.path.join(model_save_path, 'logs'),
         logging_steps=50,
         save_total_limit=2,
         remove_unused_columns=False,
-        gradient_checkpointing=not (is_albert or is_xlnet),
+        gradient_checkpointing=True,
         optim="adamw_torch",
     )
 
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
+    optimizer, scheduler = get_optimizer_and_scheduler(model, config, total_steps)
     trainer = Trainer(
         model=model,
         args=training_args,
@@ -144,6 +145,7 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
         eval_dataset=tokenized_datasets['validation'],
         tokenizer=tokenizer,
         data_collator=data_collator,
+        optimizers=(optimizer, scheduler),
     )
 
     return trainer, tokenized_datasets

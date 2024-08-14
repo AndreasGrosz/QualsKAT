@@ -1,0 +1,903 @@
+
+Trainings-Zusammenfassung für roberta-base:
+Anzahl der Epochen: 3
+Anzahl der Batches pro Epoche: 129
+Gesamtanzahl der Batches: 387
+Batch-Größe: 4
+Gesamtanzahl der Trainingsdokumente: 169
+Geschätzte Trainingszeit: 25.80 Minuten
+============================================================
+
+  0%|                                                                                 | 0/5 [00:00<?, ?it/s]/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+{'train_runtime': 8.1345, 'train_samples_per_second': 20.776, 'train_steps_per_second': 0.615, 'train_loss': 3.97664794921875, 'epoch': 0.93}
+100%|█████████████████████████████████████████████████████████████████████████| 5/5 [00:08<00:00,  1.63s/it]
+
+Starte Training für roberta-base
+Epoch 1:   0%|                                                                       | 0/43 [00:00<?, ?it/s]/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Epoch 1:   0%|                                                          | 0/43 [00:00<?, ?it/s, loss=0.4845]
+Fehler während des Trainings: 'generator' object has no attribute 'grad'
+Versuche, das Training zu beenden...
+100%|███████████████████████████████████████████████████████████████████████| 10/10 [00:00<00:00, 27.34it/s]
+
+Testergebnisse für roberta-base (rob-b):
+eval_loss: 3.8917336463928223
+eval_runtime: 0.3744
+eval_samples_per_second: 98.837
+eval_steps_per_second: 26.713
+epoch: 0.9302325581395349
+
+Ausführungszeit für Modell roberta-base (rob-b): 0.02 Minuten
+
+********************************************************************************
+Training Model: microsoft/deberta-base (deb-b)
+********************************************************************************
+
+Some weights of DebertaForSequenceClassification were not initialized from the model checkpoint at /home/res/projekte/kd0241-py/Q-KAT/AAUNaL/fresh-models/microsoft/deberta-base and are newly initialized because the shapes did not match:
+- classifier.bias: found shape torch.Size([2]) in the checkpoint and torch.Size([53]) in the model instantiated
+- classifier.weight: found shape torch.Size([2, 768]) in the checkpoint and torch.Size([53, 768]) in the model instantiated
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Map: 100%|████████████████████████████████████████████████████████| 242/242 [00:00<00:00, 441.39 examples/s]
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/transformers/training_args.py:1525: FutureWarning: `evaluation_strategy` is deprecated and will be removed in version 4.46 of 🤗 Transformers. Use `eval_strategy` instead
+  warnings.warn(
+
+Starte Training für microsoft/deberta-base
+Epoch 1:   0%|                                                                       | 0/43 [00:00<?, ?it/s]
+Fehler während des Trainings: CUDA out of memory. Tried to allocate 48.00 MiB. GPU 0 has a total capacity of 7.66 GiB of which 18.12 MiB is free. Including non-PyTorch memory, this process has 7.62 GiB memory in use. Of the allocated memory 7.46 GiB is allocated by PyTorch, and 32.51 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Versuche, das Training zu beenden...
+
+Trainings-Zusammenfassung für microsoft/deberta-base:
+Anzahl der Epochen: 3
+Anzahl der Batches pro Epoche: 129
+Gesamtanzahl der Batches: 387
+Batch-Größe: 4
+Gesamtanzahl der Trainingsdokumente: 169
+Geschätzte Trainingszeit: 25.80 Minuten
+============================================================
+
+  0%|                                                                                 | 0/5 [00:00<?, ?it/s]/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+{'train_runtime': 15.1996, 'train_samples_per_second': 11.119, 'train_steps_per_second': 0.329, 'train_loss': 3.815214157104492, 'epoch': 0.93}
+100%|█████████████████████████████████████████████████████████████████████████| 5/5 [00:15<00:00,  3.04s/it]
+
+Starte Training für microsoft/deberta-base
+Epoch 1:   0%|                                                                       | 0/43 [00:00<?, ?it/s]/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Epoch 1:   0%|                                                          | 0/43 [00:00<?, ?it/s, loss=0.4473]
+Fehler während des Trainings: 'generator' object has no attribute 'grad'
+Versuche, das Training zu beenden...
+100%|███████████████████████████████████████████████████████████████████████| 10/10 [00:00<00:00, 16.57it/s]
+
+Testergebnisse für microsoft/deberta-base (deb-b):
+eval_loss: 3.469025135040283
+eval_runtime: 0.6797
+eval_samples_per_second: 54.438
+eval_steps_per_second: 14.713
+epoch: 0.9302325581395349
+
+Ausführungszeit für Modell microsoft/deberta-base (deb-b): 0.03 Minuten
+
+********************************************************************************
+Training Model: albert-base-v2 (alb-b)
+********************************************************************************
+
+Some weights of AlbertForSequenceClassification were not initialized from the model checkpoint at /home/res/projekte/kd0241-py/Q-KAT/AAUNaL/fresh-models/albert-base-v2 and are newly initialized because the shapes did not match:
+- classifier.bias: found shape torch.Size([2]) in the checkpoint and torch.Size([53]) in the model instantiated
+- classifier.weight: found shape torch.Size([2, 768]) in the checkpoint and torch.Size([53, 768]) in the model instantiated
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Map: 100%|████████████████████████████████████████████████████████| 242/242 [00:00<00:00, 385.67 examples/s]
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/transformers/training_args.py:1525: FutureWarning: `evaluation_strategy` is deprecated and will be removed in version 4.46 of 🤗 Transformers. Use `eval_strategy` instead
+  warnings.warn(
+
+Starte Training für albert-base-v2
+Epoch 1:   0%|                                                          | 0/43 [00:00<?, ?it/s, loss=0.5496]
+============================================================
+Epoch: 0.00 | Step: 0/129
+Loss: 0.5496 | Grad Norm: 330516.4375
+Learning Rate: 0.000020
+Elapsed Time: 0.00 min | Remaining Time: 0.53 min
+============================================================
+
+Epoch 1:  23%|███████████▍                                     | 10/43 [00:02<00:08,  4.06it/s, loss=0.5722]
+============================================================
+Epoch: 0.23 | Step: 10/129
+Loss: 0.5722 | Grad Norm: 2616697.0000
+Learning Rate: 0.000020
+Elapsed Time: 0.05 min | Remaining Time: 0.49 min
+============================================================
+
+Epoch 1:  47%|██████████████████████▊                          | 20/43 [00:05<00:05,  4.05it/s, loss=0.5996]
+============================================================
+Epoch: 0.47 | Step: 20/129
+Loss: 0.5996 | Grad Norm: 2656317.0000
+Learning Rate: 0.000020
+Elapsed Time: 0.09 min | Remaining Time: 0.44 min
+============================================================
+
+Epoch 1:  70%|██████████████████████████████████▏              | 30/43 [00:07<00:03,  4.05it/s, loss=0.5389]
+============================================================
+Epoch: 0.70 | Step: 30/129
+Loss: 0.5389 | Grad Norm: 2633270.2500
+Learning Rate: 0.000020
+Elapsed Time: 0.13 min | Remaining Time: 0.40 min
+============================================================
+
+Epoch 1:  93%|█████████████████████████████████████████████▌   | 40/43 [00:10<00:00,  4.06it/s, loss=0.5295]
+============================================================
+Epoch: 0.93 | Step: 40/129
+Loss: 0.5295 | Grad Norm: 2420514.2500
+Learning Rate: 0.000020
+Elapsed Time: 0.17 min | Remaining Time: 0.36 min
+============================================================
+
+Epoch 1: 100%|█████████████████████████████████████████████████| 43/43 [00:10<00:00,  4.13it/s, loss=0.5659]
+100%|█████████████████████████████████████████████████████████████████████████| 9/9 [00:00<00:00, 17.04it/s]
+
+Evaluationsergebnisse nach Epoche 1:
+eval_loss: 4.50401496887207
+eval_model_preparation_time: 0.0004
+eval_runtime: 0.5376
+eval_samples_per_second: 66.96
+eval_steps_per_second: 16.74
+Epoch 2:   0%|                                                          | 0/43 [00:00<?, ?it/s, loss=0.5540]
+============================================================
+Epoch: 1.00 | Step: 43/129
+Loss: 0.5540 | Grad Norm: 939742.0000
+Learning Rate: 0.000020
+Elapsed Time: 0.19 min | Remaining Time: 0.36 min
+============================================================
+
+Epoch 2:  23%|███████████▍                                     | 10/43 [00:01<00:05,  6.35it/s, loss=0.5979]
+============================================================
+Epoch: 1.23 | Step: 53/129
+Loss: 0.5979 | Grad Norm: 2513073.5000
+Learning Rate: 0.000020
+Elapsed Time: 0.21 min | Remaining Time: 0.29 min
+============================================================
+
+Epoch 2:  47%|██████████████████████▊                          | 20/43 [00:03<00:03,  6.35it/s, loss=0.5602]
+============================================================
+Epoch: 1.47 | Step: 63/129
+Loss: 0.5602 | Grad Norm: 2671749.2500
+Learning Rate: 0.000020
+Elapsed Time: 0.24 min | Remaining Time: 0.24 min
+============================================================
+
+Epoch 2:  70%|██████████████████████████████████▏              | 30/43 [00:04<00:02,  6.36it/s, loss=0.5995]
+============================================================
+Epoch: 1.70 | Step: 73/129
+Loss: 0.5995 | Grad Norm: 2541401.0000
+Learning Rate: 0.000020
+Elapsed Time: 0.26 min | Remaining Time: 0.20 min
+============================================================
+
+Epoch 2:  93%|█████████████████████████████████████████████▌   | 40/43 [00:06<00:00,  6.35it/s, loss=0.5955]
+============================================================
+Epoch: 1.93 | Step: 83/129
+Loss: 0.5955 | Grad Norm: 2621495.0000
+Learning Rate: 0.000020
+Elapsed Time: 0.29 min | Remaining Time: 0.16 min
+============================================================
+
+Epoch 2: 100%|█████████████████████████████████████████████████| 43/43 [00:06<00:00,  6.47it/s, loss=0.6182]
+100%|█████████████████████████████████████████████████████████████████████████| 9/9 [00:00<00:00, 17.04it/s]
+
+Evaluationsergebnisse nach Epoche 2:
+eval_loss: 4.50401496887207
+eval_model_preparation_time: 0.0004
+eval_runtime: 0.5373
+eval_samples_per_second: 67.002
+eval_steps_per_second: 16.751
+Epoch 3:   0%|                                                          | 0/43 [00:00<?, ?it/s, loss=0.5601]
+============================================================
+Epoch: 2.00 | Step: 86/129
+Loss: 0.5601 | Grad Norm: 819256.7500
+Learning Rate: 0.000020
+Elapsed Time: 0.30 min | Remaining Time: 0.15 min
+============================================================
+
+Epoch 3:  23%|███████████▍                                     | 10/43 [00:01<00:05,  6.35it/s, loss=0.5598]
+============================================================
+Epoch: 2.23 | Step: 96/129
+Loss: 0.5598 | Grad Norm: 2692882.7500
+Learning Rate: 0.000020
+Elapsed Time: 0.33 min | Remaining Time: 0.11 min
+============================================================
+
+Epoch 3:  47%|██████████████████████▊                          | 20/43 [00:03<00:03,  6.35it/s, loss=0.6029]
+============================================================
+Epoch: 2.47 | Step: 106/129
+Loss: 0.6029 | Grad Norm: 2497499.2500
+Learning Rate: 0.000020
+Elapsed Time: 0.36 min | Remaining Time: 0.07 min
+============================================================
+
+Epoch 3:  70%|██████████████████████████████████▏              | 30/43 [00:04<00:02,  6.35it/s, loss=0.5720]
+============================================================
+Epoch: 2.70 | Step: 116/129
+Loss: 0.5720 | Grad Norm: 2538398.5000
+Learning Rate: 0.000020
+Elapsed Time: 0.38 min | Remaining Time: 0.04 min
+============================================================
+
+Epoch 3:  93%|█████████████████████████████████████████████▌   | 40/43 [00:06<00:00,  6.35it/s, loss=0.5917]
+============================================================
+Epoch: 2.93 | Step: 126/129
+Loss: 0.5917 | Grad Norm: 2691057.0000
+Learning Rate: 0.000020
+Elapsed Time: 0.41 min | Remaining Time: 0.01 min
+============================================================
+
+Epoch 3: 100%|█████████████████████████████████████████████████| 43/43 [00:06<00:00,  6.47it/s, loss=0.6123]
+100%|█████████████████████████████████████████████████████████████████████████| 9/9 [00:00<00:00, 17.04it/s]
+
+Evaluationsergebnisse nach Epoche 3:
+eval_loss: 4.50401496887207
+eval_model_preparation_time: 0.0004
+eval_runtime: 0.5369
+eval_samples_per_second: 67.052
+eval_steps_per_second: 16.763
+
+Training abgeschlossen.
+
+Trainings-Zusammenfassung für albert-base-v2:
+Anzahl der Epochen: 3
+Anzahl der Batches pro Epoche: 129
+Gesamtanzahl der Batches: 387
+Batch-Größe: 4
+Gesamtanzahl der Trainingsdokumente: 169
+Geschätzte Trainingszeit: 25.80 Minuten
+============================================================
+
+{'train_runtime': 6.4107, 'train_samples_per_second': 26.362, 'train_steps_per_second': 0.78, 'train_loss': 3.7756591796875, 'epoch': 0.93}
+100%|█████████████████████████████████████████████████████████████████████████| 5/5 [00:06<00:00,  1.28s/it]
+
+Starte Training für albert-base-v2
+Epoch 1:   0%|                                                          | 0/43 [00:00<?, ?it/s, loss=0.3745]
+Fehler während des Trainings: 'generator' object has no attribute 'grad'
+Versuche, das Training zu beenden...
+100%|███████████████████████████████████████████████████████████████████████| 10/10 [00:00<00:00, 18.68it/s]
+
+Testergebnisse für albert-base-v2 (alb-b):
+eval_loss: 3.1012985706329346
+eval_model_preparation_time: 0.0004
+eval_runtime: 0.5442
+eval_samples_per_second: 67.992
+eval_steps_per_second: 18.376
+epoch: 0.9302325581395349
+
+Ausführungszeit für Modell albert-base-v2 (alb-b): 0.01 Minuten
+
+********************************************************************************
+Training Model: t5-large (t5-l)
+********************************************************************************
+
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+Some weights of T5ForSequenceClassification were not initialized from the model checkpoint at t5-large and are newly initialized: ['classification_head.dense.bias', 'classification_head.dense.weight', 'classification_head.out_proj.bias', 'classification_head.out_proj.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Map: 100%|████████████████████████████████████████████████████████| 242/242 [00:00<00:00, 413.28 examples/s]
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/transformers/training_args.py:1525: FutureWarning: `evaluation_strategy` is deprecated and will be removed in version 4.46 of 🤗 Transformers. Use `eval_strategy` instead
+  warnings.warn(
+
+Starte Training für t5-large
+Epoch 1:   0%|                                                                       | 0/43 [00:00<?, ?it/s]
+Fehler während des Trainings: CUDA out of memory. Tried to allocate 64.00 MiB. GPU 0 has a total capacity of 7.66 GiB of which 22.12 MiB is free. Including non-PyTorch memory, this process has 7.62 GiB memory in use. Of the allocated memory 7.20 GiB is allocated by PyTorch, and 297.80 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Versuche, das Training zu beenden...
+
+Trainings-Zusammenfassung für t5-large:
+Anzahl der Epochen: 3
+Anzahl der Batches pro Epoche: 129
+Gesamtanzahl der Batches: 387
+Batch-Größe: 4
+Gesamtanzahl der Trainingsdokumente: 169
+Geschätzte Trainingszeit: 25.80 Minuten
+============================================================
+
+  0%|                                                                                 | 0/5 [00:00<?, ?it/s]/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Fehler während des Trainings: CUDA out of memory. Tried to allocate 64.00 MiB. GPU 0 has a total capacity of 7.66 GiB of which 64.12 MiB is free. Including non-PyTorch memory, this process has 7.57 GiB memory in use. Of the allocated memory 7.38 GiB is allocated by PyTorch, and 71.35 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Versuche, das Training zu beenden...
+
+Starte Training für t5-large
+Epoch 1:   0%|                                                                       | 0/43 [00:00<?, ?it/s]
+Fehler während des Trainings: CUDA out of memory. Tried to allocate 64.00 MiB. GPU 0 has a total capacity of 7.66 GiB of which 64.12 MiB is free. Including non-PyTorch memory, this process has 7.57 GiB memory in use. Of the allocated memory 7.32 GiB is allocated by PyTorch, and 135.39 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Versuche, das Training zu beenden...
+{'eval_loss': nan, 'eval_runtime': 3.2992, 'eval_samples_per_second': 11.215, 'eval_steps_per_second': 3.031, 'epoch': 0}
+  0%|                                                                                 | 0/5 [00:05<?, ?it/s]
+Testergebnisse für t5-large (t5-l):
+eval_loss: nan
+eval_runtime: 3.2992
+eval_samples_per_second: 11.215
+eval_steps_per_second: 3.031
+epoch: 0
+
+Ausführungszeit für Modell t5-large (t5-l): 0.12 Minuten
+
+********************************************************************************
+Training Model: allenai/longformer-base-4096 (long-b)
+********************************************************************************
+
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+Some weights of LongformerForSequenceClassification were not initialized from the model checkpoint at allenai/longformer-base-4096 and are newly initialized: ['classifier.dense.bias', 'classifier.dense.weight', 'classifier.out_proj.bias', 'classifier.out_proj.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Map: 100%|████████████████████████████████████████████████████████| 242/242 [00:00<00:00, 387.17 examples/s]
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/transformers/training_args.py:1525: FutureWarning: `evaluation_strategy` is deprecated and will be removed in version 4.46 of 🤗 Transformers. Use `eval_strategy` instead
+  warnings.warn(
+  0%|                                                                                 | 0/5 [00:11<?, ?it/s]
+
+Starte Training für allenai/longformer-base-4096
+Epoch 1:   0%|                                                                       | 0/43 [00:00<?, ?it/s]Initializing global attention on CLS token...
+Epoch 1:   0%|                                                                       | 0/43 [00:00<?, ?it/s]
+Fehler während des Trainings: CUDA out of memory. Tried to allocate 14.00 MiB. GPU 0 has a total capacity of 7.66 GiB of which 24.12 MiB is free. Including non-PyTorch memory, this process has 7.61 GiB memory in use. Of the allocated memory 7.35 GiB is allocated by PyTorch, and 137.16 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Versuche, das Training zu beenden...
+
+Trainings-Zusammenfassung für allenai/longformer-base-4096:
+Anzahl der Epochen: 3
+Anzahl der Batches pro Epoche: 129
+Gesamtanzahl der Batches: 387
+Batch-Größe: 4
+Gesamtanzahl der Trainingsdokumente: 169
+Geschätzte Trainingszeit: 25.80 Minuten
+============================================================
+
+  0%|                                                                                 | 0/5 [00:00<?, ?it/s]/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+{'train_runtime': 21.4575, 'train_samples_per_second': 7.876, 'train_steps_per_second': 0.233, 'train_loss': 3.75648193359375, 'epoch': 0.93}
+100%|█████████████████████████████████████████████████████████████████████████| 5/5 [00:21<00:00,  4.29s/it]
+
+Starte Training für allenai/longformer-base-4096
+Epoch 1:   0%|                                                                       | 0/43 [00:00<?, ?it/s]/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+Epoch 1:   0%|                                                          | 0/43 [00:00<?, ?it/s, loss=0.4549]
+Fehler während des Trainings: 'generator' object has no attribute 'grad'
+Versuche, das Training zu beenden...
+100%|███████████████████████████████████████████████████████████████████████| 10/10 [00:00<00:00, 10.19it/s]
+
+Testergebnisse für allenai/longformer-base-4096 (long-b):
+eval_loss: 3.5722129344940186
+eval_runtime: 1.1021
+eval_samples_per_second: 33.572
+eval_steps_per_second: 9.074
+epoch: 0.9302325581395349
+
+Ausführungszeit für Modell allenai/longformer-base-4096 (long-b): 0.04 Minuten
+
+********************************************************************************
+Training Model: xlnet-large-cased (xln-l)
+********************************************************************************
+
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+Some weights of XLNetForSequenceClassification were not initialized from the model checkpoint at xlnet-large-cased and are newly initialized: ['logits_proj.bias', 'logits_proj.weight', 'sequence_summary.summary.bias', 'sequence_summary.summary.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Map: 100%|████████████████████████████████████████████████████████| 242/242 [00:00<00:00, 368.74 examples/s]
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/transformers/training_args.py:1525: FutureWarning: `evaluation_strategy` is deprecated and will be removed in version 4.46 of 🤗 Transformers. Use `eval_strategy` instead
+  warnings.warn(
+
+Starte Training für xlnet-large-cased
+Epoch 1:   0%|                                                         | 0/169 [00:00<?, ?it/s, loss=0.4529]
+============================================================
+Epoch: 0.00 | Step: 0/507
+Loss: 0.4529 | Grad Norm: 551428.2500
+Learning Rate: 0.000020
+Elapsed Time: 0.01 min | Remaining Time: 2.65 min
+============================================================
+
+Epoch 1:   6%|██▊                                             | 10/169 [00:03<00:48,  3.30it/s, loss=0.4703]
+============================================================
+Epoch: 0.06 | Step: 10/507
+Loss: 0.4703 | Grad Norm: 3555836.7500
+Learning Rate: 0.000020
+Elapsed Time: 0.06 min | Remaining Time: 2.53 min
+============================================================
+
+Epoch 1:  12%|█████▋                                          | 20/169 [00:06<00:45,  3.29it/s, loss=0.3456]
+============================================================
+Epoch: 0.12 | Step: 20/507
+Loss: 0.3456 | Grad Norm: 3857282.2500
+Learning Rate: 0.000020
+Elapsed Time: 0.11 min | Remaining Time: 2.48 min
+============================================================
+
+Epoch 1:  18%|████████▌                                       | 30/169 [00:09<00:42,  3.29it/s, loss=0.3774]
+============================================================
+Epoch: 0.18 | Step: 30/507
+Loss: 0.3774 | Grad Norm: 9211674.0000
+Learning Rate: 0.000020
+Elapsed Time: 0.16 min | Remaining Time: 2.42 min
+============================================================
+
+Epoch 1:  24%|███████████▎                                    | 40/169 [00:12<00:39,  3.29it/s, loss=0.4365]
+============================================================
+Epoch: 0.24 | Step: 40/507
+Loss: 0.4365 | Grad Norm: 5049858.5000
+Learning Rate: 0.000020
+Elapsed Time: 0.21 min | Remaining Time: 2.37 min
+============================================================
+
+Epoch 1:  30%|██████████████▏                                 | 50/169 [00:15<00:36,  3.29it/s, loss=0.4015]
+============================================================
+Epoch: 0.30 | Step: 50/507
+Loss: 0.4015 | Grad Norm: 4245998.5000
+Learning Rate: 0.000020
+Elapsed Time: 0.26 min | Remaining Time: 2.32 min
+============================================================
+
+Epoch 1:  36%|█████████████████                               | 60/169 [00:18<00:33,  3.29it/s, loss=0.5139]
+============================================================
+Epoch: 0.36 | Step: 60/507
+Loss: 0.5139 | Grad Norm: 4298984.5000
+Learning Rate: 0.000020
+Elapsed Time: 0.31 min | Remaining Time: 2.27 min
+============================================================
+
+Epoch 1:  41%|███████████████████▉                            | 70/169 [00:21<00:30,  3.29it/s, loss=0.5837]
+============================================================
+Epoch: 0.41 | Step: 70/507
+Loss: 0.5837 | Grad Norm: 6708478.0000
+Learning Rate: 0.000020
+Elapsed Time: 0.36 min | Remaining Time: 2.22 min
+============================================================
+
+Epoch 1:  47%|██████████████████████▋                         | 80/169 [00:24<00:27,  3.29it/s, loss=0.4374]
+============================================================
+Epoch: 0.47 | Step: 80/507
+Loss: 0.4374 | Grad Norm: 4366528.5000
+Learning Rate: 0.000020
+Elapsed Time: 0.41 min | Remaining Time: 2.17 min
+============================================================
+
+Epoch 1:  53%|█████████████████████████▌                      | 90/169 [00:27<00:24,  3.29it/s, loss=0.3095]
+============================================================
+Epoch: 0.53 | Step: 90/507
+Loss: 0.3095 | Grad Norm: 3364397.2500
+Learning Rate: 0.000020
+Elapsed Time: 0.46 min | Remaining Time: 2.12 min
+============================================================
+
+Epoch 1:  59%|███████████████████████████▊                   | 100/169 [00:30<00:20,  3.29it/s, loss=0.4161]
+============================================================
+Epoch: 0.59 | Step: 100/507
+Loss: 0.4161 | Grad Norm: 7556540.5000
+Learning Rate: 0.000020
+Elapsed Time: 0.51 min | Remaining Time: 2.07 min
+============================================================
+
+Epoch 1:  65%|██████████████████████████████▌                | 110/169 [00:33<00:17,  3.29it/s, loss=0.6152]
+============================================================
+Epoch: 0.65 | Step: 110/507
+Loss: 0.6152 | Grad Norm: 3786841.2500
+Learning Rate: 0.000020
+Elapsed Time: 0.57 min | Remaining Time: 2.02 min
+============================================================
+
+Epoch 1:  71%|█████████████████████████████████▎             | 120/169 [00:36<00:14,  3.29it/s, loss=0.5555]
+============================================================
+Epoch: 0.71 | Step: 120/507
+Loss: 0.5555 | Grad Norm: 4517376.5000
+Learning Rate: 0.000020
+Elapsed Time: 0.62 min | Remaining Time: 1.97 min
+============================================================
+
+Epoch 1:  77%|████████████████████████████████████▏          | 130/169 [00:40<00:11,  3.29it/s, loss=0.4111]
+============================================================
+Epoch: 0.77 | Step: 130/507
+Loss: 0.4111 | Grad Norm: 3381731.5000
+Learning Rate: 0.000020
+Elapsed Time: 0.67 min | Remaining Time: 1.92 min
+============================================================
+
+Epoch 1:  83%|██████████████████████████████████████▉        | 140/169 [00:43<00:08,  3.29it/s, loss=0.5470]
+============================================================
+Epoch: 0.83 | Step: 140/507
+Loss: 0.5470 | Grad Norm: 4351706.5000
+Learning Rate: 0.000020
+Elapsed Time: 0.72 min | Remaining Time: 1.86 min
+============================================================
+
+Epoch 1:  89%|█████████████████████████████████████████▋     | 150/169 [00:46<00:05,  3.29it/s, loss=0.4192]
+============================================================
+Epoch: 0.89 | Step: 150/507
+Loss: 0.4192 | Grad Norm: 3620922.2500
+Learning Rate: 0.000020
+Elapsed Time: 0.77 min | Remaining Time: 1.81 min
+============================================================
+
+Epoch 1:  95%|████████████████████████████████████████████▍  | 160/169 [00:49<00:02,  3.29it/s, loss=0.5772]
+============================================================
+Epoch: 0.95 | Step: 160/507
+Loss: 0.5772 | Grad Norm: 4029594.0000
+Learning Rate: 0.000020
+Elapsed Time: 0.82 min | Remaining Time: 1.76 min
+============================================================
+
+Epoch 1: 100%|███████████████████████████████████████████████| 169/169 [00:51<00:00,  3.27it/s, loss=0.3761]
+100%|███████████████████████████████████████████████████████████████████████| 36/36 [00:01<00:00, 19.06it/s]
+
+Evaluationsergebnisse nach Epoche 1:
+eval_loss: 3.793077230453491
+eval_model_preparation_time: 0.0038
+eval_runtime: 1.908
+eval_samples_per_second: 18.868
+eval_steps_per_second: 18.868
+Epoch 2:   0%|                                                         | 0/169 [00:00<?, ?it/s, loss=0.5522]
+============================================================
+Epoch: 1.00 | Step: 169/507
+Loss: 0.5522 | Grad Norm: 3752321.5000
+Learning Rate: 0.000020
+Elapsed Time: 0.90 min | Remaining Time: 1.78 min
+============================================================
+
+Epoch 2:   6%|██▊                                             | 10/169 [00:01<00:23,  6.81it/s, loss=0.5420]
+============================================================
+Epoch: 1.06 | Step: 179/507
+Loss: 0.5420 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 0.92 min | Remaining Time: 1.67 min
+============================================================
+
+Epoch 2:  12%|█████▋                                          | 20/169 [00:03<00:21,  6.80it/s, loss=0.4465]
+============================================================
+Epoch: 1.12 | Step: 189/507
+Loss: 0.4465 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 0.95 min | Remaining Time: 1.58 min
+============================================================
+
+Epoch 2:  18%|████████▌                                       | 30/169 [00:04<00:20,  6.81it/s, loss=0.5630]
+============================================================
+Epoch: 1.18 | Step: 199/507
+Loss: 0.5630 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 0.97 min | Remaining Time: 1.49 min
+============================================================
+
+Epoch 2:  24%|███████████▎                                    | 40/169 [00:06<00:18,  6.81it/s, loss=0.5161]
+============================================================
+Epoch: 1.24 | Step: 209/507
+Loss: 0.5161 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 0.99 min | Remaining Time: 1.41 min
+============================================================
+
+Epoch 2:  30%|██████████████▏                                 | 50/169 [00:07<00:17,  6.81it/s, loss=0.4990]
+============================================================
+Epoch: 1.30 | Step: 219/507
+Loss: 0.4990 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.02 min | Remaining Time: 1.33 min
+============================================================
+
+Epoch 2:  36%|█████████████████                               | 60/169 [00:09<00:15,  6.81it/s, loss=0.4338]
+============================================================
+Epoch: 1.36 | Step: 229/507
+Loss: 0.4338 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.04 min | Remaining Time: 1.26 min
+============================================================
+
+Epoch 2:  41%|███████████████████▉                            | 70/169 [00:10<00:14,  6.81it/s, loss=0.4639]
+============================================================
+Epoch: 1.41 | Step: 239/507
+Loss: 0.4639 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.07 min | Remaining Time: 1.19 min
+============================================================
+
+Epoch 2:  47%|██████████████████████▋                         | 80/169 [00:12<00:13,  6.81it/s, loss=0.4019]
+============================================================
+Epoch: 1.47 | Step: 249/507
+Loss: 0.4019 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.09 min | Remaining Time: 1.12 min
+============================================================
+
+Epoch 2:  53%|█████████████████████████▌                      | 90/169 [00:13<00:11,  6.81it/s, loss=0.5518]
+============================================================
+Epoch: 1.53 | Step: 259/507
+Loss: 0.5518 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.12 min | Remaining Time: 1.06 min
+============================================================
+
+Epoch 2:  59%|███████████████████████████▊                   | 100/169 [00:15<00:10,  6.81it/s, loss=0.5459]
+============================================================
+Epoch: 1.59 | Step: 269/507
+Loss: 0.5459 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.14 min | Remaining Time: 1.00 min
+============================================================
+
+Epoch 2:  65%|██████████████████████████████▌                | 110/169 [00:16<00:08,  6.81it/s, loss=0.5728]
+============================================================
+Epoch: 1.65 | Step: 279/507
+Loss: 0.5728 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.17 min | Remaining Time: 0.95 min
+============================================================
+
+Epoch 2:  71%|█████████████████████████████████▎             | 120/169 [00:17<00:07,  6.81it/s, loss=0.6172]
+============================================================
+Epoch: 1.71 | Step: 289/507
+Loss: 0.6172 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.19 min | Remaining Time: 0.89 min
+============================================================
+
+Epoch 2:  77%|████████████████████████████████████▏          | 130/169 [00:19<00:05,  6.81it/s, loss=0.4341]
+============================================================
+Epoch: 1.77 | Step: 299/507
+Loss: 0.4341 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.22 min | Remaining Time: 0.84 min
+============================================================
+
+Epoch 2:  83%|██████████████████████████████████████▉        | 140/169 [00:20<00:04,  6.81it/s, loss=0.3904]
+============================================================
+Epoch: 1.83 | Step: 309/507
+Loss: 0.3904 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.24 min | Remaining Time: 0.79 min
+============================================================
+
+Epoch 2:  89%|█████████████████████████████████████████▋     | 150/169 [00:22<00:02,  6.81it/s, loss=0.5215]
+============================================================
+Epoch: 1.89 | Step: 319/507
+Loss: 0.5215 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.27 min | Remaining Time: 0.74 min
+============================================================
+
+Epoch 2:  95%|████████████████████████████████████████████▍  | 160/169 [00:23<00:01,  6.81it/s, loss=0.4463]
+============================================================
+Epoch: 1.95 | Step: 329/507
+Loss: 0.4463 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.29 min | Remaining Time: 0.69 min
+============================================================
+
+Epoch 2: 100%|███████████████████████████████████████████████| 169/169 [00:25<00:00,  6.73it/s, loss=0.5449]
+100%|███████████████████████████████████████████████████████████████████████| 36/36 [00:01<00:00, 19.07it/s]
+
+Evaluationsergebnisse nach Epoche 2:
+eval_loss: 3.793077230453491
+eval_model_preparation_time: 0.0038
+eval_runtime: 1.9031
+eval_samples_per_second: 18.917
+eval_steps_per_second: 18.917
+Epoch 3:   0%|                                                         | 0/169 [00:00<?, ?it/s, loss=0.6133]
+============================================================
+Epoch: 2.00 | Step: 338/507
+Loss: 0.6133 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.35 min | Remaining Time: 0.67 min
+============================================================
+
+Epoch 3:   6%|██▊                                             | 10/169 [00:01<00:23,  6.80it/s, loss=0.4182]
+============================================================
+Epoch: 2.06 | Step: 348/507
+Loss: 0.4182 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.37 min | Remaining Time: 0.62 min
+============================================================
+
+Epoch 3:  12%|█████▋                                          | 20/169 [00:03<00:21,  6.81it/s, loss=0.3958]
+============================================================
+Epoch: 2.12 | Step: 358/507
+Loss: 0.3958 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.40 min | Remaining Time: 0.58 min
+============================================================
+
+Epoch 3:  18%|████████▌                                       | 30/169 [00:04<00:20,  6.81it/s, loss=0.5723]
+============================================================
+Epoch: 2.18 | Step: 368/507
+Loss: 0.5723 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.42 min | Remaining Time: 0.53 min
+============================================================
+
+Epoch 3:  24%|███████████▎                                    | 40/169 [00:06<00:18,  6.81it/s, loss=0.5566]
+============================================================
+Epoch: 2.24 | Step: 378/507
+Loss: 0.5566 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.45 min | Remaining Time: 0.49 min
+============================================================
+
+Epoch 3:  30%|██████████████▏                                 | 50/169 [00:07<00:17,  6.82it/s, loss=0.4104]
+============================================================
+Epoch: 2.30 | Step: 388/507
+Loss: 0.4104 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.47 min | Remaining Time: 0.45 min
+============================================================
+
+Epoch 3:  36%|█████████████████                               | 60/169 [00:09<00:16,  6.81it/s, loss=0.4670]
+============================================================
+Epoch: 2.36 | Step: 398/507
+Loss: 0.4670 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.49 min | Remaining Time: 0.40 min
+============================================================
+
+Epoch 3:  41%|███████████████████▉                            | 70/169 [00:10<00:14,  6.81it/s, loss=0.3403]
+============================================================
+Epoch: 2.41 | Step: 408/507
+Loss: 0.3403 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.52 min | Remaining Time: 0.36 min
+============================================================
+
+Epoch 3:  47%|██████████████████████▋                         | 80/169 [00:12<00:13,  6.81it/s, loss=0.3669]
+============================================================
+Epoch: 2.47 | Step: 418/507
+Loss: 0.3669 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.54 min | Remaining Time: 0.32 min
+============================================================
+
+Epoch 3:  53%|█████████████████████████▌                      | 90/169 [00:13<00:11,  6.80it/s, loss=0.4136]
+============================================================
+Epoch: 2.53 | Step: 428/507
+Loss: 0.4136 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.57 min | Remaining Time: 0.29 min
+============================================================
+
+Epoch 3:  59%|███████████████████████████▊                   | 100/169 [00:15<00:10,  6.81it/s, loss=0.5337]
+============================================================
+Epoch: 2.59 | Step: 438/507
+Loss: 0.5337 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.59 min | Remaining Time: 0.25 min
+============================================================
+
+Epoch 3:  65%|██████████████████████████████▌                | 110/169 [00:16<00:08,  6.81it/s, loss=0.4763]
+============================================================
+Epoch: 2.65 | Step: 448/507
+Loss: 0.4763 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.62 min | Remaining Time: 0.21 min
+============================================================
+
+Epoch 3:  71%|█████████████████████████████████▎             | 120/169 [00:17<00:07,  6.81it/s, loss=0.5073]
+============================================================
+Epoch: 2.71 | Step: 458/507
+Loss: 0.5073 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.64 min | Remaining Time: 0.17 min
+============================================================
+
+Epoch 3:  77%|████████████████████████████████████▏          | 130/169 [00:19<00:05,  6.81it/s, loss=0.4500]
+============================================================
+Epoch: 2.77 | Step: 468/507
+Loss: 0.4500 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.67 min | Remaining Time: 0.14 min
+============================================================
+
+Epoch 3:  83%|██████████████████████████████████████▉        | 140/169 [00:20<00:04,  6.81it/s, loss=0.3728]
+============================================================
+Epoch: 2.83 | Step: 478/507
+Loss: 0.3728 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.69 min | Remaining Time: 0.10 min
+============================================================
+
+Epoch 3:  89%|█████████████████████████████████████████▋     | 150/169 [00:22<00:02,  6.81it/s, loss=0.4319]
+============================================================
+Epoch: 2.89 | Step: 488/507
+Loss: 0.4319 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.72 min | Remaining Time: 0.06 min
+============================================================
+
+Epoch 3:  95%|████████████████████████████████████████████▍  | 160/169 [00:23<00:01,  6.81it/s, loss=0.4517]
+============================================================
+Epoch: 2.95 | Step: 498/507
+Loss: 0.4517 | Grad Norm: nan
+Learning Rate: 0.000020
+Elapsed Time: 1.74 min | Remaining Time: 0.03 min
+============================================================
+
+Epoch 3: 100%|███████████████████████████████████████████████| 169/169 [00:25<00:00,  6.73it/s, loss=0.3906]
+100%|███████████████████████████████████████████████████████████████████████| 36/36 [00:01<00:00, 19.07it/s]
+
+Evaluationsergebnisse nach Epoche 3:
+eval_loss: 3.793077230453491
+eval_model_preparation_time: 0.0038
+eval_runtime: 1.9026
+eval_samples_per_second: 18.921
+eval_steps_per_second: 18.921
+
+Training abgeschlossen.
+
+Trainings-Zusammenfassung für xlnet-large-cased:
+Anzahl der Epochen: 3
+Anzahl der Batches pro Epoche: 507
+Gesamtanzahl der Batches: 1521
+Batch-Größe: 4
+Gesamtanzahl der Trainingsdokumente: 169
+Geschätzte Trainingszeit: 101.40 Minuten
+============================================================
+
+100%|███████████████████████████████████████████████████████████████████████| 21/21 [00:26<00:00,  1.31s/it]Fehler während des Trainings: You are trying to save a non contiguous tensor: `transformer.layer.0.ff.layer_1.weight` which is not allowed. It either means you are trying to save tensors which are reference of each other in which case it's recommended to save only the full tensors, and reslice at load time, or simply call `.contiguous()` on your tensor to pack it before saving.
+Versuche, das Training zu beenden...
+
+Starte Training für xlnet-large-cased
+Epoch 1:   0%|                                                         | 0/169 [00:00<?, ?it/s, loss=0.3838]
+Fehler während des Trainings: 'generator' object has no attribute 'grad' 0/169 [00:00<?, ?it/s, loss=0.3838]
+Versuche, das Training zu beenden...
+{'eval_loss': 0.9718380570411682, 'eval_model_preparation_time': 0.0038, 'eval_runtime': 1.9586, 'eval_samples_per_second': 18.891, 'eval_steps_per_second': 18.891, 'epoch': 0.99}
+100%|███████████████████████████████████████████████████████████████████████| 21/21 [00:29<00:00,  1.31s/it]
+Testergebnisse für xlnet-large-cased (xln-l):
+eval_loss: 0.9718380570411682
+eval_model_preparation_time: 0.0038
+eval_runtime: 1.9586
+eval_samples_per_second: 18.891
+eval_steps_per_second: 18.891
+epoch: 0.9940828402366864
+
+Ausführungszeit für Modell xlnet-large-cased (xln-l): 0.06 Minuten
+
+********************************************************************************
+Training Model: google/electra-large-discriminator (elec-l)
+********************************************************************************
+
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+Some weights of ElectraForSequenceClassification were not initialized from the model checkpoint at google/electra-large-discriminator and are newly initialized: ['classifier.dense.bias', 'classifier.dense.weight', 'classifier.out_proj.bias', 'classifier.out_proj.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Map: 100%|████████████████████████████████████████████████████████| 242/242 [00:00<00:00, 477.94 examples/s]
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/transformers/training_args.py:1525: FutureWarning: `evaluation_strategy` is deprecated and will be removed in version 4.46 of 🤗 Transformers. Use `eval_strategy` instead
+  warnings.warn(
+100%|███████████████████████████████████████████████████████████████████████| 21/21 [00:33<00:00,  1.58s/it]
+
+Starte Training für google/electra-large-discriminator
+Epoch 1:   0%|                                                                       | 0/43 [00:00<?, ?it/s]
+Fehler während des Trainings: CUDA out of memory. Tried to allocate 64.00 MiB. GPU 0 has a total capacity of 7.66 GiB of which 24.12 MiB is free. Including non-PyTorch memory, this process has 7.61 GiB memory in use. Of the allocated memory 7.40 GiB is allocated by PyTorch, and 89.29 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+Versuche, das Training zu beenden...
+
+Trainings-Zusammenfassung für google/electra-large-discriminator:
+Anzahl der Epochen: 3
+Anzahl der Batches pro Epoche: 129
+Gesamtanzahl der Batches: 387
+Batch-Größe: 4
+Gesamtanzahl der Trainingsdokumente: 169
+Geschätzte Trainingszeit: 25.80 Minuten
+============================================================
+
+  0%|                                                                                 | 0/5 [00:00<?, ?it/s]/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+100%|█████████████████████████████████████████████████████████████████████████| 5/5 [00:20<00:00,  4.12s/it]Fehler während des Trainings: You are trying to save a non contiguous tensor: `electra.encoder.layer.0.attention.self.query.weight` which is not allowed. It either means you are trying to save tensors which are reference of each other in which case it's recommended to save only the full tensors, and reslice at load time, or simply call `.contiguous()` on your tensor to pack it before saving.
+Versuche, das Training zu beenden...
+
+Starte Training für google/electra-large-discriminator
+Epoch 1:   0%|                                                          | 0/43 [00:00<?, ?it/s, loss=0.3961]
+Fehler während des Trainings: 'generator' object has no attribute 'grad'| 0/43 [00:00<?, ?it/s, loss=0.3961]
+Versuche, das Training zu beenden...
+{'eval_loss': 3.1499154567718506, 'eval_runtime': 1.0828, 'eval_samples_per_second': 34.169, 'eval_steps_per_second': 9.235, 'epoch': 0.93}
+100%|█████████████████████████████████████████████████████████████████████████| 5/5 [00:22<00:00,  4.12s/it]
+Testergebnisse für google/electra-large-discriminator (elec-l):
+eval_loss: 3.1499154567718506
+eval_runtime: 1.0828
+eval_samples_per_second: 34.169
+eval_steps_per_second: 9.235
+epoch: 0.9302325581395349
+
+Ausführungszeit für Modell google/electra-large-discriminator (elec-l): 0.05 Minuten
+================================================================================
+Training abgeschlossen für google/electra-large-discriminator
+Traceback (most recent call last):
+  File "/home/res/projekte/kd0241-py/Q-KAT/AAUNaL/main.py", line 389, in <module>
+    main()
+  File "/home/res/projekte/kd0241-py/Q-KAT/AAUNaL/main.py", line 378, in main
+    print(f"{Fore.YELLOW}Finale Loss: {trainer.state.log_history[-1]['loss']}")
+KeyError: 'loss'
+100%|█████████████████████████████████████████████████████████████████████████| 5/5 [00:23<00:00,  4.72s/it]
+res@captiva ~/p/k/Q/AAUNaL (main) [1]>
+

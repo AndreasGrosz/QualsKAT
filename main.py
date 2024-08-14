@@ -12,7 +12,7 @@ import gc
 import torch
 import numpy as np
 from datasets import Dataset, DatasetDict
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, set_seed
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, set_seed, get_linear_schedule_with_warmup
 from sklearn.preprocessing import LabelEncoder
 from huggingface_hub import HfApi, hf_hub_download
 from requests.exceptions import HTTPError
@@ -41,6 +41,17 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 if torch.cuda.is_available():
     print(f"Verfügbarer GPU-Speicher: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
+
+
+def get_optimizer_and_scheduler(model, config, num_training_steps):
+    optimizer = torch.optim.AdamW(model.parameters(), lr=float(config['Training']['learning_rate']), weight_decay=float(config['Training']['weight_decay']))
+    scheduler = get_linear_schedule_with_warmup(
+        optimizer,
+        num_warmup_steps=int(config['Training']['warmup_steps']),
+        num_training_steps=num_training_steps
+    )
+    return optimizer, scheduler
+
 
 
 def get_total_steps(trainer):
