@@ -1,3 +1,4 @@
+import csv
 from datetime import datetime
 import warnings
 from data_processing import extract_text_from_file
