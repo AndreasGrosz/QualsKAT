@@ -54,7 +54,7 @@ def check_environment():
     required_keys = {
         'Paths': ['documents', 'check_this', 'output', 'models'],
         'Training': ['batch_size', 'learning_rate', 'num_epochs'],
-        'Model': ['model_name']
+        'Models': ['model_name']
     }
     for section, keys in required_keys.items():
         for key in keys:
