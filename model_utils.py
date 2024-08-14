@@ -113,8 +113,11 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
     # Deaktiviere Gradient Checkpointing für Modelle, die es nicht unterstützen
     use_gradient_checkpointing = not (is_albert or is_xlnet)
 
-    if hasattr(model, "gradient_checkpointing_enable"):
-        model.gradient_checkpointing_enable()
+    try:
+        if hasattr(model, "gradient_checkpointing_enable"):
+            model.gradient_checkpointing_enable()
+    except ValueError as e:
+        print(f"Warnung: Gradient Checkpointing nicht unterstützt für dieses Modell. {str(e)}")
 
     training_args = TrainingArguments(
         output_dir=model_save_path,

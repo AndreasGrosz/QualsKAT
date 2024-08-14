@@ -25,7 +25,10 @@ from analysis_utils import analyze_new_article, analyze_document, analyze_docume
 from file_utils import get_device, extract_text_from_file
 from experiment_logger import log_experiment
 from colorama import Fore, Back, Style, init
+import warnings
 
+
+warnings.filterwarnings("ignore", category=FutureWarning, module="torch.utils.checkpoint")
 
 init(autoreset=True)  # Initialisiert Colorama
 
@@ -154,7 +157,7 @@ def main():
                                     global_step,
                                     total_steps,
                                     loss.item(),
-                                    trainer.model.named_parameters().grad.norm().item(),
+                                    torch.nn.utils.clip_grad_norm_(trainer.model.parameters(), trainer.args.max_grad_norm).item(),
                                     trainer.lr_scheduler.get_last_lr()[0],
                                     start_time
                                 )
