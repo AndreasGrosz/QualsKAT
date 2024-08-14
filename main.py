@@ -35,6 +35,11 @@ if hasattr(torch.cuda.amp, 'GradScaler'):
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename='classifier.log')
 
+
+def get_total_steps(trainer):
+    return get_total_steps(trainer)
+
+
 def print_training_progress(epoch, step, total_steps, loss, grad_norm, learning_rate, start_time):
     elapsed_time = time.time() - start_time
     estimated_total_time = elapsed_time / step * total_steps
@@ -126,7 +131,7 @@ def main():
 
                 # Berechne total_steps hier, nachdem der Trainer initialisiert wurde
                 train_dataloader = trainer.get_train_dataloader()
-                total_steps = len(train_dataloader)
+                get_total_steps(trainer)
 
                 print(f"\n{Fore.CYAN}Trainings-Zusammenfassung für {hf_name}:")
                 print(f"{Fore.CYAN}Anzahl der Epochen: {config['Training']['num_epochs']}")
@@ -149,12 +154,12 @@ def main():
                     else:
                         raise
 
-                total_steps = len(trainer.train_dataloader)
+                total_steps = get_total_steps(trainer)
                 start_time = time.time()
 
                 try:
                     for epoch in range(int(config['Training']['num_epochs'])):
-                        for step, batch in enumerate(trainer.train_dataloader):
+                        for step, batch in enumerate(trainer.get_train_dataloader()):
                             loss = trainer.training_step(batch, step)
                             if step % 10 == 0:  # Print every 10 steps
                                 print_training_progress(
