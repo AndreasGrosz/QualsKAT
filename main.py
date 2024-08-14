@@ -108,7 +108,7 @@ def main():
                 num_labels = len(categories)
                 model, tokenizer = get_model_and_tokenizer(hf_name, num_labels, categories, config)
 
-                trainer, tokenized_datasets = setup_model_and_trainer(dataset, le, config, hf_name, model, tokenizer, quick=args.quick)
+                trainer, tokenized_datasets = setup_model_and_trainer(dataset, le, config, hf_name, model, tokenizer, args.quick)
                 trainer.train()
                 results = trainer.evaluate(eval_dataset=tokenized_datasets['test'])
                 logging.info(f"Testergebnisse für {hf_name} ({short_name}): {results}")
