@@ -96,9 +96,6 @@ def check_environment():
             except Exception as e:
                 logging.error(f"Fehler beim Laden des Llama-Modells {model_name}: {str(e)}")
                 raise
-        else:
-            # Bestehendes Code für andere Modelle
-            # ...
 
         try:
             AutoTokenizer.from_pretrained(model_name)
