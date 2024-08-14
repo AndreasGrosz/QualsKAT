@@ -12,11 +12,11 @@ model_list =
     roberta-base,rob-b,True,True
     microsoft/deberta-base,deb-b,True,True
     albert-base-v2,alb-b,True,True
-    gpt3-6B,gpt3,False,False
-    t5-large,t5-l,False,False
-    allenai/longformer-base-4096,long-b,False,False
-    xlnet-large-cased,xln-l,False,False
-    google/electra-large-discriminator,elec-l,False,False
+    gpt3-6B,gpt3,True,True
+    t5-large,t5-l,True,True
+    allenai/longformer-base-4096,long-b,True,True
+    xlnet-large-cased,xln-l,True,True
+    google/electra-large-discriminator,elec-l,True,True
 
 [DocumentsCheck]
 checksum =
