@@ -157,3 +157,12 @@ def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_fil
         "Top_Vorhersagen": dict(top_predictions[:5]),
         "Schlussfolgerung": "Komplexe Schlussfolgerung basierend auf den Top-Vorhersagen"
     }
+
+def get_models_for_task(config, task):
+    models = []
+    for model_info in csv.reader(config['Models']['model_list'].split('\n')):
+        if len(model_info) == 4:  # Sicherstellen, dass die Zeile vollständig ist
+            hf_name, short_name, train, check = model_info
+            if (task == 'train' and train.lower() == 'true') or (task == 'check' and check.lower() == 'true'):
+                models.append((hf_name, short_name))
+    return models

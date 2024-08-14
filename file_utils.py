@@ -1,3 +1,4 @@
+import hashlib
 import time
 from datetime import datetime
 import os
@@ -13,6 +14,22 @@ from striprtf.striprtf import rtf_to_text
 import docx
 import pdfplumber
 from analysis_utils import analyze_new_article
+
+
+def calculate_documents_checksum(documents_path):
+    checksum = hashlib.md5()
+    for root, _, files in os.walk(documents_path):
+        for file in sorted(files):  # Sortieren für Konsistenz
+            checksum.update(file.encode())
+    return checksum.hexdigest()
+
+
+
+def update_config_checksum(config, new_checksum):
+    config['DocumentsCheck']['checksum'] = new_checksum
+    with open('config.txt', 'w') as configfile:
+        config.write(configfile)
+
 
 
 def check_environment():

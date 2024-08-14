@@ -4,6 +4,7 @@ from datetime import date
 import logging
 import configparser
 import argparse
+import hashlib
 import sys
 import json
 from tqdm import tqdm
@@ -15,13 +16,13 @@ import numpy as np
 from datasets import Dataset, DatasetDict
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, set_seed
 from sklearn.preprocessing import LabelEncoder
-from huggingface_hub import HfApi
+from huggingface_hub import HfApi, hf_hub_download
 from requests.exceptions import HTTPError
 
 # Importe aus Ihren eigenen Modulen
-from file_utils import check_environment, check_hf_token, check_files, extract_text_from_file
+from file_utils import check_environment, check_hf_token, check_files, extract_text_from_file, calculate_documents_checksum, update_config_checksum
 from data_processing import create_dataset, load_categories_from_csv
-from model_utils import setup_model_and_trainer, get_model_and_tokenizer
+from model_utils import setup_model_and_trainer, get_model_and_tokenizer, get_models_for_task
 from analysis_utils import analyze_new_article, analyze_document, analyze_documents_csv
 from file_utils import get_device, extract_text_from_file
 from experiment_logger import log_experiment
@@ -31,6 +32,7 @@ if hasattr(torch.cuda.amp, 'GradScaler'):
     torch.cuda.amp.GradScaler = lambda **kwargs: torch.amp.GradScaler('cuda', **kwargs)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename='classifier.log')
+
 
 def main():
     logging.info("")
@@ -83,62 +85,82 @@ def main():
 
         total_start_time = time.time()
         training_performed = False
+        config = configparser.ConfigParser()
+        config.read('config.txt')
+
+        documents_path = config['Paths']['documents']
+        current_checksum = calculate_documents_checksum(documents_path)
+        stored_checksum = config['DocumentsCheck'].get('checksum', '')
 
         if args.train:
-            training_performed = True
-            for model_name in model_names:
-                model_name = model_name.strip()
-                logging.info(f"Trainiere Modell: {model_name}")
+        training_performed = True
+        models_to_train = get_models_for_task(config, 'train')
 
-                model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
+        if current_checksum != stored_checksum:
+            logging.info("Änderungen im documents-Ordner erkannt. Starte vollständiges Neutraining.")
+            for hf_name, short_name in models_to_train:
+                logging.info(f"Trainiere Modell: {hf_name} ({short_name})")
+
+                model_save_path = os.path.join(config['Paths']['models'], short_name)
 
                 num_labels = len(categories)
-                model = AutoModelForSequenceClassification.from_pretrained(
-                    model_name,
-                    num_labels=num_labels,
-                    id2label={i: cat for i, cat in enumerate(categories)},
-                    label2id={cat: i for i, cat in enumerate(categories)}
-                )
+                model, tokenizer = get_model_and_tokenizer(hf_name, num_labels, categories, config)
 
-                tokenizer, trainer, tokenized_datasets = setup_model_and_trainer(dataset, le, config, model_name, model, quick=args.quick)
+                trainer, tokenized_datasets = setup_model_and_trainer(dataset, le, config, hf_name, model, tokenizer, quick=args.quick)
                 trainer.train()
                 results = trainer.evaluate(eval_dataset=tokenized_datasets['test'])
-                logging.info(f"Testergebnisse für {model_name}: {results}")
+                logging.info(f"Testergebnisse für {hf_name} ({short_name}): {results}")
 
-                log_experiment(config, model_name, results, config['Paths']['output'])
+                log_experiment(config, hf_name, results, config['Paths']['output'])
 
-                logging.info(f"Trainings- und Evaluationsergebnisse:")
+                logging.info(f"Trainings- und Evaluationsergebnisse für {hf_name} ({short_name}):")
                 for key, value in results.items():
                     logging.info(f"{key}: {value}")
-                logging.info(f"Ausführungszeit für Modell {model_name}: {(time.time() - total_start_time) / 60:.2f} Minuten")
+
                 trainer.save_model(model_save_path)
                 tokenizer.save_pretrained(model_save_path)
 
-            total_end_time = time.time()
-            total_duration = (total_end_time - total_start_time) / 60
-            logging.info(f"Gesamtausführungszeit für alle Modelle: {total_duration:.2f} Minuten")
+                logging.info(f"Ausführungszeit für Modell {hf_name} ({short_name}): {(time.time() - total_start_time) / 60:.2f} Minuten")
+
+            update_config_checksum(config, current_checksum)
+        else:
+            logging.info("Keine Änderungen erkannt. Vervollständige Training für neue Modelle.")
+            for hf_name, short_name in models_to_train:
+                model_save_path = os.path.join(config['Paths']['models'], short_name)
+                if not os.path.exists(model_save_path):
+                    logging.info(f"Trainiere neues Modell: {hf_name} ({short_name})")
+
+                    num_labels = len(categories)
+                    model, tokenizer = get_model_and_tokenizer(hf_name, num_labels, categories, config)
+
+                    trainer, tokenized_datasets = setup_model_and_trainer(dataset, le, config, hf_name, model, tokenizer, quick=args.quick)
+                    trainer.train()
+                    results = trainer.evaluate(eval_dataset=tokenized_datasets['test'])
+                    logging.info(f"Testergebnisse für {hf_name} ({short_name}): {results}")
+
+                    log_experiment(config, hf_name, results, config['Paths']['output'])
+
+                    logging.info(f"Trainings- und Evaluationsergebnisse für {hf_name} ({short_name}):")
+                    for key, value in results.items():
+                        logging.info(f"{key}: {value}")
+
+                    trainer.save_model(model_save_path)
+                    tokenizer.save_pretrained(model_save_path)
+
+                    logging.info(f"Ausführungszeit für Modell {hf_name} ({short_name}): {(time.time() - total_start_time) / 60:.2f} Minuten")
+
+        total_end_time = time.time()
+        total_duration = (total_end_time - total_start_time) / 60
+        logging.info(f"Gesamtausführungszeit für alle Modelle: {total_duration:.2f} Minuten")
 
         if args.checkthis:
-            models = {
-                'r-base': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-base')),
-                           AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-base')),
-                           LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
-                'ms-deberta': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'microsoft_deberta-base')),
-                               AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'microsoft_deberta-base')),
-                               LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
-                'distilb': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'distilbert-base-uncased')),
-                            AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'distilbert-base-uncased')),
-                            LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
-                'r-large': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-large')),
-                            AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'roberta-large')),
-                            LabelEncoder().fit(['Nicht-LRH', 'LRH'])),
-                'albert': (AutoModelForSequenceClassification.from_pretrained(os.path.join(config['Paths']['models'], 'albert-base-v2')),
-                           AutoTokenizer.from_pretrained(os.path.join(config['Paths']['models'], 'albert-base-v2')),
-                           LabelEncoder().fit(['Nicht-LRH', 'LRH']))
-            }
+            rgs.checkthis:
+            models_to_check = get_models_for_task(config, 'check')
+            for hf_name, short_name in models_to_check:
 
-            check_folder = config['Paths']['check_this']
-            analyze_documents_csv(check_folder, models, extract_text_from_file)
+                check_folder = config['Paths']['check_this']
+                analyze_documents_csv(check_folder, models, extract_text_from_file)
+                pass
 
         if args.predict:
             result = analyze_new_article(args.predict, trainer, tokenizer, le, extract_text_from_file)
