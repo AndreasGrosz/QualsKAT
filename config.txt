@@ -16,7 +16,8 @@ model_list =
     allenai/longformer-base-4096,long-b,True,True
     xlnet-large-cased,xln-l,True,True
     google/electra-large-discriminator,elec-l,True,True
-    Meta-Llama-3-8B,llama3-8b,True,True
+
+#Meta-Llama-3-8B,llama3-8b,True,True
 
 [DocumentsCheck]
 checksum =
