@@ -113,6 +113,9 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
     # Deaktiviere Gradient Checkpointing für Modelle, die es nicht unterstützen
     use_gradient_checkpointing = not (is_albert or is_xlnet)
 
+    if hasattr(model, "gradient_checkpointing_enable"):
+        model.gradient_checkpointing_enable()
+
     training_args = TrainingArguments(
         output_dir=model_save_path,
         num_train_epochs=1 if quick else int(config['Training']['num_epochs']),
@@ -127,6 +130,7 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
         eval_steps=100 if not quick else None,
         save_steps=100 if not quick else None,
         load_best_model_at_end=True if not quick else False,
+        fp16=True,  # Fügen Sie diese Zeile hinzu (für c)
     )
 
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)

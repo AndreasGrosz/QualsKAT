@@ -23,7 +23,7 @@ model_list =
 checksum =
 
 [Training]
-batch_size = 16
+batch_size = 4
 learning_rate = 2e-5
 num_epochs = 3
 weight_decay = 0.01

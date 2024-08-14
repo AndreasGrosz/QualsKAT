@@ -134,6 +134,53 @@ def main():
 
                 total_steps = get_total_steps(trainer)
 
+                start_time = time.time()
+                total_steps = len(trainer.get_train_dataloader()) * int(config['Training']['num_epochs'])
+
+                try:
+                    print(f"\n{Fore.CYAN}Starte Training für {hf_name}")
+                    train_dataloader = trainer.get_train_dataloader()
+
+                    for epoch in range(int(config['Training']['num_epochs'])):
+                        progress_bar = tqdm(train_dataloader, desc=f"Epoch {epoch+1}")
+                        for step, batch in enumerate(progress_bar):
+                            loss = trainer.training_step(model, batch)
+                            progress_bar.set_postfix(loss=f"{loss.item():.4f}")
+
+                            if step % 10 == 0:  # Print every 10 steps
+                                global_step = epoch * len(train_dataloader) + step
+                                print_training_progress(
+                                    epoch + step/len(train_dataloader),
+                                    global_step,
+                                    total_steps,
+                                    loss.item(),
+                                    trainer.model.named_parameters().grad.norm().item(),
+                                    trainer.lr_scheduler.get_last_lr()[0],
+                                    start_time
+                                )
+
+                                # Fügen Sie diese Zeilen hier ein (für 5.)
+                                elapsed_time = time.time() - start_time
+                                steps_per_second = (epoch * len(train_dataloader) + step + 1) / elapsed_time
+                                remaining_steps = total_steps - (epoch * len(train_dataloader) + step + 1)
+                                estimated_time_remaining = remaining_steps / steps_per_second
+                                print(f"Geschätzte verbleibende Zeit: {estimated_time_remaining/60:.2f} Minuten")
+
+                        # Evaluation am Ende jeder Epoche
+                        eval_results = trainer.evaluate()
+                        print(f"\n{Fore.GREEN}Evaluationsergebnisse nach Epoche {epoch+1}:")
+                        for key, value in eval_results.items():
+                            print(f"{Fore.CYAN}{key}: {value}")
+
+                    print(f"\n{Fore.GREEN}Training abgeschlossen.")
+                except Exception as e:
+                    print(f"{Fore.RED}Fehler während des Trainings: {str(e)}")
+                    print(f"{Fore.YELLOW}Versuche, das Training zu beenden...")
+                    if hasattr(trainer, 'state'):
+                        trainer.state.global_step = total_steps  # Force training to end
+                    if hasattr(trainer, 'is_in_train'):
+                        trainer.is_in_train = False
+
                 print(f"\n{Fore.CYAN}Trainings-Zusammenfassung für {hf_name}:")
                 print(f"{Fore.CYAN}Anzahl der Epochen: {config['Training']['num_epochs']}")
                 print(f"{Fore.CYAN}Anzahl der Batches pro Epoche: {total_steps}")
@@ -162,8 +209,10 @@ def main():
                     total_steps = len(train_dataloader) * int(config['Training']['num_epochs'])
 
                     for epoch in range(int(config['Training']['num_epochs'])):
-                        for step, batch in enumerate(train_dataloader):
+                        progress_bar = tqdm(trainer.get_train_dataloader(), desc=f"Epoch {epoch+1}")
+                        for step, batch in enumerate(progress_bar):
                             loss = trainer.training_step(model, batch)
+                            progress_bar.set_postfix(loss=f"{loss.item():.4f}")
 
                             if step % 10 == 0:  # Print every 10 steps
                                 global_step = epoch * len(train_dataloader) + step
@@ -201,6 +250,10 @@ def main():
                     print(f"{Fore.CYAN}{key}: {value}")
 
                 log_experiment(config, hf_name, results, config['Paths']['output'])
+
+                for param in trainer.model.parameters():
+                if not param.data.is_contiguous():
+                    param.data = param.data.contiguous()
 
                 trainer.save_model(model_save_path)
                 tokenizer.save_pretrained(model_save_path)
@@ -240,6 +293,10 @@ def main():
                 logging.info(f"Trainings- und Evaluationsergebnisse für {hf_name} ({short_name}):")
                 for key, value in results.items():
                     logging.info(f"{key}: {value}")
+
+                for param in trainer.model.parameters():
+                    if not param.data.is_contiguous():
+                        param.data = param.data.contiguous()
 
                 trainer.save_model(model_save_path)
                 tokenizer.save_pretrained(model_save_path)
@@ -317,8 +374,11 @@ def main():
             total_duration = (total_end_time - total_start_time) / 60
             logging.error(f"Gesamtausführungszeit für alle Modelle: {total_duration:.2f} Minuten")
 
-        print(f"Training abgeschlossen. Finale Loss: {trainer.state.log_history[-1]['loss']}")
-        print(f"Anzahl der durchgeführten Schritte: {trainer.state.global_step}")
+        print(f"{Fore.CYAN}{'='*80}")
+        print(f"{Fore.GREEN}Training abgeschlossen für {hf_name}")
+        print(f"{Fore.YELLOW}Finale Loss: {trainer.state.log_history[-1]['loss']}")
+        print(f"{Fore.YELLOW}Anzahl der durchgeführten Schritte: {trainer.state.global_step}")
+        print(f"{Fore.CYAN}{'='*80}")
         logging.error("---------------------------------------")
         logging.error("Programmende")
 
