@@ -77,6 +77,9 @@ def check_environment():
         raise FileNotFoundError(f"Keine Dateien im Verzeichnis '{documents_path}' gefunden.")
 
     model_list = config['Models']['model_list'].split('\n')
+
+    base_model_path = os.path.join(os.path.dirname(__file__), 'fresh-models')
+
     for model_line in model_list:
         if not model_line.strip():
             continue
