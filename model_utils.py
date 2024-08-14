@@ -5,7 +5,7 @@ from data_processing import extract_text_from_file
 import datetime
 import torch
 from datasets import DatasetDict
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, DataCollatorWithPadding, LlamaForCausalLM, LlamaTokenizer, AutoConfig
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, DataCollatorWithPadding, LlamaForCausalLM, LlamaTokenizer, AutoConfig,get_linear_schedule_with_warmup
 import numpy as np
 import os
 import logging
@@ -16,6 +16,17 @@ from tqdm import tqdm
 
 
 warnings.filterwarnings("ignore", message="Some weights of")
+
+
+def get_optimizer_and_scheduler(model, config, num_training_steps):
+    optimizer = torch.optim.AdamW(model.parameters(), lr=float(config['Training']['learning_rate']), weight_decay=float(config['Training']['weight_decay']))
+    scheduler = get_linear_schedule_with_warmup(
+        optimizer,
+        num_warmup_steps=int(config['Training']['warmup_steps']),
+        num_training_steps=num_training_steps
+    )
+    return optimizer, scheduler
+
 
 def predict_for_model(model, tokenizer, text, le):
     inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
@@ -134,7 +145,11 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
         gradient_checkpointing=True,
         optim="adamw_torch",
     )
+    num_update_steps_per_epoch = len(tokenized_datasets['train']) // (int(config['Training']['batch_size']) * int(config['Training']['gradient_accumulation_steps']))
+    num_train_epochs = 1 if quick else int(config['Training']['num_epochs'])
+    total_steps = num_update_steps_per_epoch * num_train_epochs
 
+    optimizer, scheduler = get_optimizer_and_scheduler(model, config, total_steps)
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
     optimizer, scheduler = get_optimizer_and_scheduler(model, config, total_steps)

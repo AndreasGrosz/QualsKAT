@@ -20,7 +20,8 @@ from requests.exceptions import HTTPError
 # Importe aus Ihren eigenen Modulen
 from file_utils import check_environment, check_hf_token, check_files, extract_text_from_file, calculate_documents_checksum, update_config_checksum
 from data_processing import create_dataset, load_categories_from_csv
-from model_utils import setup_model_and_trainer, get_model_and_tokenizer, get_models_for_task
+from model_utils import setup_model_and_trainer, get_model_and_tokenizer, get_models_for_task, get_optimizer_and_scheduler
+
 from analysis_utils import analyze_new_article, analyze_document, analyze_documents_csv
 from file_utils import get_device, extract_text_from_file
 from experiment_logger import log_experiment
@@ -41,17 +42,6 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 if torch.cuda.is_available():
     print(f"Verfügbarer GPU-Speicher: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
-
-
-def get_optimizer_and_scheduler(model, config, num_training_steps):
-    optimizer = torch.optim.AdamW(model.parameters(), lr=float(config['Training']['learning_rate']), weight_decay=float(config['Training']['weight_decay']))
-    scheduler = get_linear_schedule_with_warmup(
-        optimizer,
-        num_warmup_steps=int(config['Training']['warmup_steps']),
-        num_training_steps=num_training_steps
-    )
-    return optimizer, scheduler
-
 
 
 def get_total_steps(trainer):
