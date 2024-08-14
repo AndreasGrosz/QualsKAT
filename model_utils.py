@@ -114,7 +114,7 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, model, tokeniz
         per_device_eval_batch_size=2,
         num_train_epochs=1 if quick else int(config['Training']['num_epochs']),
         weight_decay=0.01,
-        evaluation_strategy="steps",
+        eval_strategy="steps",
         eval_steps=100,
         save_strategy="steps",
         save_steps=100,
@@ -125,7 +125,7 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, model, tokeniz
         logging_steps=50,
         save_total_limit=2,
         remove_unused_columns=False,
-        gradient_checkpointing=not is_albert,  # Deaktiviere für ALBERT-Modelle
+        gradient_checkpointing=not (is_albert or is_xlnet),  # Deaktiviere für ALBERT und XLNet
         optim="adamw_torch",
     )
 
