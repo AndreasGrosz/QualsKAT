@@ -9,8 +9,6 @@ import sys
 import json
 from tqdm import tqdm
 import gc
-from colorama import Fore, Style
-from datetime import date
 import torch
 import numpy as np
 from datasets import Dataset, DatasetDict
@@ -26,12 +24,29 @@ from model_utils import setup_model_and_trainer, get_model_and_tokenizer, get_mo
 from analysis_utils import analyze_new_article, analyze_document, analyze_documents_csv
 from file_utils import get_device, extract_text_from_file
 from experiment_logger import log_experiment
+from colorama import Fore, Back, Style, init
+
+
+init(autoreset=True)  # Initialisiert Colorama
 
 
 if hasattr(torch.cuda.amp, 'GradScaler'):
     torch.cuda.amp.GradScaler = lambda **kwargs: torch.amp.GradScaler('cuda', **kwargs)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename='classifier.log')
+
+def print_training_progress(epoch, step, total_steps, loss, grad_norm, learning_rate, start_time):
+    elapsed_time = time.time() - start_time
+    estimated_total_time = elapsed_time / step * total_steps
+    remaining_time = estimated_total_time - elapsed_time
+
+    print(f"\n{Fore.CYAN}{'='*60}")
+    print(f"{Fore.YELLOW}Epoch: {epoch:.2f} | Step: {step}/{total_steps}")
+    print(f"{Fore.GREEN}Loss: {loss:.4f} | Grad Norm: {grad_norm:.4f}")
+    print(f"{Fore.BLUE}Learning Rate: {learning_rate:.6f}")
+    print(f"{Fore.MAGENTA}Elapsed Time: {elapsed_time/60:.2f} min | Remaining Time: {remaining_time/60:.2f} min")
+    print(f"{Fore.CYAN}{'='*60}\n")
+
 
 
 def main():
@@ -97,6 +112,77 @@ def main():
         if args.train:
             training_performed = True
             models_to_process = get_models_for_task(config, 'train')
+
+            for hf_name, short_name in models_to_process:
+                print(f"\n{Fore.YELLOW}{'*'*80}")
+                print(f"{Fore.YELLOW}Training Model: {hf_name} ({short_name})")
+                print(f"{Fore.YELLOW}{'*'*80}\n")
+
+                model_save_path = os.path.join(config['Paths']['models'], short_name)
+                num_labels = len(categories)
+                model, tokenizer = get_model_and_tokenizer(hf_name, num_labels, categories, config)
+
+                trainer, tokenized_datasets = setup_model_and_trainer(dataset, le, config, hf_name, model, tokenizer, args.quick)
+
+                print(f"\n{Fore.CYAN}Trainings-Zusammenfassung für {hf_name}:")
+                print(f"{Fore.CYAN}Anzahl der Epochen: {config['Training']['num_epochs']}")
+                print(f"{Fore.CYAN}Anzahl der Batches pro Epoche: {len(trainer.train_dataloader)}")
+                print(f"{Fore.CYAN}Gesamtanzahl der Batches: {int(config['Training']['num_epochs']) * len(trainer.train_dataloader)}")
+                print(f"{Fore.CYAN}Batch-Größe: {config['Training']['batch_size']}")
+                print(f"{Fore.CYAN}Gesamtanzahl der Trainingsdokumente: {len(tokenized_datasets['train'])}")
+                print(f"{Fore.CYAN}Geschätzte Trainingszeit: {(int(config['Training']['num_epochs']) * len(trainer.train_dataloader) * 4) / 60:.2f} Minuten") # Annahme: 4 Sekunden pro Batch
+                print(f"{Fore.CYAN}{'='*60}\n")
+
+                # Hier folgt der Rest des Trainingscodes
+                try:
+                    trainer.train()
+                except ValueError as e:
+                    if "does not support gradient checkpointing" in str(e):
+                        print(f"{Fore.RED}Gradient checkpointing nicht unterstützt für {hf_name}. Training ohne Gradient Checkpointing wird fortgesetzt.")
+                        trainer.args.gradient_checkpointing = False
+                        trainer.train()
+                    else:
+                        raise
+
+                total_steps = len(trainer.train_dataloader)
+                start_time = time.time()
+
+                try:
+                    for epoch in range(int(config['Training']['num_epochs'])):
+                        for step, batch in enumerate(trainer.train_dataloader):
+                            loss = trainer.training_step(batch, step)
+                            if step % 10 == 0:  # Print every 10 steps
+                                print_training_progress(
+                                    epoch + step/total_steps,
+                                    step,
+                                    total_steps,
+                                    loss.item(),
+                                    trainer.model.named_parameters().grad.norm().item(),
+                                    trainer.lr_scheduler.get_last_lr()[0],
+                                    start_time
+                                )
+                except ValueError as e:
+                    if "does not support gradient checkpointing" in str(e):
+                        print(f"{Fore.RED}Gradient checkpointing nicht unterstützt für {hf_name}. Training ohne Gradient Checkpointing wird fortgesetzt.")
+                        trainer.args.gradient_checkpointing = False
+                        trainer.train()
+                    else:
+                        raise
+
+                results = trainer.evaluate(eval_dataset=tokenized_datasets['test'])
+                print(f"\n{Fore.GREEN}Testergebnisse für {hf_name} ({short_name}):")
+                for key, value in results.items():
+                    print(f"{Fore.CYAN}{key}: {value}")
+
+                log_experiment(config, hf_name, results, config['Paths']['output'])
+
+                trainer.save_model(model_save_path)
+                tokenizer.save_pretrained(model_save_path)
+
+                print(f"\n{Fore.MAGENTA}Ausführungszeit für Modell {hf_name} ({short_name}): {(time.time() - start_time) / 60:.2f} Minuten")
+
+            update_config_checksum(config, current_checksum)
+
 
         if current_checksum != stored_checksum:
             logging.info("Änderungen im documents-Ordner erkannt. Starte vollständiges Neutraining.")
