@@ -37,7 +37,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 
 def get_total_steps(trainer):
-    return get_total_steps(trainer)
+    return len(trainer.get_train_dataloader())
 
 
 def print_training_progress(epoch, step, total_steps, loss, grad_norm, learning_rate, start_time):
@@ -129,9 +129,7 @@ def main():
 
                 trainer, tokenized_datasets = setup_model_and_trainer(dataset, le, config, hf_name, model, tokenizer, args.quick)
 
-                # Berechne total_steps hier, nachdem der Trainer initialisiert wurde
-                train_dataloader = trainer.get_train_dataloader()
-                get_total_steps(trainer)
+                total_steps = get_total_steps(trainer)
 
                 print(f"\n{Fore.CYAN}Trainings-Zusammenfassung für {hf_name}:")
                 print(f"{Fore.CYAN}Anzahl der Epochen: {config['Training']['num_epochs']}")
@@ -139,7 +137,7 @@ def main():
                 print(f"{Fore.CYAN}Gesamtanzahl der Batches: {int(config['Training']['num_epochs']) * total_steps}")
                 print(f"{Fore.CYAN}Batch-Größe: {config['Training']['batch_size']}")
                 print(f"{Fore.CYAN}Gesamtanzahl der Trainingsdokumente: {len(tokenized_datasets['train'])}")
-                print(f"{Fore.CYAN}Geschätzte Trainingszeit: {(int(config['Training']['num_epochs']) * total_steps * 4) / 60:.2f} Minuten") # Annahme: 4 Sekunden pro Batch
+                print(f"{Fore.CYAN}Geschätzte Trainingszeit: {(int(config['Training']['num_epochs']) * total_steps * 4) / 60:.2f} Minuten")
                 print(f"{Fore.CYAN}{'='*60}\n")
 
                 start_time = time.time()
