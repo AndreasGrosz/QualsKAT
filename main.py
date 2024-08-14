@@ -124,20 +124,21 @@ def main():
 
                 trainer, tokenized_datasets = setup_model_and_trainer(dataset, le, config, hf_name, model, tokenizer, args.quick)
 
+                # Berechne total_steps hier, nachdem der Trainer initialisiert wurde
+                train_dataloader = trainer.get_train_dataloader()
+                total_steps = len(train_dataloader)
+
                 print(f"\n{Fore.CYAN}Trainings-Zusammenfassung für {hf_name}:")
                 print(f"{Fore.CYAN}Anzahl der Epochen: {config['Training']['num_epochs']}")
-
-                # Initialisiere den Dataloader
-                train_dataloader = trainer.get_train_dataloader()
-
-                print(f"{Fore.CYAN}Anzahl der Batches pro Epoche: {len(train_dataloader)}")
-                print(f"{Fore.CYAN}Gesamtanzahl der Batches: {int(config['Training']['num_epochs']) * len(train_dataloader)}")
+                print(f"{Fore.CYAN}Anzahl der Batches pro Epoche: {total_steps}")
+                print(f"{Fore.CYAN}Gesamtanzahl der Batches: {int(config['Training']['num_epochs']) * total_steps}")
                 print(f"{Fore.CYAN}Batch-Größe: {config['Training']['batch_size']}")
                 print(f"{Fore.CYAN}Gesamtanzahl der Trainingsdokumente: {len(tokenized_datasets['train'])}")
-                print(f"{Fore.CYAN}Geschätzte Trainingszeit: {(int(config['Training']['num_epochs']) * len(train_dataloader) * 4) / 60:.2f} Minuten") # Annahme: 4 Sekunden pro Batch
+                print(f"{Fore.CYAN}Geschätzte Trainingszeit: {(int(config['Training']['num_epochs']) * total_steps * 4) / 60:.2f} Minuten") # Annahme: 4 Sekunden pro Batch
                 print(f"{Fore.CYAN}{'='*60}\n")
 
-                # Hier folgt der Rest des Trainingscodes
+                start_time = time.time()
+
                 try:
                     trainer.train()
                 except ValueError as e:
