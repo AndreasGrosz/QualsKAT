@@ -126,11 +126,15 @@ def main():
 
                 print(f"\n{Fore.CYAN}Trainings-Zusammenfassung für {hf_name}:")
                 print(f"{Fore.CYAN}Anzahl der Epochen: {config['Training']['num_epochs']}")
-                print(f"{Fore.CYAN}Anzahl der Batches pro Epoche: {len(trainer.train_dataloader)}")
-                print(f"{Fore.CYAN}Gesamtanzahl der Batches: {int(config['Training']['num_epochs']) * len(trainer.train_dataloader)}")
+
+                # Initialisiere den Dataloader
+                train_dataloader = trainer.get_train_dataloader()
+
+                print(f"{Fore.CYAN}Anzahl der Batches pro Epoche: {len(train_dataloader)}")
+                print(f"{Fore.CYAN}Gesamtanzahl der Batches: {int(config['Training']['num_epochs']) * len(train_dataloader)}")
                 print(f"{Fore.CYAN}Batch-Größe: {config['Training']['batch_size']}")
                 print(f"{Fore.CYAN}Gesamtanzahl der Trainingsdokumente: {len(tokenized_datasets['train'])}")
-                print(f"{Fore.CYAN}Geschätzte Trainingszeit: {(int(config['Training']['num_epochs']) * len(trainer.train_dataloader) * 4) / 60:.2f} Minuten") # Annahme: 4 Sekunden pro Batch
+                print(f"{Fore.CYAN}Geschätzte Trainingszeit: {(int(config['Training']['num_epochs']) * len(train_dataloader) * 4) / 60:.2f} Minuten") # Annahme: 4 Sekunden pro Batch
                 print(f"{Fore.CYAN}{'='*60}\n")
 
                 # Hier folgt der Rest des Trainingscodes
