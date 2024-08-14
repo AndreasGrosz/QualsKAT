@@ -4,6 +4,7 @@ import warnings
 from data_processing import extract_text_from_file
 import datetime
 import torch
+from datasets import DatasetDict
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, DataCollatorWithPadding, LlamaForCausalLM, LlamaTokenizer, AutoConfig
 import numpy as np
 import os
@@ -86,16 +87,19 @@ def get_optimal_batch_size(model, max_sequence_length, device):
 
 
 def setup_model_and_trainer(dataset_dict, le, config, model_name, model, tokenizer, quick=False):
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels = len(le.classes_))
-
-    model.config.label2id = {label: i for i, label in enumerate(le.classes_)}
-    model.config.id2label = {i: label for i, label in enumerate(le.classes_)}
-
     def tokenize_function(examples):
         return tokenizer(examples["text"], truncation=True, padding="max_length", max_length=512)
 
+    # Tokenisiere den gesamten Datensatz
     tokenized_datasets = dataset_dict.map(tokenize_function, batched=True, remove_columns=["text", "filename"])
+
+    # Teile den Datensatz in Train und Test
+    train_testvalid = tokenized_datasets.train_test_split(test_size=0.3, seed=42)
+    test_valid = train_testvalid['test'].train_test_split(test_size=0.5, seed=42)
+
+    train_dataset = train_testvalid['train']
+    test_dataset = test_valid['test']
+    valid_dataset = test_valid['train']
 
     model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
     os.makedirs(model_save_path, exist_ok=True)
@@ -110,7 +114,7 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, model, tokeniz
         per_device_eval_batch_size=2,
         num_train_epochs=1 if quick else int(config['Training']['num_epochs']),
         weight_decay=0.01,
-        eval_strategy="steps",  # Geändert von evaluation_strategy zu eval_strategy
+        evaluation_strategy="steps",
         eval_steps=100,
         save_strategy="steps",
         save_steps=100,
@@ -127,17 +131,16 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, model, tokeniz
 
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
-
     trainer = Trainer(
         model=model,
         args=training_args,
-        train_dataset=tokenized_datasets['train'],
-        eval_dataset=tokenized_datasets['test'],
+        train_dataset=train_dataset,
+        eval_dataset=valid_dataset,
         tokenizer=tokenizer,
         data_collator=data_collator,
     )
 
-    return tokenizer, trainer, tokenized_datasets
+    return trainer, {'train': train_dataset, 'test': test_dataset, 'valid': valid_dataset}
 
 
 def compute_metrics(eval_pred):
