@@ -81,7 +81,7 @@ def main():
         if len(dataset) == 0:
             raise ValueError("Der erstellte Datensatz ist leer. Überprüfen Sie die Eingabedaten.")
 
-        model_names = config['Model']['model_name'].split(',')
+        model_names = config['Models']['model_name'].split(',')
 
         total_start_time = time.time()
         training_performed = False
