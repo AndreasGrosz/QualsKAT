@@ -93,8 +93,8 @@ def main():
         stored_checksum = config['DocumentsCheck'].get('checksum', '')
 
         if args.train:
-        training_performed = True
-        models_to_train = get_models_for_task(config, 'train')
+            training_performed = True
+            models_to_train = get_models_for_task(config, 'train')
 
         if current_checksum != stored_checksum:
             logging.info("Änderungen im documents-Ordner erkannt. Starte vollständiges Neutraining.")
