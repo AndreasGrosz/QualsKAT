@@ -86,11 +86,22 @@ def get_optimal_batch_size(model, max_sequence_length, device):
         return 8  # Ein vernünftiger Standardwert für CPUs
 
 
-def setup_model_and_trainer(dataset_dict, le, config, model_name, model, tokenizer, quick=False):
+def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, quick=False):
     def tokenize_function(examples):
         return tokenizer(examples["text"], truncation=True, padding="max_length", max_length=512)
 
-    tokenized_datasets = dataset_dict.map(tokenize_function, batched=True, remove_columns=["text", "filename"])
+    # Tokenisiere den gesamten Datensatz
+    tokenized_datasets = dataset.map(tokenize_function, batched=True, remove_columns=["text", "filename"])
+
+    # Teile den Datensatz in Train und Test
+    train_testvalid = tokenized_datasets.train_test_split(test_size=0.3, seed=42)
+    test_valid = train_testvalid['test'].train_test_split(test_size=0.5, seed=42)
+
+    tokenized_datasets = DatasetDict({
+        'train': train_testvalid['train'],
+        'test': test_valid['test'],
+        'validation': test_valid['train']
+    })
 
     model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
     os.makedirs(model_save_path, exist_ok=True)
@@ -130,7 +141,7 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, model, tokeniz
         model=model,
         args=training_args,
         train_dataset=tokenized_datasets['train'],
-        eval_dataset=tokenized_datasets['test'],
+        eval_dataset=tokenized_datasets['validation'],
         tokenizer=tokenizer,
         data_collator=data_collator,
     )
