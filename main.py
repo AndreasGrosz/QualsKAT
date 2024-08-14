@@ -154,7 +154,6 @@ def main():
         logging.info(f"Gesamtausführungszeit für alle Modelle: {total_duration:.2f} Minuten")
 
         if args.checkthis:
-            rgs.checkthis:
             models_to_check = get_models_for_task(config, 'check')
             for hf_name, short_name in models_to_check:
 
