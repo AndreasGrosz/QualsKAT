@@ -46,15 +46,17 @@ def check_environment():
     config = configparser.ConfigParser()
     config.read('config.txt')
 
-    required_sections = ['Paths', 'Training', 'Models']
+    required_sections = ['Paths', 'Models', 'Training', 'Optimization', 'Evaluation']
     for section in required_sections:
         if section not in config:
             raise KeyError(f"Abschnitt '{section}' fehlt in der config.txt")
 
     required_keys = {
         'Paths': ['documents', 'check_this', 'output', 'models'],
-        'Training': ['batch_size', 'learning_rate', 'num_epochs'],
-        'Models': ['model_name']
+        'Models': ['model_list'],
+        'Training': ['batch_size', 'learning_rate', 'num_epochs', 'weight_decay', 'warmup_steps', 'gradient_accumulation_steps'],
+        'Optimization': ['fp16', 'max_grad_norm'],
+        'Evaluation': ['eval_steps', 'save_steps']
     }
     for section, keys in required_keys.items():
         for key in keys:
@@ -74,23 +76,17 @@ def check_environment():
     if not any(os.scandir(documents_path)):
         raise FileNotFoundError(f"Keine Dateien im Verzeichnis '{documents_path}' gefunden.")
 
-    model_names = config['Model']['model_name'].split(',')
-    for model_name in model_names:
-        model_name = model_name.strip()
-        if not model_name:
-            logging.warning("Leerer Modellname in der Konfiguration gefunden. Bitte überprüfen Sie die config.txt")
+    model_list = config['Models']['model_list'].split('\n')
+    for model_line in model_list:
+        if not model_line.strip():
             continue
+        model_info = model_line.split(',')
+        if len(model_info) != 4:
+            raise ValueError(f"Ungültiges Modell-Format in config.txt: {model_line}")
+        model_name = model_info[0].strip()
         try:
-            model_path = os.path.join("fresh-models", model_name)
-            if not os.path.exists(model_path):
-                raise ValueError(f"Modellverzeichnis nicht gefunden: {model_path}")
-
-            config_path = os.path.join(model_path, "config.json")
-            if not os.path.exists(config_path):
-                raise ValueError(f"config.json nicht gefunden in: {model_path}")
-
-            AutoTokenizer.from_pretrained(model_path)
-            AutoModelForSequenceClassification.from_pretrained(model_path)
+            AutoTokenizer.from_pretrained(model_name)
+            AutoModelForSequenceClassification.from_pretrained(model_name)
             logging.info(f"Modell erfolgreich geladen: {model_name}")
         except Exception as e:
             logging.error(f"Fehler beim Laden des Modells {model_name}: {str(e)}")
