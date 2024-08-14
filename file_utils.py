@@ -100,9 +100,21 @@ def check_environment():
                 model = LlamaForCausalLM.from_pretrained(local_model_path)
             else:
                 if os.path.exists(local_model_path):
-                    tokenizer = AutoTokenizer.from_pretrained(local_model_path, use_fast=False)
+                    # Für lokale Modelle
+                    tokenizer_json_path = os.path.join(local_model_path, 'tokenizer.json')
+                    if os.path.exists(tokenizer_json_path):
+                        with open(tokenizer_json_path, 'r') as f:
+                            tokenizer_config = json.load(f)
+                        tokenizer = AutoTokenizer.from_pretrained(
+                            local_model_path,
+                            use_fast=False,
+                            tokenizer_config=tokenizer_config
+                        )
+                    else:
+                        tokenizer = AutoTokenizer.from_pretrained(local_model_path, use_fast=False)
                     model = AutoModelForSequenceClassification.from_pretrained(local_model_path)
                 else:
+                    # Für Modelle von Hugging Face
                     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
                     model = AutoModelForSequenceClassification.from_pretrained(model_name)
 
