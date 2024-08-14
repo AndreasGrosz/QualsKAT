@@ -1,0 +1,191 @@
+python3 main.py --train                                         (aaunal)
+You are using the default legacy behaviour of the <class 'transformers.models.t5.tokenization_t5.T5Tokenizer'>. This is expected, and simply means that the `legacy` (previous) behavior will be used so nothing changes for you. If you want to use the new behaviour, set `legacy=False`. This should only be set if you understand what it means, and thoroughly read the reason why this was added as explained in https://github.com/huggingface/transformers/pull/24565
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+Some weights of T5ForSequenceClassification were not initialized from the model checkpoint at t5-large and are newly initialized: ['classification_head.dense.bias', 'classification_head.dense.weight', 'classification_head.out_proj.bias', 'classification_head.out_proj.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Some weights of LongformerForSequenceClassification were not initialized from the model checkpoint at allenai/longformer-base-4096 and are newly initialized: ['classifier.dense.bias', 'classifier.dense.weight', 'classifier.out_proj.bias', 'classifier.out_proj.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Some weights of XLNetForSequenceClassification were not initialized from the model checkpoint at xlnet-large-cased and are newly initialized: ['logits_proj.bias', 'logits_proj.weight', 'sequence_summary.summary.bias', 'sequence_summary.summary.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Some weights of ElectraForSequenceClassification were not initialized from the model checkpoint at google/electra-large-discriminator and are newly initialized: ['classifier.dense.bias', 'classifier.dense.weight', 'classifier.out_proj.bias', 'classifier.out_proj.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Some weights of DistilBertForSequenceClassification were not initialized from the model checkpoint at /home/res/projekte/kd0241-py/Q-KAT/AAUNaL/fresh-models/distilbert-base-uncased and are newly initialized because the shapes did not match:
+- classifier.bias: found shape torch.Size([2]) in the checkpoint and torch.Size([53]) in the model instantiated
+- classifier.weight: found shape torch.Size([2, 768]) in the checkpoint and torch.Size([53, 768]) in the model instantiated
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Map: 100%|██████████████████████████████████████████████████████| 2428/2428 [00:04<00:00, 575.68 examples/s]
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/transformers/training_args.py:1525: FutureWarning: `evaluation_strategy` is deprecated and will be removed in version 4.46 of 🤗 Transformers. Use `eval_strategy` instead
+  warnings.warn(
+  0%|                                                                               | 0/318 [00:00<?, ?it/s]/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/utils/checkpoint.py:295: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with torch.enable_grad(), device_autocast_ctx, torch.cpu.amp.autocast(**ctx.cpu_autocast_kwargs):  # type: ignore[attr-defined]
+{'loss': 1.7747, 'grad_norm': 4.9178972244262695, 'learning_rate': 1.685534591194969e-05, 'epoch': 0.47}
+{'loss': 0.2941, 'grad_norm': 1.381597638130188, 'learning_rate': 1.3773584905660378e-05, 'epoch': 0.94}
+{'eval_loss': 0.09309395402669907, 'eval_runtime': 1.7223, 'eval_samples_per_second': 211.345, 'eval_steps_per_second': 105.672, 'epoch': 0.94}
+ 31%|█████████████████████▋                                               | 100/318 [00:38<01:18,  2.77it/s/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/utils/checkpoint.py:295: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with torch.enable_grad(), device_autocast_ctx, torch.cpu.amp.autocast(**ctx.cpu_autocast_kwargs):  # type: ignore[attr-defined]
+{'loss': 0.0545, 'grad_norm': 0.581115186214447, 'learning_rate': 1.069182389937107e-05, 'epoch': 1.41}
+{'loss': 0.0271, 'grad_norm': 0.22737808525562286, 'learning_rate': 7.5471698113207555e-06, 'epoch': 1.88}
+{'eval_loss': 0.031068645417690277, 'eval_runtime': 1.7259, 'eval_samples_per_second': 210.901, 'eval_steps_per_second': 105.451, 'epoch': 1.88}
+ 63%|███████████████████████████████████████████▍                         | 200/318 [01:16<00:42,  2.76it/s/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/utils/checkpoint.py:295: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with torch.enable_grad(), device_autocast_ctx, torch.cpu.amp.autocast(**ctx.cpu_autocast_kwargs):  # type: ignore[attr-defined]
+{'loss': 0.0142, 'grad_norm': 0.12689462304115295, 'learning_rate': 4.402515723270441e-06, 'epoch': 2.35}
+{'loss': 0.0095, 'grad_norm': 0.1426868885755539, 'learning_rate': 1.257861635220126e-06, 'epoch': 2.82}
+{'eval_loss': 0.028896374627947807, 'eval_runtime': 1.7252, 'eval_samples_per_second': 210.993, 'eval_steps_per_second': 105.497, 'epoch': 2.82}
+ 94%|█████████████████████████████████████████████████████████████████    | 300/318 [01:55<00:06,  2.76it/s/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/utils/checkpoint.py:295: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with torch.enable_grad(), device_autocast_ctx, torch.cpu.amp.autocast(**ctx.cpu_autocast_kwargs):  # type: ignore[attr-defined]
+{'train_runtime': 122.887, 'train_samples_per_second': 41.477, 'train_steps_per_second': 2.588, 'train_loss': 0.3434952812374763, 'epoch': 2.99}
+100%|█████████████████████████████████████████████████████████████████████| 318/318 [02:02<00:00,  2.59it/s]
+100%|████████████████████████████████████████████████████████████████████| 183/183 [00:01<00:00, 104.43it/s]
+Some weights of RobertaForSequenceClassification were not initialized from the model checkpoint at /home/res/projekte/kd0241-py/Q-KAT/AAUNaL/fresh-models/roberta-large and are newly initialized because the shapes did not match:
+- classifier.out_proj.bias: found shape torch.Size([2]) in the checkpoint and torch.Size([53]) in the model instantiated
+- classifier.out_proj.weight: found shape torch.Size([2, 1024]) in the checkpoint and torch.Size([53, 1024]) in the model instantiated
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Map: 100%|██████████████████████████████████████████████████████| 2428/2428 [00:06<00:00, 399.86 examples/s]
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/transformers/training_args.py:1525: FutureWarning: `evaluation_strategy` is deprecated and will be removed in version 4.46 of 🤗 Transformers. Use `eval_strategy` instead
+  warnings.warn(
+  0%|                                                                               | 0/318 [00:00<?, ?it/s]/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/utils/checkpoint.py:295: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with torch.enable_grad(), device_autocast_ctx, torch.cpu.amp.autocast(**ctx.cpu_autocast_kwargs):  # type: ignore[attr-defined]
+{'loss': 0.6699, 'grad_norm': 2.410861015319824, 'learning_rate': 1.69811320754717e-05, 'epoch': 0.47}
+{'loss': 0.0207, 'grad_norm': 0.016760004684329033, 'learning_rate': 1.389937106918239e-05, 'epoch': 0.94}
+{'eval_loss': 0.00866665318608284, 'eval_runtime': 11.2183, 'eval_samples_per_second': 32.447, 'eval_steps_per_second': 16.223, 'epoch': 0.94}
+ 31%|█████████████████████▋                                               | 100/318 [03:56<08:10,  2.25s/it/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/utils/checkpoint.py:295: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with torch.enable_grad(), device_autocast_ctx, torch.cpu.amp.autocast(**ctx.cpu_autocast_kwargs):  # type: ignore[attr-defined]
+{'loss': 0.0045, 'grad_norm': 30.97693634033203, 'learning_rate': 1.0754716981132076e-05, 'epoch': 1.41}
+{'loss': 0.001, 'grad_norm': 0.008286034688353539, 'learning_rate': 7.6100628930817626e-06, 'epoch': 1.88}
+{'eval_loss': 0.0019242992857471108, 'eval_runtime': 11.2198, 'eval_samples_per_second': 32.443, 'eval_steps_per_second': 16.221, 'epoch': 1.88}
+ 63%|███████████████████████████████████████████▍                         | 200/318 [07:56<04:26,  2.26s/it/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/utils/checkpoint.py:295: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with torch.enable_grad(), device_autocast_ctx, torch.cpu.amp.autocast(**ctx.cpu_autocast_kwargs):  # type: ignore[attr-defined]
+{'loss': 0.0005, 'grad_norm': 0.007148833479732275, 'learning_rate': 4.465408805031447e-06, 'epoch': 2.35}
+{'loss': 0.0004, 'grad_norm': 0.006738084834069014, 'learning_rate': 1.3207547169811322e-06, 'epoch': 2.82}
+{'eval_loss': 0.008300197310745716, 'eval_runtime': 11.2186, 'eval_samples_per_second': 32.446, 'eval_steps_per_second': 16.223, 'epoch': 2.82}
+ 94%|█████████████████████████████████████████████████████████████████    | 300/318 [11:56<00:40,  2.26s/it/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/utils/checkpoint.py:295: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with torch.enable_grad(), device_autocast_ctx, torch.cpu.amp.autocast(**ctx.cpu_autocast_kwargs):  # type: ignore[attr-defined]
+{'train_runtime': 763.8253, 'train_samples_per_second': 6.673, 'train_steps_per_second': 0.416, 'train_loss': 0.10960535381762486, 'epoch': 2.99}
+100%|█████████████████████████████████████████████████████████████████████| 318/318 [12:43<00:00,  2.40s/it]
+100%|█████████████████████████████████████████████████████████████████████| 183/183 [00:11<00:00, 16.28it/s]
+Some weights of RobertaForSequenceClassification were not initialized from the model checkpoint at /home/res/projekte/kd0241-py/Q-KAT/AAUNaL/fresh-models/roberta-base and are newly initialized because the shapes did not match:
+- classifier.out_proj.bias: found shape torch.Size([2]) in the checkpoint and torch.Size([53]) in the model instantiated
+- classifier.out_proj.weight: found shape torch.Size([2, 768]) in the checkpoint and torch.Size([53, 768]) in the model instantiated
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Map: 100%|██████████████████████████████████████████████████████| 2428/2428 [00:05<00:00, 410.50 examples/s]
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/transformers/training_args.py:1525: FutureWarning: `evaluation_strategy` is deprecated and will be removed in version 4.46 of 🤗 Transformers. Use `eval_strategy` instead
+  warnings.warn(
+  0%|                                                                               | 0/318 [00:00<?, ?it/s]/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/utils/checkpoint.py:295: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with torch.enable_grad(), device_autocast_ctx, torch.cpu.amp.autocast(**ctx.cpu_autocast_kwargs):  # type: ignore[attr-defined]
+{'loss': 1.3451, 'grad_norm': 4.528257369995117, 'learning_rate': 1.6918238993710692e-05, 'epoch': 0.47}
+{'loss': 0.0604, 'grad_norm': 0.2003777176141739, 'learning_rate': 1.3773584905660378e-05, 'epoch': 0.94}
+{'eval_loss': 0.020122412592172623, 'eval_runtime': 3.6039, 'eval_samples_per_second': 101.002, 'eval_steps_per_second': 50.501, 'epoch': 0.94}
+ 31%|█████████████████████▋                                               | 100/318 [01:18<02:42,  1.34it/s/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/utils/checkpoint.py:295: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with torch.enable_grad(), device_autocast_ctx, torch.cpu.amp.autocast(**ctx.cpu_autocast_kwargs):  # type: ignore[attr-defined]
+{'loss': 0.0161, 'grad_norm': 0.5684492588043213, 'learning_rate': 1.069182389937107e-05, 'epoch': 1.41}
+{'loss': 0.0059, 'grad_norm': 0.08055607974529266, 'learning_rate': 7.5471698113207555e-06, 'epoch': 1.88}
+{'eval_loss': 0.003711202647536993, 'eval_runtime': 3.5994, 'eval_samples_per_second': 101.128, 'eval_steps_per_second': 50.564, 'epoch': 1.88}
+ 63%|███████████████████████████████████████████▍                         | 200/318 [02:37<01:27,  1.34it/s/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/utils/checkpoint.py:295: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with torch.enable_grad(), device_autocast_ctx, torch.cpu.amp.autocast(**ctx.cpu_autocast_kwargs):  # type: ignore[attr-defined]
+{'loss': 0.0058, 'grad_norm': 0.05654746666550636, 'learning_rate': 4.402515723270441e-06, 'epoch': 2.35}
+{'loss': 0.0065, 'grad_norm': 0.04921308532357216, 'learning_rate': 1.257861635220126e-06, 'epoch': 2.82}
+{'eval_loss': 0.0026144850999116898, 'eval_runtime': 3.5995, 'eval_samples_per_second': 101.126, 'eval_steps_per_second': 50.563, 'epoch': 2.82}
+ 94%|█████████████████████████████████████████████████████████████████    | 300/318 [03:56<00:13,  1.34it/s/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/utils/checkpoint.py:295: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with torch.enable_grad(), device_autocast_ctx, torch.cpu.amp.autocast(**ctx.cpu_autocast_kwargs):  # type: ignore[attr-defined]
+{'train_runtime': 251.8986, 'train_samples_per_second': 20.234, 'train_steps_per_second': 1.262, 'train_loss': 0.22658227224769834, 'epoch': 2.99}
+100%|█████████████████████████████████████████████████████████████████████| 318/318 [04:11<00:00,  1.26it/s]
+100%|█████████████████████████████████████████████████████████████████████| 183/183 [00:03<00:00, 50.73it/s]
+Some weights of DebertaForSequenceClassification were not initialized from the model checkpoint at /home/res/projekte/kd0241-py/Q-KAT/AAUNaL/fresh-models/microsoft/deberta-base and are newly initialized because the shapes did not match:
+- classifier.bias: found shape torch.Size([2]) in the checkpoint and torch.Size([53]) in the model instantiated
+- classifier.weight: found shape torch.Size([2, 768]) in the checkpoint and torch.Size([53, 768]) in the model instantiated
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Map: 100%|██████████████████████████████████████████████████████| 2428/2428 [00:06<00:00, 397.70 examples/s]
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/transformers/training_args.py:1525: FutureWarning: `evaluation_strategy` is deprecated and will be removed in version 4.46 of 🤗 Transformers. Use `eval_strategy` instead
+  warnings.warn(
+  0%|                                                                               | 0/318 [00:00<?, ?it/s]/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/utils/checkpoint.py:295: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with torch.enable_grad(), device_autocast_ctx, torch.cpu.amp.autocast(**ctx.cpu_autocast_kwargs):  # type: ignore[attr-defined]
+{'loss': 1.2001, 'grad_norm': 0.879882276058197, 'learning_rate': 1.6918238993710692e-05, 'epoch': 0.47}
+{'loss': 0.0315, 'grad_norm': 0.1396484673023224, 'learning_rate': 1.3773584905660378e-05, 'epoch': 0.94}
+{'eval_loss': 0.05542498826980591, 'eval_runtime': 6.2304, 'eval_samples_per_second': 58.423, 'eval_steps_per_second': 29.211, 'epoch': 0.94}
+ 31%|█████████████████████▋                                               | 100/318 [02:20<04:52,  1.34s/it/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/utils/checkpoint.py:295: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with torch.enable_grad(), device_autocast_ctx, torch.cpu.amp.autocast(**ctx.cpu_autocast_kwargs):  # type: ignore[attr-defined]
+{'loss': 0.0109, 'grad_norm': 0.3445761501789093, 'learning_rate': 1.069182389937107e-05, 'epoch': 1.41}
+{'loss': 0.0031, 'grad_norm': 0.05828607454895973, 'learning_rate': 7.5471698113207555e-06, 'epoch': 1.88}
+{'eval_loss': 0.01811794377863407, 'eval_runtime': 6.2209, 'eval_samples_per_second': 58.513, 'eval_steps_per_second': 29.256, 'epoch': 1.88}
+ 63%|███████████████████████████████████████████▍                         | 200/318 [04:41<02:38,  1.34s/it/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/utils/checkpoint.py:295: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with torch.enable_grad(), device_autocast_ctx, torch.cpu.amp.autocast(**ctx.cpu_autocast_kwargs):  # type: ignore[attr-defined]
+{'loss': 0.0025, 'grad_norm': 0.033643171191215515, 'learning_rate': 4.402515723270441e-06, 'epoch': 2.35}
+{'loss': 0.0021, 'grad_norm': 0.03526376560330391, 'learning_rate': 1.257861635220126e-06, 'epoch': 2.82}
+{'eval_loss': 0.015819737687706947, 'eval_runtime': 6.2265, 'eval_samples_per_second': 58.459, 'eval_steps_per_second': 29.23, 'epoch': 2.82}
+ 94%|█████████████████████████████████████████████████████████████████    | 300/318 [07:03<00:24,  1.34s/it/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/utils/checkpoint.py:295: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with torch.enable_grad(), device_autocast_ctx, torch.cpu.amp.autocast(**ctx.cpu_autocast_kwargs):  # type: ignore[attr-defined]
+{'train_runtime': 450.3396, 'train_samples_per_second': 11.318, 'train_steps_per_second': 0.706, 'train_loss': 0.19666546717895278, 'epoch': 2.99}
+100%|█████████████████████████████████████████████████████████████████████| 318/318 [07:30<00:00,  1.42s/it]
+100%|█████████████████████████████████████████████████████████████████████| 183/183 [00:06<00:00, 29.29it/s]
+Some weights of AlbertForSequenceClassification were not initialized from the model checkpoint at /home/res/projekte/kd0241-py/Q-KAT/AAUNaL/fresh-models/albert-base-v2 and are newly initialized because the shapes did not match:
+- classifier.bias: found shape torch.Size([2]) in the checkpoint and torch.Size([53]) in the model instantiated
+- classifier.weight: found shape torch.Size([2, 768]) in the checkpoint and torch.Size([53, 768]) in the model instantiated
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Map: 100%|██████████████████████████████████████████████████████| 2428/2428 [00:05<00:00, 442.07 examples/s]
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/transformers/training_args.py:1525: FutureWarning: `evaluation_strategy` is deprecated and will be removed in version 4.46 of 🤗 Transformers. Use `eval_strategy` instead
+  warnings.warn(
+{'loss': 0.8418, 'grad_norm': 3.4617228507995605, 'learning_rate': 1.69811320754717e-05, 'epoch': 0.47}
+{'loss': 0.0948, 'grad_norm': 0.15484893321990967, 'learning_rate': 1.389937106918239e-05, 'epoch': 0.94}
+{'eval_loss': 0.005407511722296476, 'eval_runtime': 3.8653, 'eval_samples_per_second': 94.171, 'eval_steps_per_second': 47.086, 'epoch': 0.94}
+{'loss': 0.0202, 'grad_norm': 106.27050018310547, 'learning_rate': 1.0754716981132076e-05, 'epoch': 1.41}
+{'loss': 0.0191, 'grad_norm': 0.04699929431080818, 'learning_rate': 7.6100628930817626e-06, 'epoch': 1.88}
+{'eval_loss': 0.001997151179239154, 'eval_runtime': 3.8661, 'eval_samples_per_second': 94.152, 'eval_steps_per_second': 47.076, 'epoch': 1.88}
+{'loss': 0.009, 'grad_norm': 0.03156272694468498, 'learning_rate': 4.465408805031447e-06, 'epoch': 2.35}
+{'loss': 0.0027, 'grad_norm': 0.02842099219560623, 'learning_rate': 1.3207547169811322e-06, 'epoch': 2.82}
+{'eval_loss': 0.0015136462170630693, 'eval_runtime': 3.8667, 'eval_samples_per_second': 94.138, 'eval_steps_per_second': 47.069, 'epoch': 2.82}
+{'train_runtime': 183.0912, 'train_samples_per_second': 27.839, 'train_steps_per_second': 1.737, 'train_loss': 0.1558050569498314, 'epoch': 2.99}
+100%|█████████████████████████████████████████████████████████████████████| 318/318 [03:03<00:00,  1.74it/s]
+100%|█████████████████████████████████████████████████████████████████████| 183/183 [00:03<00:00, 47.25it/s]
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+Some weights of T5ForSequenceClassification were not initialized from the model checkpoint at t5-large and are newly initialized: ['classification_head.dense.bias', 'classification_head.dense.weight', 'classification_head.out_proj.bias', 'classification_head.out_proj.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Map: 100%|██████████████████████████████████████████████████████| 2428/2428 [00:05<00:00, 426.06 examples/s]
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/transformers/training_args.py:1525: FutureWarning: `evaluation_strategy` is deprecated and will be removed in version 4.46 of 🤗 Transformers. Use `eval_strategy` instead
+  warnings.warn(
+  0%|                                                                               | 0/318 [00:00<?, ?it/s]/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/utils/checkpoint.py:295: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with torch.enable_grad(), device_autocast_ctx, torch.cpu.amp.autocast(**ctx.cpu_autocast_kwargs):  # type: ignore[attr-defined]
+{'loss': 0.0, 'grad_norm': nan, 'learning_rate': 2e-05, 'epoch': 0.47}
+{'loss': 0.0, 'grad_norm': nan, 'learning_rate': 2e-05, 'epoch': 0.94}
+{'eval_loss': nan, 'eval_runtime': 33.8304, 'eval_samples_per_second': 10.76, 'eval_steps_per_second': 5.38, 'epoch': 0.94}
+ 31%|█████████████████████▋                                               | 100/318 [11:00<22:45,  6.26s/it/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:600: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.4 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/home/res/miniconda3/envs/aaunal/lib/python3.10/site-packages/torch/utils/checkpoint.py:295: FutureWarning: `torch.cpu.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cpu', args...)` instead.
+  with torch.enable_grad(), device_autocast_ctx, torch.cpu.amp.autocast(**ctx.cpu_autocast_kwargs):  # type: ignore[attr-defined]
+{'loss': 0.0, 'grad_norm': nan, 'learning_rate': 2e-05, 'epoch': 1.41}
+ 61%|██████████████████████████████████████████▎                          | 195/318 [2
