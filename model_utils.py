@@ -90,18 +90,7 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
     def tokenize_function(examples):
         return tokenizer(examples["text"], truncation=True, padding="max_length", max_length=512)
 
-    # Tokenisiere den gesamten Datensatz
     tokenized_datasets = dataset.map(tokenize_function, batched=True, remove_columns=["text", "filename"])
-
-    # Teile den Datensatz in Train und Test
-    train_testvalid = tokenized_datasets.train_test_split(test_size=0.3, seed=42)
-    test_valid = train_testvalid['test'].train_test_split(test_size=0.5, seed=42)
-
-    tokenized_datasets = DatasetDict({
-        'train': train_testvalid['train'],
-        'test': test_valid['test'],
-        'validation': test_valid['train']
-    })
 
     model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
     os.makedirs(model_save_path, exist_ok=True)
@@ -110,30 +99,29 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
     is_albert = "albert" in model_name.lower()
     is_xlnet = "xlnet" in model_name.lower()
 
-    # Deaktiviere Gradient Checkpointing für Modelle, die es nicht unterstützen
-    use_gradient_checkpointing = not (is_albert or is_xlnet)
-
-    try:
-        if hasattr(model, "gradient_checkpointing_enable"):
-            model.gradient_checkpointing_enable()
-    except ValueError as e:
-        print(f"Warnung: Gradient Checkpointing nicht unterstützt für dieses Modell. {str(e)}")
+    # Batch-Größe für XLNet reduzieren
+    batch_size = 1 if is_xlnet else int(config['Training']['batch_size'])
 
     training_args = TrainingArguments(
         output_dir=model_save_path,
+        learning_rate=float(config['Training']['learning_rate']),
+        per_device_train_batch_size=batch_size,
+        per_device_eval_batch_size=batch_size,
         num_train_epochs=1 if quick else int(config['Training']['num_epochs']),
-        per_device_train_batch_size=int(config['Training']['batch_size']),
-        per_device_eval_batch_size=int(config['Training']['batch_size']),
-        warmup_steps=100,
         weight_decay=0.01,
+        evaluation_strategy="steps",
+        eval_steps=100,
+        save_strategy="steps",
+        save_steps=100,
+        load_best_model_at_end=True,
+        fp16=torch.cuda.is_available() and not is_xlnet,
+        gradient_accumulation_steps=8,
         logging_dir=os.path.join(model_save_path, 'logs'),
-        logging_steps=10,
-        evaluation_strategy="steps" if not quick else "no",
-        save_strategy="steps" if not quick else "no",
-        eval_steps=100 if not quick else None,
-        save_steps=100 if not quick else None,
-        load_best_model_at_end=True if not quick else False,
-        fp16=True,  # Fügen Sie diese Zeile hinzu (für c)
+        logging_steps=50,
+        save_total_limit=2,
+        remove_unused_columns=False,
+        gradient_checkpointing=not (is_albert or is_xlnet),
+        optim="adamw_torch",
     )
 
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
@@ -142,7 +130,7 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
         model=model,
         args=training_args,
         train_dataset=tokenized_datasets['train'],
-        eval_dataset=tokenized_datasets['validation'],
+        eval_dataset=tokenized_datasets['test'],
         tokenizer=tokenizer,
         data_collator=data_collator,
     )

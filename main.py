@@ -143,6 +143,7 @@ def main():
                 try:
                     print(f"\n{Fore.CYAN}Starte Training für {hf_name}")
                     train_dataloader = trainer.get_train_dataloader()
+                    total_steps = len(train_dataloader) * int(config['Training']['num_epochs'])
 
                     for epoch in range(int(config['Training']['num_epochs'])):
                         progress_bar = tqdm(train_dataloader, desc=f"Epoch {epoch+1}")
@@ -152,22 +153,17 @@ def main():
 
                             if step % 10 == 0:  # Print every 10 steps
                                 global_step = epoch * len(train_dataloader) + step
+                                grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), trainer.args.max_grad_norm).item()
+                                lr = trainer.lr_scheduler.get_last_lr()[0] if trainer.lr_scheduler else trainer.args.learning_rate
                                 print_training_progress(
                                     epoch + step/len(train_dataloader),
                                     global_step,
                                     total_steps,
                                     loss.item(),
-                                    torch.nn.utils.clip_grad_norm_(trainer.model.parameters(), trainer.args.max_grad_norm).item(),
-                                    trainer.lr_scheduler.get_last_lr()[0],
+                                    grad_norm,
+                                    lr,
                                     start_time
                                 )
-
-                                # Fügen Sie diese Zeilen hier ein (für 5.)
-                                elapsed_time = time.time() - start_time
-                                steps_per_second = (epoch * len(train_dataloader) + step + 1) / elapsed_time
-                                remaining_steps = total_steps - (epoch * len(train_dataloader) + step + 1)
-                                estimated_time_remaining = remaining_steps / steps_per_second
-                                print(f"Geschätzte verbleibende Zeit: {estimated_time_remaining/60:.2f} Minuten")
 
                         # Evaluation am Ende jeder Epoche
                         eval_results = trainer.evaluate()
