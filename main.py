@@ -36,6 +36,10 @@ if hasattr(torch.cuda.amp, 'GradScaler'):
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename='classifier.log')
 
 
+if torch.cuda.is_available():
+    print(f"Verfügbarer GPU-Speicher: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
+
+
 def get_total_steps(trainer):
     return len(trainer.get_train_dataloader())
 
