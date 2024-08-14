@@ -90,22 +90,17 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, model, tokeniz
     def tokenize_function(examples):
         return tokenizer(examples["text"], truncation=True, padding="max_length", max_length=512)
 
-    # Tokenisiere den gesamten Datensatz
     tokenized_datasets = dataset_dict.map(tokenize_function, batched=True, remove_columns=["text", "filename"])
-
-    # Teile den Datensatz in Train und Test
-    train_testvalid = tokenized_datasets.train_test_split(test_size=0.3, seed=42)
-    test_valid = train_testvalid['test'].train_test_split(test_size=0.5, seed=42)
-
-    train_dataset = train_testvalid['train']
-    test_dataset = test_valid['test']
-    valid_dataset = test_valid['train']
 
     model_save_path = os.path.join(config['Paths']['models'], model_name.replace('/', '_'))
     os.makedirs(model_save_path, exist_ok=True)
 
-    # Überprüfen, ob es sich um ein ALBERT-Modell handelt
+    # Überprüfen, ob es sich um ein ALBERT- oder XLNet-Modell handelt
     is_albert = "albert" in model_name.lower()
+    is_xlnet = "xlnet" in model_name.lower()
+
+    # Deaktiviere Gradient Checkpointing für Modelle, die es nicht unterstützen
+    use_gradient_checkpointing = not (is_albert or is_xlnet)
 
     training_args = TrainingArguments(
         output_dir=model_save_path,
@@ -114,7 +109,7 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, model, tokeniz
         per_device_eval_batch_size=2,
         num_train_epochs=1 if quick else int(config['Training']['num_epochs']),
         weight_decay=0.01,
-        eval_strategy="steps",
+        evaluation_strategy="steps",
         eval_steps=100,
         save_strategy="steps",
         save_steps=100,
@@ -125,7 +120,7 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, model, tokeniz
         logging_steps=50,
         save_total_limit=2,
         remove_unused_columns=False,
-        gradient_checkpointing=not (is_albert or is_xlnet),  # Deaktiviere für ALBERT und XLNet
+        gradient_checkpointing=use_gradient_checkpointing,
         optim="adamw_torch",
     )
 
@@ -134,13 +129,13 @@ def setup_model_and_trainer(dataset_dict, le, config, model_name, model, tokeniz
     trainer = Trainer(
         model=model,
         args=training_args,
-        train_dataset=train_dataset,
-        eval_dataset=valid_dataset,
+        train_dataset=tokenized_datasets['train'],
+        eval_dataset=tokenized_datasets['test'],
         tokenizer=tokenizer,
         data_collator=data_collator,
     )
 
-    return trainer, {'train': train_dataset, 'test': test_dataset, 'valid': valid_dataset}
+    return trainer, tokenized_datasets
 
 
 def compute_metrics(eval_pred):
