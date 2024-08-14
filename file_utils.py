@@ -1,6 +1,7 @@
 import hashlib
 import time
 from datetime import datetime
+import json
 import os
 import olefile
 import csv
@@ -79,6 +80,7 @@ def check_environment():
     model_list = config['Models']['model_list'].split('\n')
 
     base_model_path = os.path.join(os.path.dirname(__file__), 'fresh-models')
+    logging.info(f"Base model path: {base_model_path}")
 
     for model_line in model_list:
         if not model_line.strip():
@@ -90,6 +92,7 @@ def check_environment():
         model_name = model_name.strip()
 
         local_model_path = os.path.join(base_model_path, model_name)
+        logging.info(f"Versuche Modell zu laden: {model_name} von Pfad: {local_model_path}")
 
         try:
             if model_name == "Meta-Llama-3-8B":
@@ -100,9 +103,10 @@ def check_environment():
                 model = LlamaForCausalLM.from_pretrained(local_model_path)
             else:
                 if os.path.exists(local_model_path):
-                    # Für lokale Modelle
+                    logging.info(f"Lokales Modell gefunden: {local_model_path}")
                     tokenizer_json_path = os.path.join(local_model_path, 'tokenizer.json')
                     if os.path.exists(tokenizer_json_path):
+                        logging.info(f"Tokenizer JSON gefunden: {tokenizer_json_path}")
                         with open(tokenizer_json_path, 'r') as f:
                             tokenizer_config = json.load(f)
                         tokenizer = AutoTokenizer.from_pretrained(
@@ -111,10 +115,11 @@ def check_environment():
                             tokenizer_config=tokenizer_config
                         )
                     else:
+                        logging.info(f"Tokenizer JSON nicht gefunden, verwende Standard-Konfiguration")
                         tokenizer = AutoTokenizer.from_pretrained(local_model_path, use_fast=False)
                     model = AutoModelForSequenceClassification.from_pretrained(local_model_path)
                 else:
-                    # Für Modelle von Hugging Face
+                    logging.info(f"Lokales Modell nicht gefunden, versuche von Hugging Face zu laden: {model_name}")
                     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
                     model = AutoModelForSequenceClassification.from_pretrained(model_name)
 
