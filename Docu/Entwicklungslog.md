@@ -453,3 +453,27 @@ Robustheit: Modelle mit niedrigerem eval loss sind oft robuster gegenüber leich
 Vertrauenswürdigkeit: Sie können mehr Vertrauen in die Vorhersagen des Modells haben, wenn es einen niedrigen eval loss aufweist.
 
 Basierend auf den eval loss Werten scheinen RoBERTa (large) und ALBERT am besten zu generalisieren, gefolgt von DistilBERT. Diese Modelle könnten für Ihre Aufgabe der Autorenerkennung am geeignetsten sein.
+
+## 13.8.24 Beta-Version
+
+Wir haben seit gestern eine stabile, funktionierende Beta-Version, die offenbar dank der 5 Modelle in den meisten Fällen exakt bestimmen kann, ob eine Seite einen LRH-Text enthält oder nicht.
+
+Diese fresh-models hatten wir trainiert:
+* microsoft/deberta-base
+* roberta-base
+* roberta-large
+* distilbert-base-uncased
+* albert-base-v2
+
+Ich habe die erzeugten Models samt zugrunde liegenden Trainingsdaten und die py in dies Backup-Verzeichnis kopiert:
+kd0241-py/Q-KAT/AAUNaL/backups/240813 Betaversion/
+
+Wir haben die folgenden LRH-Volumes in Seiten zerlegt und sie getestet:
+* Red Vols vom Stand 1978
+* Red Vols vom Stand 1991
+* OEC u MS Vols vom Stand 1991
+
+über 23000 txt-files (je eine Seite der Vols) in 52 MB dauern etwa 12 Std zum checkthis.
+
+
+

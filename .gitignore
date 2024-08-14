@@ -67,6 +67,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+AGs zur python-Programmierungen.odt
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
