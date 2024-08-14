@@ -101,9 +101,9 @@ def check_environment():
                 raise
 
         try:
-            AutoTokenizer.from_pretrained(model_name)
-            AutoModelForSequenceClassification.from_pretrained(model_name)
-            logging.info(f"Modell erfolgreich geladen: {model_name}")
+            tokenizer = AutoTokenizer.from_pretrained(local_model_path, use_fast=False)
+            model = AutoModelForCausalLM.from_pretrained(local_model_path)
+            logging.info(f"Llama-Modell erfolgreich mit AutoTokenizer und AutoModelForCausalLM geladen: {model_name}")
         except Exception as e:
             logging.error(f"Fehler beim Laden des Modells {model_name}: {str(e)}")
             raise ValueError(f"Ungültiges oder nicht verfügbares Modell: {model_name}. Fehler: {str(e)}")
