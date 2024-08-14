@@ -86,24 +86,27 @@ def check_environment():
         model_info = model_line.split(',')
         if len(model_info) != 4:
             raise ValueError(f"Ungültiges Modell-Format in config.txt: {model_line}")
-        model_name = model_info[0].strip()
-        if model_name == "Meta-Llama-3-8B":
-            local_model_path = os.path.join(base_model_path, model_name)
-            if not os.path.exists(local_model_path):
-                raise ValueError(f"Llama-Modell nicht gefunden: {local_model_path}")
-            logging.info(f"Llama-Modell gefunden: {local_model_path}")
-            try:
-                LlamaTokenizer.from_pretrained(local_model_path)
-                LlamaForCausalLM.from_pretrained(local_model_path)
-                logging.info(f"Llama-Modell erfolgreich geladen: {model_name}")
-            except Exception as e:
-                logging.error(f"Fehler beim Laden des Llama-Modells {model_name}: {str(e)}")
-                raise
+        model_name, short_name, _, _ = model_info
+        model_name = model_name.strip()
+
+        local_model_path = os.path.join(base_model_path, model_name)
 
         try:
-            tokenizer = AutoTokenizer.from_pretrained(local_model_path, use_fast=False)
-            model = AutoModelForCausalLM.from_pretrained(local_model_path)
-            logging.info(f"Llama-Modell erfolgreich mit AutoTokenizer und AutoModelForCausalLM geladen: {model_name}")
+            if model_name == "Meta-Llama-3-8B":
+                if not os.path.exists(local_model_path):
+                    raise ValueError(f"Llama-Modell nicht gefunden: {local_model_path}")
+                logging.info(f"Llama-Modell gefunden: {local_model_path}")
+                tokenizer = LlamaTokenizer.from_pretrained(local_model_path)
+                model = LlamaForCausalLM.from_pretrained(local_model_path)
+            else:
+                if os.path.exists(local_model_path):
+                    tokenizer = AutoTokenizer.from_pretrained(local_model_path, use_fast=False)
+                    model = AutoModelForSequenceClassification.from_pretrained(local_model_path)
+                else:
+                    tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
+                    model = AutoModelForSequenceClassification.from_pretrained(model_name)
+
+            logging.info(f"Modell erfolgreich geladen: {model_name}")
         except Exception as e:
             logging.error(f"Fehler beim Laden des Modells {model_name}: {str(e)}")
             raise ValueError(f"Ungültiges oder nicht verfügbares Modell: {model_name}. Fehler: {str(e)}")
