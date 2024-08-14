@@ -252,8 +252,8 @@ def main():
                 log_experiment(config, hf_name, results, config['Paths']['output'])
 
                 for param in trainer.model.parameters():
-                if not param.data.is_contiguous():
-                    param.data = param.data.contiguous()
+                    if not param.data.is_contiguous():
+                        param.data = param.data.contiguous()
 
                 trainer.save_model(model_save_path)
                 tokenizer.save_pretrained(model_save_path)
