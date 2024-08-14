@@ -8,7 +8,7 @@ import logging
 import configparser
 from huggingface_hub import HfApi
 from requests.exceptions import HTTPError
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, LlamaForCausalLM, LlamaTokenizer
 import torch
 from striprtf.striprtf import rtf_to_text
 import docx
@@ -84,6 +84,22 @@ def check_environment():
         if len(model_info) != 4:
             raise ValueError(f"Ungültiges Modell-Format in config.txt: {model_line}")
         model_name = model_info[0].strip()
+        if model_name == "Meta-Llama-3-8B":
+            local_model_path = os.path.join(base_model_path, model_name)
+            if not os.path.exists(local_model_path):
+                raise ValueError(f"Llama-Modell nicht gefunden: {local_model_path}")
+            logging.info(f"Llama-Modell gefunden: {local_model_path}")
+            try:
+                LlamaTokenizer.from_pretrained(local_model_path)
+                LlamaForCausalLM.from_pretrained(local_model_path)
+                logging.info(f"Llama-Modell erfolgreich geladen: {model_name}")
+            except Exception as e:
+                logging.error(f"Fehler beim Laden des Llama-Modells {model_name}: {str(e)}")
+                raise
+        else:
+            # Bestehendes Code für andere Modelle
+            # ...
+
         try:
             AutoTokenizer.from_pretrained(model_name)
             AutoModelForSequenceClassification.from_pretrained(model_name)

@@ -3,7 +3,7 @@ import warnings
 from data_processing import extract_text_from_file
 import datetime
 import torch
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, DataCollatorWithPadding
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, DataCollatorWithPadding, LlamaForCausalLM, LlamaTokenizer
 import numpy as np
 import os
 import logging
@@ -32,9 +32,30 @@ def predict_for_model(model, tokenizer, text, le):
     return sorted(results, key=lambda x: x[1], reverse=True)
 
 
-def get_model_and_tokenizer(model_name, num_labels):
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
+def get_model_and_tokenizer(model_name, num_labels, categories, config):
+    base_model_path = os.path.join(os.path.dirname(__file__), 'fresh-models')
+    local_model_path = os.path.join(base_model_path, model_name)
+
+    if model_name == "Meta-Llama-3-8B":
+        # Spezielle Behandlung für das Llama-Modell
+        tokenizer = LlamaTokenizer.from_pretrained(local_model_path)
+        model = LlamaForCausalLM.from_pretrained(local_model_path)
+
+        # Hier müssen wir möglicherweise das Modell für Sequenzklassifizierung anpassen
+        # Dies ist ein Platzhalter und muss wahrscheinlich angepasst werden
+        model = AutoModelForSequenceClassification.from_pretrained(
+            model.config._name_or_path,
+            num_labels=num_labels,
+            id2label={i: label for i, label in enumerate(categories)},
+            label2id={label: i for i, label in enumerate(categories)}
+        )
+    elif os.path.exists(local_model_path):
+        tokenizer = AutoTokenizer.from_pretrained(local_model_path)
+        model = AutoModelForSequenceClassification.from_pretrained(local_model_path, num_labels=num_labels)
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
+
     return tokenizer, model
 
 
