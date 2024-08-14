@@ -46,7 +46,7 @@ def check_environment():
     config = configparser.ConfigParser()
     config.read('config.txt')
 
-    required_sections = ['Paths', 'Training', 'Model']
+    required_sections = ['Paths', 'Training', 'Models']
     for section in required_sections:
         if section not in config:
             raise KeyError(f"Abschnitt '{section}' fehlt in der config.txt")
