@@ -391,6 +391,7 @@ def main():
                     continue
 
                 try:
+                    from safetensors.torch import load_file
                     model.load_state_dict(load_file(model_file))
                     logging.info(f"Modell erfolgreich geladen: {hf_name}")
                 except Exception as e:
