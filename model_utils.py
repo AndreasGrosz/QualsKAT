@@ -4,8 +4,10 @@ import warnings
 from data_processing import extract_text_from_file
 import datetime
 import torch
+from safetensors.torch import save_file
 from datasets import DatasetDict
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, DataCollatorWithPadding, LlamaForCausalLM, LlamaTokenizer, AutoConfig,get_linear_schedule_with_warmup
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, DataCollatorWithPadding, LlamaForCausalLM, LlamaTokenizer, AutoConfig,get_linear_schedule_with_warmup, TrainerCallback, TrainerCallbackHandler
+
 import numpy as np
 import os
 import logging
@@ -204,6 +206,13 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
         data_collator=data_collator,
         optimizers=(optimizer, scheduler),
     )
+    def save_model_hook(models, weights, output_dir):
+        for i, model in enumerate(models):
+            model_to_save = model.module if hasattr(model, 'module') else model
+            save_file(model_to_save.state_dict(), os.path.join(output_dir, f'model{i if i != 0 else ""}.safetensors'))
+
+    trainer.add_callback(TrainerCallback())
+    trainer.extend_callback_handler(TrainerCallbackHandler(save_model_hook))
 
     return trainer, tokenized_datasets
 

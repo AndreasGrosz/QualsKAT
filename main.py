@@ -367,6 +367,9 @@ def main():
         total_duration = (total_end_time - total_start_time) / 60
         logging.info(f"Gesamtausführungszeit für alle Modelle: {total_duration:.2f} Minuten")
 
+        logging.info(f"Versuche Modell zu laden von: {model_save_path}")
+        logging.info(f"Vollständiger Pfad: {os.path.join(model_save_path, 'pytorch_model.bin')}")
+        logging.info(f"Verzeichnisinhalt: {os.listdir(model_save_path)}")
         if args.checkthis:
             models_to_process = get_models_for_task(config, 'check')
             for hf_name, short_name in models_to_process:
