@@ -367,6 +367,7 @@ def main():
         total_duration = (total_end_time - total_start_time) / 60
         logging.info(f"Gesamtausführungszeit für alle Modelle: {total_duration:.2f} Minuten")
 
+
         logging.info(f"Versuche Modell zu laden von: {model_save_path}")
         logging.info(f"Vollständiger Pfad: {os.path.join(model_save_path, 'pytorch_model.bin')}")
         logging.info(f"Verzeichnisinhalt: {os.listdir(model_save_path)}")
@@ -376,6 +377,8 @@ def main():
                 model_save_path = os.path.join(config['Paths']['models'], hf_name.replace('/', '_'))
                 num_labels = len(categories)
                 model, tokenizer = get_model_and_tokenizer(hf_name, num_labels, categories, config)
+
+                logging.info(f"Versuche Modell zu laden von: {model_save_path}")
 
                 # Laden des trainierten Modells
                 model.load_state_dict(torch.load(os.path.join(model_save_path, 'pytorch_model.bin')))
