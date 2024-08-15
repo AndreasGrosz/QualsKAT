@@ -167,7 +167,9 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
         remove_unused_columns=False,
         gradient_checkpointing=True,
         optim="adamw_torch",
+        max_grad_norm=float(config['Optimization']['max_grad_norm']),
     )
+
     if "t5" in model_name.lower():
         training_args.gradient_checkpointing = True
     elif "xlnet" in model_name.lower() or "albert" in model_name.lower():
@@ -178,19 +180,16 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
     if "xlnet" in model_name.lower():
         training_args.per_device_train_batch_size = int(config['Training']['xlnet_batch_size'])
         training_args.gradient_accumulation_steps = int(config['Training']['xlnet_gradient_accumulation_steps'])
+
     # Batch-Größe für große Modelle reduzieren
     if any(model in model_name.lower() for model in ['large', 't5', 'xlnet', 'longformer']):
         training_args.per_device_train_batch_size = 1
         training_args.per_device_eval_batch_size = 1
         training_args.gradient_accumulation_steps = 16
-    num_update_steps_per_epoch = len(tokenized_datasets['train']) // (int(config['Training']['batch_size']) * int(config['Training']['gradient_accumulation_steps']))
+
+    num_update_steps_per_epoch = len(tokenized_datasets['train']) // (training_args.per_device_train_batch_size * training_args.gradient_accumulation_steps)
     num_train_epochs = 1 if quick else int(config['Training']['num_epochs'])
     total_steps = num_update_steps_per_epoch * num_train_epochs
-
-    training_args = TrainingArguments(
-        # ... (bestehende Argumente)
-        max_grad_norm=float(config['Optimization']['max_grad_norm']),
-    )
 
     optimizer, scheduler = get_optimizer_and_scheduler(model, config, total_steps)
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
@@ -210,7 +209,7 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
         tokenizer=tokenizer,
         data_collator=data_collator,
         optimizers=(optimizer, scheduler),
-        callbacks=[SafetensorsSaveCallback]
+        callbacks=[SafetensorsSaveCallback()]
     )
 
     return trainer, tokenized_datasets
