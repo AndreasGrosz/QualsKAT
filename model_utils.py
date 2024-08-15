@@ -6,8 +6,7 @@ import datetime
 import torch
 from safetensors.torch import save_file
 from datasets import DatasetDict
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, DataCollatorWithPadding, LlamaForCausalLM, LlamaTokenizer, AutoConfig,get_linear_schedule_with_warmup, TrainerCallback, TrainerCallbackHandler
-
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, DataCollatorWithPadding, LlamaForCausalLM, LlamaTokenizer, AutoConfig,get_linear_schedule_with_warmup, TrainerCallback
 import numpy as np
 import os
 import logging
@@ -197,6 +196,15 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
 
     optimizer, scheduler = get_optimizer_and_scheduler(model, config, total_steps)
 
+    def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, quick=False):
+
+    class SafetensorsSaveCallback(TrainerCallback):
+        def on_save(self, args, state, control, **kwargs):
+            checkpoint_folder = os.path.join(args.output_dir, f"checkpoint-{state.global_step}")
+            model_to_save = kwargs['model'].module if hasattr(kwargs['model'], 'module') else kwargs['model']
+            save_file(model_to_save.state_dict(), os.path.join(checkpoint_folder, 'model.safetensors'))
+            return control
+
     trainer = Trainer(
         model=model,
         args=training_args,
@@ -205,14 +213,8 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
         tokenizer=tokenizer,
         data_collator=data_collator,
         optimizers=(optimizer, scheduler),
+        callbacks=[SafetensorsSaveCallback]
     )
-    def save_model_hook(models, weights, output_dir):
-        for i, model in enumerate(models):
-            model_to_save = model.module if hasattr(model, 'module') else model
-            save_file(model_to_save.state_dict(), os.path.join(output_dir, f'model{i if i != 0 else ""}.safetensors'))
-
-    trainer.add_callback(TrainerCallback())
-    trainer.extend_callback_handler(TrainerCallbackHandler(save_model_hook))
 
     return trainer, tokenized_datasets
 
