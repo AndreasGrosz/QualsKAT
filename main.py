@@ -16,6 +16,7 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trai
 from sklearn.preprocessing import LabelEncoder
 from huggingface_hub import HfApi, hf_hub_download
 from requests.exceptions import HTTPError
+from safetensors.torch import load_file
 
 # Importe aus Ihren eigenen Modulen
 from file_utils import check_environment, check_hf_token, check_files, extract_text_from_file, calculate_documents_checksum, update_config_checksum
@@ -375,16 +376,26 @@ def main():
             models_to_process = get_models_for_task(config, 'check')
             for hf_name, short_name in models_to_process:
                 model_save_path = os.path.join(config['Paths']['models'], hf_name.replace('/', '_'))
+                logging.info(f"Versuche Modell zu laden von: {model_save_path}")
+
+                if not os.path.exists(model_save_path):
+                    logging.warning(f"Modellverzeichnis nicht gefunden: {model_save_path}")
+                    continue
+
                 num_labels = len(categories)
                 model, tokenizer = get_model_and_tokenizer(hf_name, num_labels, categories, config)
 
-                logging.info(f"Versuche Modell zu laden von: {model_save_path}")
+                model_file = os.path.join(model_save_path, 'model.safetensors')
+                if not os.path.exists(model_file):
+                    logging.warning(f"Modelldatei nicht gefunden: {model_file}")
+                    continue
 
-                # Laden des trainierten Modells
-                model.load_state_dict(torch.load(os.path.join(model_save_path, 'pytorch_model.bin')))
-
-                check_folder = config['Paths']['check_this']
-                analyze_documents_csv(check_folder, {short_name: (model, tokenizer, le)}, extract_text_from_file)
+                try:
+                    model.load_state_dict(load_file(model_file))
+                    logging.info(f"Modell erfolgreich geladen: {hf_name}")
+                except Exception as e:
+                    logging.error(f"Fehler beim Laden des Modells {hf_name}: {str(e)}")
+                    continue
 
         if args.predict:
             models_to_check = get_models_for_task(config, 'check')
