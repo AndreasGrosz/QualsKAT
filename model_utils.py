@@ -170,10 +170,12 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
     )
     if "t5" in model_name.lower():
         training_args.gradient_checkpointing = True
-    elif "xlnet" in model_name.lower() or "albert" in model_name.lower():
+    elif "xlnet" in model_name.lower() or "albert"
+    in model_name.lower():
         training_args.gradient_checkpointing = False
     else:
         training_args.gradient_checkpointing = True
+
     if "xlnet" in model_name.lower():
         training_args.per_device_train_batch_size = int(config['Training']['xlnet_batch_size'])
         training_args.gradient_accumulation_steps = int(config['Training']['xlnet_gradient_accumulation_steps'])
@@ -193,10 +195,6 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
 
     optimizer, scheduler = get_optimizer_and_scheduler(model, config, total_steps)
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
-
-    optimizer, scheduler = get_optimizer_and_scheduler(model, config, total_steps)
-
-    def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, quick=False):
 
     class SafetensorsSaveCallback(TrainerCallback):
         def on_save(self, args, state, control, **kwargs):
