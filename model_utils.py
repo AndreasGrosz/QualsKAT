@@ -170,7 +170,7 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
     )
     if "t5" in model_name.lower():
         training_args.gradient_checkpointing = True
-    elif "xlnet" in model_name.lower() or "albert"
+    elif "xlnet" in model_name.lower() or "albert":
     in model_name.lower():
         training_args.gradient_checkpointing = False
     else:
