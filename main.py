@@ -147,6 +147,8 @@ def main():
             training_performed = True
             models_to_process = get_models_for_task(config, 'train')
 
+            model_save_path = None  # Standardwert
+
             for hf_name, short_name in models_to_process:
                 print(f"\n{Fore.YELLOW}{'*'*80}")
                 print(f"{Fore.YELLOW}Training Model: {hf_name} ({short_name})")
@@ -363,6 +365,12 @@ def main():
                     tokenizer.save_pretrained(model_save_path)
 
                     logging.info(f"Ausführungszeit für Modell {hf_name} ({short_name}): {(time.time() - total_start_time) / 60:.2f} Minuten")
+
+            if model_save_path is None:
+                logging.error("Kein Modell wurde verarbeitet.")
+            else:
+                logging.info(f"Versuche Modell zu laden von: {model_save_path}")
+
 
         total_end_time = time.time()
         total_duration = (total_end_time - total_start_time) / 60
