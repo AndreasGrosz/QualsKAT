@@ -20,8 +20,7 @@ from requests.exceptions import HTTPError
 # Importe aus Ihren eigenen Modulen
 from file_utils import check_environment, check_hf_token, check_files, extract_text_from_file, calculate_documents_checksum, update_config_checksum
 from data_processing import create_dataset, load_categories_from_csv
-from model_utils import setup_model_and_trainer, get_model_and_tokenizer, get_models_for_task, get_optimizer_and_scheduler
-
+from model_utils import setup_model_and_trainer, get_model_and_tokenizer, get_models_for_task, get_optimizer_and_scheduler make_model_tensors_contiguous
 from analysis_utils import analyze_new_article, analyze_document, analyze_documents_csv
 from file_utils import get_device, extract_text_from_file
 from experiment_logger import log_experiment
@@ -194,15 +193,21 @@ def main():
 
                 try:
                     trainer.train()
+                except ValueError as e:
+                    if "You are trying to save a non contiguous tensor" in str(e):
+                        print(f"Fehler beim Speichern des Modells: {str(e)}")
+                        print("Versuche, die Tensoren zusammenhängend zu machen und erneut zu speichern...")
+                        make_model_tensors_contiguous(model)
+                        trainer.save_model(model_save_path)
+                    else:
+                        raise
                 except Exception as e:
                     print(f"Fehler während des Trainings: {str(e)}")
                     print("Versuche, das Training zu beenden...")
-                    trainer.state.global_step = trainer.args.max_steps  # Force training to end
-                    trainer.is_in_train = False
-
-                total_steps = get_total_steps(trainer)
-                start_time = time.time()
-
+                    if hasattr(trainer, 'state'):
+                        trainer.state.global_step = total_steps  # Force training to end
+                    if hasattr(trainer, 'is_in_train'):
+                        trainer.is_in_train = False
                 try:
                     print(f"\n{Fore.CYAN}Starte Training für {hf_name}")
                     train_dataloader = trainer.get_train_dataloader()
@@ -250,6 +255,12 @@ def main():
                     print(f"{Fore.CYAN}{key}: {value}")
 
                 log_experiment(config, hf_name, results, config['Paths']['output'])
+
+                model.cpu()
+                torch.cuda.empty_cache()
+                gc.collect()
+
+                print(f"\n{Fore.MAGENTA}Ausführungszeit für Modell {hf_name} ({short_name}): {(time.time() - start_time) / 60:.2f} Minuten")
 
                 for param in trainer.model.parameters():
                     if not param.data.is_contiguous():

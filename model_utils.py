@@ -64,6 +64,11 @@ def get_model_and_tokenizer(model_name, num_labels, categories, config):
             config=model_config,
             ignore_mismatched_sizes=True
         )
+        if "xlnet" in model_name.lower():
+            model.train()  # Stellen Sie sicher, dass das Modell im Trainingsmodus ist
+            # Initialisieren Sie die Speicher für die relativen Positionen
+            model.transformer.mem_len = 2048
+            model.transformer.attn_type = 'bi'
     else:
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForSequenceClassification.from_pretrained(
@@ -75,6 +80,12 @@ def get_model_and_tokenizer(model_name, num_labels, categories, config):
         )
 
     return model, tokenizer
+
+
+def make_model_tensors_contiguous(model):
+    for param in model.state_dict().values():
+        if isinstance(param, torch.Tensor):
+            param.data = param.data.contiguous()
 
 
 def get_device():
@@ -99,7 +110,7 @@ def get_optimal_batch_size(model, max_sequence_length, device):
 
 def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, quick=False):
     def tokenize_function(examples):
-        return tokenizer(examples["text"], truncation=True, padding="max_length", max_length=512)
+        return tokenizer(examples["text"], truncation=True, padding="max_length", max_length=256)
 
     # Tokenisiere den gesamten Datensatz
     tokenized_datasets = dataset.map(tokenize_function, batched=True, remove_columns=["text", "filename"])
@@ -145,6 +156,20 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
         gradient_checkpointing=True,
         optim="adamw_torch",
     )
+    if "t5" in model_name.lower():
+        training_args.gradient_checkpointing = True
+    elif "xlnet" in model_name.lower() or "albert" in model_name.lower():
+        training_args.gradient_checkpointing = False
+    else:
+        training_args.gradient_checkpointing = True
+    if "xlnet" in model_name.lower():
+        training_args.per_device_train_batch_size = int(config['Training']['xlnet_batch_size'])
+        training_args.gradient_accumulation_steps = int(config['Training']['xlnet_gradient_accumulation_steps'])
+    # Batch-Größe für große Modelle reduzieren
+    if any(model in model_name.lower() for model in ['large', 't5', 'xlnet', 'longformer']):
+        training_args.per_device_train_batch_size = 1
+        training_args.per_device_eval_batch_size = 1
+        training_args.gradient_accumulation_steps = 16
     num_update_steps_per_epoch = len(tokenized_datasets['train']) // (int(config['Training']['batch_size']) * int(config['Training']['gradient_accumulation_steps']))
     num_train_epochs = 1 if quick else int(config['Training']['num_epochs'])
     total_steps = num_update_steps_per_epoch * num_train_epochs

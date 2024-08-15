@@ -23,12 +23,15 @@ model_list =
 checksum =
 
 [Training]
-batch_size = 4
+batch_size = 1
 learning_rate = 2e-5
 num_epochs = 3
 weight_decay = 0.01
 warmup_steps = 500
-gradient_accumulation_steps = 4
+gradient_accumulation_steps = 16
+
+xlnet_batch_size = 1
+xlnet_gradient_accumulation_steps = 32
 
 [Optimization]
 fp16 = True
