@@ -47,6 +47,27 @@ def get_total_steps(trainer):
     return len(trainer.get_train_dataloader())
 
 
+def custom_training_loop(trainer, model, total_steps):
+    progress_bar = tqdm(range(total_steps))
+    for step, batch in enumerate(trainer.get_train_dataloader()):
+        model.train()
+        batch = {k: v.to(model.device) for k, v in batch.items()}
+        outputs = model(**batch)
+        loss = outputs.loss
+        loss.backward()
+
+        if (step + 1) % trainer.args.gradient_accumulation_steps == 0:
+            trainer.optimizer.step()
+            trainer.lr_scheduler.step()
+            model.zero_grad()
+            progress_bar.update(1)
+
+        if step >= total_steps:
+            break
+
+    return trainer
+
+
 def print_training_progress(epoch, step, total_steps, loss, grad_norm, learning_rate, start_time):
     elapsed_time = time.time() - start_time
     estimated_total_time = elapsed_time / (step + 1) * total_steps
@@ -67,6 +88,7 @@ def main():
 
     # Setze einen festen Seed für Reproduzierbarkeit
     set_seed(42)
+    models_to_process = []
 
     device = get_device()
     logging.info(f"Verwende Gerät: {device}")
@@ -192,7 +214,7 @@ def main():
                 start_time = time.time()
 
                 try:
-                    trainer.train()
+                    trainer = custom_training_loop(trainer, model, total_steps)
                 except ValueError as e:
                     if "You are trying to save a non contiguous tensor" in str(e):
                         print(f"Fehler beim Speichern des Modells: {str(e)}")
@@ -202,8 +224,8 @@ def main():
                     else:
                         raise
                 except Exception as e:
-                    print(f"Fehler während des Trainings: {str(e)}")
-                    print("Versuche, das Training zu beenden...")
+                    print(f"{Fore.RED}Fehler während des Trainings: {str(e)}")
+                    print(f"{Fore.YELLOW}Versuche, das Training zu beenden...")
                     if hasattr(trainer, 'state'):
                         trainer.state.global_step = total_steps  # Force training to end
                     if hasattr(trainer, 'is_in_train'):
@@ -346,8 +368,8 @@ def main():
         logging.info(f"Gesamtausführungszeit für alle Modelle: {total_duration:.2f} Minuten")
 
         if args.checkthis:
-            models_to_check = get_models_for_task(config, 'check')
-            for hf_name, short_name in models_to_check:
+            models_to_process = get_models_for_task(config, 'check')
+            for hf_name, short_name in models_to_process:
                 model_save_path = os.path.join(config['Paths']['models'], short_name)
                 num_labels = len(categories)
                 model, tokenizer = get_model_and_tokenizer(hf_name, num_labels, categories, config)
@@ -387,7 +409,10 @@ def main():
 
         print(f"{Fore.CYAN}{'='*80}")
         print(f"{Fore.GREEN}Training abgeschlossen für {hf_name}")
-        print(f"{Fore.YELLOW}Finale Loss: {trainer.state.log_history[-1]['loss']}")
+        if trainer.state.log_history and 'loss' in trainer.state.log_history[-1]:
+            print(f"{Fore.YELLOW}Finale Loss: {trainer.state.log_history[-1]['loss']}")
+        else:
+            print(f"{Fore.YELLOW}Finale Loss: Nicht verfügbar")
         print(f"{Fore.YELLOW}Anzahl der durchgeführten Schritte: {trainer.state.global_step}")
         print(f"{Fore.CYAN}{'='*80}")
         logging.error("---------------------------------------")

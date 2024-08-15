@@ -19,7 +19,18 @@ warnings.filterwarnings("ignore", message="Some weights of")
 
 
 def get_optimizer_and_scheduler(model, config, num_training_steps):
-    optimizer = torch.optim.AdamW(model.parameters(), lr=float(config['Training']['learning_rate']), weight_decay=float(config['Training']['weight_decay']))
+    no_decay = ["bias", "LayerNorm.weight"]
+    optimizer_grouped_parameters = [
+        {
+            "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
+            "weight_decay": float(config['Training']['weight_decay']),
+        },
+        {
+            "params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)],
+            "weight_decay": 0.0,
+        },
+    ]
+    optimizer = torch.optim.AdamW(optimizer_grouped_parameters, lr=float(config['Training']['learning_rate']))
     scheduler = get_linear_schedule_with_warmup(
         optimizer,
         num_warmup_steps=int(config['Training']['warmup_steps']),
@@ -174,10 +185,16 @@ def setup_model_and_trainer(dataset, le, config, model_name, model, tokenizer, q
     num_train_epochs = 1 if quick else int(config['Training']['num_epochs'])
     total_steps = num_update_steps_per_epoch * num_train_epochs
 
+    training_args = TrainingArguments(
+        # ... (bestehende Argumente)
+        max_grad_norm=float(config['Optimization']['max_grad_norm']),
+    )
+
     optimizer, scheduler = get_optimizer_and_scheduler(model, config, total_steps)
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
     optimizer, scheduler = get_optimizer_and_scheduler(model, config, total_steps)
+
     trainer = Trainer(
         model=model,
         args=training_args,
