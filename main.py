@@ -90,6 +90,7 @@ def main():
     # Setze einen festen Seed für Reproduzierbarkeit
     set_seed(42)
     models_to_process = []
+    model_save_path = None
 
     device = get_device()
     logging.info(f"Verwende Gerät: {device}")
@@ -147,7 +148,6 @@ def main():
             training_performed = True
             models_to_process = get_models_for_task(config, 'train')
 
-            model_save_path = None  # Standardwert
 
             for hf_name, short_name in models_to_process:
                 print(f"\n{Fore.YELLOW}{'*'*80}")
@@ -366,11 +366,6 @@ def main():
 
                     logging.info(f"Ausführungszeit für Modell {hf_name} ({short_name}): {(time.time() - total_start_time) / 60:.2f} Minuten")
 
-            if model_save_path is None:
-                logging.error("Kein Modell wurde verarbeitet.")
-            else:
-                logging.info(f"Versuche Modell zu laden von: {model_save_path}")
-
 
         total_end_time = time.time()
         total_duration = (total_end_time - total_start_time) / 60
@@ -380,6 +375,7 @@ def main():
         logging.info(f"Versuche Modell zu laden von: {model_save_path}")
         logging.info(f"Vollständiger Pfad: {os.path.join(model_save_path, 'pytorch_model.bin')}")
         logging.info(f"Verzeichnisinhalt: {os.listdir(model_save_path)}")
+
         if args.checkthis:
             models_to_process = get_models_for_task(config, 'check')
             for hf_name, short_name in models_to_process:
@@ -399,18 +395,21 @@ def main():
                     continue
 
                 try:
-                    from safetensors.torch import load_file
                     model.load_state_dict(load_file(model_file))
                     logging.info(f"Modell erfolgreich geladen: {hf_name}")
                 except Exception as e:
                     logging.error(f"Fehler beim Laden des Modells {hf_name}: {str(e)}")
                     continue
+
                 # Hier den Code für die Analyse mit dem geladenen Modell einfügen
                 check_files(config, {short_name: (model, tokenizer, le)}, extract_text_from_file)
 
                 # Speicher freigeben
                 del model
                 torch.cuda.empty_cache()
+
+            if not models_to_process:
+                logging.warning("Keine Modelle zum Überprüfen gefunden.")
 
         if args.predict:
             models_to_check = get_models_for_task(config, 'check')
