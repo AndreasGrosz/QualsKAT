@@ -396,6 +396,12 @@ def main():
                 except Exception as e:
                     logging.error(f"Fehler beim Laden des Modells {hf_name}: {str(e)}")
                     continue
+                # Hier den Code für die Analyse mit dem geladenen Modell einfügen
+                check_files(config, {short_name: (model, tokenizer, le)}, extract_text_from_file)
+
+                # Speicher freigeben
+                del model
+                torch.cuda.empty_cache()
 
         if args.predict:
             models_to_check = get_models_for_task(config, 'check')
