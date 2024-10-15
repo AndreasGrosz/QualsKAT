@@ -94,3 +94,5 @@ If you encounter CUDA-related issues:
 ## License
 
 [Specify the license under which your project is released]
+# Umgebung aktivieren
+conda activate ./env
