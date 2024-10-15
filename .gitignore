@@ -7,7 +7,6 @@ documents-neu
 venv/
 models/
 fresh-models/
-output/
 CheckThis/
 
 # Andere zu ignorierende Dateien:
