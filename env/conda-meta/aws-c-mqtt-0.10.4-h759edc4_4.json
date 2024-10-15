@@ -1,0 +1,169 @@
+{
+  "build": "h759edc4_4",
+  "build_number": 4,
+  "channel": "https://conda.anaconda.org/conda-forge/linux-64",
+  "constrains": [],
+  "depends": [
+    "aws-c-common >=0.9.19,<0.9.20.0a0",
+    "aws-c-http >=0.8.1,<0.8.2.0a0",
+    "aws-c-io >=0.14.8,<0.14.9.0a0",
+    "libgcc-ng >=12"
+  ],
+  "extracted_package_dir": "/home/res/miniconda3/pkgs/aws-c-mqtt-0.10.4-h759edc4_4",
+  "files": [
+    "bin/elastipubsub",
+    "bin/elastipubsub5",
+    "bin/mqtt5canary",
+    "include/aws/mqtt/client.h",
+    "include/aws/mqtt/exports.h",
+    "include/aws/mqtt/mqtt.h",
+    "include/aws/mqtt/private/mqtt_client_test_helper.h",
+    "include/aws/mqtt/v5/mqtt5_client.h",
+    "include/aws/mqtt/v5/mqtt5_listener.h",
+    "include/aws/mqtt/v5/mqtt5_packet_storage.h",
+    "include/aws/mqtt/v5/mqtt5_types.h",
+    "lib/aws-c-mqtt/cmake/aws-c-mqtt-config.cmake",
+    "lib/aws-c-mqtt/cmake/shared/aws-c-mqtt-targets-release.cmake",
+    "lib/aws-c-mqtt/cmake/shared/aws-c-mqtt-targets.cmake",
+    "lib/libaws-c-mqtt.so",
+    "lib/libaws-c-mqtt.so.1.0.0"
+  ],
+  "fn": "aws-c-mqtt-0.10.4-h759edc4_4.conda",
+  "license": "Apache-2.0",
+  "link": {
+    "source": "/home/res/miniconda3/pkgs/aws-c-mqtt-0.10.4-h759edc4_4",
+    "type": 1
+  },
+  "md5": "8ced661d9dcece8698922fd8a73b6511",
+  "name": "aws-c-mqtt",
+  "package_tarball_full_path": "/home/res/miniconda3/pkgs/aws-c-mqtt-0.10.4-h759edc4_4.conda",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "bin/elastipubsub",
+        "file_mode": "binary",
+        "path_type": "hardlink",
+        "prefix_placeholder": "/home/conda/feedstock_root/build_artifacts/aws-c-mqtt_1716188408744/_h_env_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_",
+        "sha256": "11d2b073b59022afde05c8bfe9a471340919997bf73ea5c7aa8a21f07971d5b4",
+        "sha256_in_prefix": "2ac837957ddb35a7cc739f11157bbbe68a3465f6f6f5cf0d2c8b5f1c3c5c1c99",
+        "size_in_bytes": 40800
+      },
+      {
+        "_path": "bin/elastipubsub5",
+        "file_mode": "binary",
+        "path_type": "hardlink",
+        "prefix_placeholder": "/home/conda/feedstock_root/build_artifacts/aws-c-mqtt_1716188408744/_h_env_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_",
+        "sha256": "77829e1e45120c81a8280289048dc7d7a13cbe07e1fb5d3680303b7130fe1fc0",
+        "sha256_in_prefix": "0771d26b5089f06bfcb896a4cce86aeecd226407131386c121c8b8b10d2239e7",
+        "size_in_bytes": 36720
+      },
+      {
+        "_path": "bin/mqtt5canary",
+        "path_type": "hardlink",
+        "sha256": "fb48dbbd0ae4ca8c82b9c1fc0f523cc6fbf30059016e3f81f3e51ffd5f988004",
+        "sha256_in_prefix": "fb48dbbd0ae4ca8c82b9c1fc0f523cc6fbf30059016e3f81f3e51ffd5f988004",
+        "size_in_bytes": 37272
+      },
+      {
+        "_path": "include/aws/mqtt/client.h",
+        "path_type": "hardlink",
+        "sha256": "9af742e9208b9216b52db65d71ee2e47d6be5918cad575b5752db6a3cd44d034",
+        "sha256_in_prefix": "9af742e9208b9216b52db65d71ee2e47d6be5918cad575b5752db6a3cd44d034",
+        "size_in_bytes": 28679
+      },
+      {
+        "_path": "include/aws/mqtt/exports.h",
+        "path_type": "hardlink",
+        "sha256": "2749a681a985652e8075b0135c85671bbcd17bef0c829045ab33e48ec9cf3e6a",
+        "sha256_in_prefix": "2749a681a985652e8075b0135c85671bbcd17bef0c829045ab33e48ec9cf3e6a",
+        "size_in_bytes": 981
+      },
+      {
+        "_path": "include/aws/mqtt/mqtt.h",
+        "path_type": "hardlink",
+        "sha256": "a1cba848da8ef2d2df0acac6f615ab58642fdff1c3f0a44259ea9e26b1dba60a",
+        "sha256_in_prefix": "a1cba848da8ef2d2df0acac6f615ab58642fdff1c3f0a44259ea9e26b1dba60a",
+        "size_in_bytes": 4441
+      },
+      {
+        "_path": "include/aws/mqtt/private/mqtt_client_test_helper.h",
+        "path_type": "hardlink",
+        "sha256": "5f446cf0474ff5f290c43185dbf5fa558b0169ffe68af3373b37073710d388c1",
+        "sha256_in_prefix": "5f446cf0474ff5f290c43185dbf5fa558b0169ffe68af3373b37073710d388c1",
+        "size_in_bytes": 1090
+      },
+      {
+        "_path": "include/aws/mqtt/v5/mqtt5_client.h",
+        "path_type": "hardlink",
+        "sha256": "cc2368f918177e5a6030dd6e7a87f1490012cffa7a393f07239ec3e4da56b967",
+        "sha256_in_prefix": "cc2368f918177e5a6030dd6e7a87f1490012cffa7a393f07239ec3e4da56b967",
+        "size_in_bytes": 28267
+      },
+      {
+        "_path": "include/aws/mqtt/v5/mqtt5_listener.h",
+        "path_type": "hardlink",
+        "sha256": "db1ae186806ea891a26b7d96d8a3d48efdeae392e602ed4cbc40f3a6aefc9c62",
+        "sha256_in_prefix": "db1ae186806ea891a26b7d96d8a3d48efdeae392e602ed4cbc40f3a6aefc9c62",
+        "size_in_bytes": 2674
+      },
+      {
+        "_path": "include/aws/mqtt/v5/mqtt5_packet_storage.h",
+        "path_type": "hardlink",
+        "sha256": "70955ec61379a886ec7cd59d224131aa3525024d59f6a66dda088b19f1ceb4b5",
+        "sha256_in_prefix": "70955ec61379a886ec7cd59d224131aa3525024d59f6a66dda088b19f1ceb4b5",
+        "size_in_bytes": 9797
+      },
+      {
+        "_path": "include/aws/mqtt/v5/mqtt5_types.h",
+        "path_type": "hardlink",
+        "sha256": "e8e932fb3e61865bd01d128c081aab89113821dd9da0f82cfc9c9a0cde8c97cc",
+        "sha256_in_prefix": "e8e932fb3e61865bd01d128c081aab89113821dd9da0f82cfc9c9a0cde8c97cc",
+        "size_in_bytes": 15717
+      },
+      {
+        "_path": "lib/aws-c-mqtt/cmake/aws-c-mqtt-config.cmake",
+        "path_type": "hardlink",
+        "sha256": "f23b325f9f814f2cc23fe568f27e0564233f116ca405dde965152f1436812b69",
+        "sha256_in_prefix": "f23b325f9f814f2cc23fe568f27e0564233f116ca405dde965152f1436812b69",
+        "size_in_bytes": 564
+      },
+      {
+        "_path": "lib/aws-c-mqtt/cmake/shared/aws-c-mqtt-targets-release.cmake",
+        "path_type": "hardlink",
+        "sha256": "0e9554a81f35d46e6c03933f656b1b87c975151e9dc65b06697e5ab82fea28fc",
+        "sha256_in_prefix": "0e9554a81f35d46e6c03933f656b1b87c975151e9dc65b06697e5ab82fea28fc",
+        "size_in_bytes": 871
+      },
+      {
+        "_path": "lib/aws-c-mqtt/cmake/shared/aws-c-mqtt-targets.cmake",
+        "path_type": "hardlink",
+        "sha256": "28df019d6f1cb6757d86abf8c440d30bc9ceda22227e0b2db7cca344c7284211",
+        "sha256_in_prefix": "28df019d6f1cb6757d86abf8c440d30bc9ceda22227e0b2db7cca344c7284211",
+        "size_in_bytes": 4298
+      },
+      {
+        "_path": "lib/libaws-c-mqtt.so",
+        "path_type": "softlink",
+        "sha256": "891ea87bacee30853e841abaa1e7f3b8b141b435a69d76ab9354598b67f4a31a",
+        "size_in_bytes": 375000
+      },
+      {
+        "_path": "lib/libaws-c-mqtt.so.1.0.0",
+        "file_mode": "binary",
+        "path_type": "hardlink",
+        "prefix_placeholder": "/home/conda/feedstock_root/build_artifacts/aws-c-mqtt_1716188408744/_h_env_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_",
+        "sha256": "891ea87bacee30853e841abaa1e7f3b8b141b435a69d76ab9354598b67f4a31a",
+        "sha256_in_prefix": "7b9ff0fc654025cb652d703d6bc0388c3a09a78519068fe732f9c655fba8c24e",
+        "size_in_bytes": 375000
+      }
+    ],
+    "paths_version": 1
+  },
+  "requested_spec": "None",
+  "sha256": "663b659077570819c649b05b0a1f616373618d89ac5ad6ed93ff4b660b4172dc",
+  "size": 164198,
+  "subdir": "linux-64",
+  "timestamp": 1716189027000,
+  "url": "https://conda.anaconda.org/conda-forge/linux-64/aws-c-mqtt-0.10.4-h759edc4_4.conda",
+  "version": "0.10.4"
+}
