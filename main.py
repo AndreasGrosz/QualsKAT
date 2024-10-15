@@ -26,6 +26,19 @@ from analysis_utils import analyze_new_article, analyze_document, analyze_docume
 from file_utils import get_device, extract_text_from_file
 from experiment_logger import log_experiment
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+def check_cuda():
+    if torch.cuda.is_available():
+        logger.info(f"CUDA ist verfügbar. Gefundene Geräte: {torch.cuda.device_count()}")
+        logger.info(f"Aktuelles CUDA-Gerät: {torch.cuda.get_device_name(0)}")
+        return True
+    else:
+        logger.warning("CUDA ist nicht verfügbar. Verwende CPU.")
+        return False
+
+
 # Aktualisiere den GradScaler
 if hasattr(torch.cuda.amp, 'GradScaler'):
     torch.cuda.amp.GradScaler = lambda **kwargs: torch.amp.GradScaler('cuda', **kwargs)
@@ -36,6 +49,7 @@ def main():
     logging.info("")
     logging.error("Programmstart")
     logging.error("=============")
+    cuda_available = check_cuda()
 
     # Setze einen festen Seed für Reproduzierbarkeit
     set_seed(42)

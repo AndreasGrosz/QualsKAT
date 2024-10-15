@@ -1,27 +1,96 @@
-## Authorship Attribution Project
+# Authorship Attribution and QKAT CUDA Project
 
-### Overview
-This project focuses on authorship attribution, aiming to determine the author of a given text. Two approaches, generative (n-gram language model) and discriminative (sequence classifier), are explored and compared in terms of their effectiveness in this task.
+## Overview
+This project combines authorship attribution techniques with CUDA-accelerated computations and model loading. It aims to determine the author of a given text using both generative (n-gram language model) and discriminative (sequence classifier) approaches, while leveraging CUDA for performance optimization.
 
-### Setup
-I have compiled source files containing excerpts from works by various authors: Jane Austen, Charles Dickens, Leo Tolstoy, and Oscar Wilde. These files are available in the repo. Ensure to decide on the encoding type to use, preferably UTF-8.
+## Project Components
 
-### Project Details
+### 1. Authorship Attribution
 - **Generative Classifier**:
-  - Utilize NLTK's LM package to build n-gram language models, experimenting with different smoothing techniques and backoff strategies as outlined in Section 3.5 of Jurafsky and Martin.
-  - Implement methods to handle out-of-vocabulary words during runtime.
-  - Generate samples for each author using the trained language models and report the perplexity scores.
-  - Optional: Implement n-gram language models from scratch using Numpy or PyTorch for bonus points.
+  - Uses NLTK's LM package for n-gram language models
+  - Experiments with different smoothing techniques and backoff strategies
+  - Handles out-of-vocabulary words
+  - Generates samples and reports perplexity scores for each author
 
 - **Discriminative Classifier**:
-  - Employ Huggingface to create a sequence classification model with k labels corresponding to the number of authors.
-  - Prepare data, create train and test dataloaders, and train the classifier using the Huggingface Trainer class.
+  - Utilizes Huggingface for sequence classification
+  - Prepares data, creates train and test dataloaders
+  - Trains the classifier using Huggingface Trainer class
 
-### Instructions
-- Run the program `classifier.py` with the following command-line setups:
+### 2. CUDA and Model Loading
+- Implements CUDA-accelerated computations for improved performance
+- Manages model loading and processing
+
+## Environment Setup
+
+This project uses a local conda environment for managing dependencies.
+
+1. Ensure you have Anaconda or Miniconda installed.
+
+2. Clone the repository:
+   ```
+   git clone [your-repository-url]
+   cd [your-project-directory]
+   ```
+
+3. Create and activate the local conda environment:
+   ```
+   conda create --prefix ./env python=3.10
+   conda activate ./env
+   ```
+
+4. Install the required packages:
+   ```
+   conda env update --prefix ./env --file environment.yml --prune
+   ```
+
+5. Verify the installation:
+   ```
+   conda list
+   ```
+
+## Running the Project
+
+### Authorship Attribution Component
+```
+python main.py --checkthis --quick
+
+```
+
+## Project Structure
+
+- `main.py`: Main script for authorship attribution
+- `file_utils.py`: Utility functions for file operations
+- `model_utils.py`: Functions for model loading and processing
+- `data_processing.py`: Data processing and preparation functions
+- `analysis_utils.py`: Analysis utility functions
+- `env/`: Local conda environment (do not edit directly)
+- `models/`: Directory containing pre-trained models
+- `CheckThis/`: Directory for files to be analyzed
+- `output/`: Directory for output files
+
+## Data Preparation
+Ensure source files containing excerpts from various authors are available in the repository. Use UTF-8 encoding for consistency.
+
+## Git and Environment Management
+
+- The local conda environment (`./env`) is included in version control, excluding large binary files.
+- After making changes to the environment, update `environment.yml`:
   ```
-  python3 classifier.py authorlist -approach [generative|discriminative]
-  python3 classifier.pt authorlist -approach [generative|discriminative] -test testfile
+  conda env export --from-history > environment.yml
   ```
-- When running without the `-test` flag, the program automatically extracts a development set, trains the model, and prints the results.
-- When running with the `-test` flag, the program uses the entirety of data to train a language model and outputs classification results for each line in the given test file.
+
+## Troubleshooting
+
+If you encounter CUDA-related issues:
+1. Ensure your CUDA drivers are up to date.
+2. Verify that the installed PyTorch version is compatible with your CUDA version.
+3. Check the `models` directory to ensure all required model files are present.
+
+## Contributing
+
+[Add any guidelines for contributing to your project]
+
+## License
+
+[Specify the license under which your project is released]
