@@ -15,33 +15,49 @@ from sklearn.preprocessing import LabelEncoder
 import numpy as np
 
 
-def analyze_documents_csv(check_folder, models, extract_text_from_file):
+import csv
+import os
+from tqdm import tqdm
+from statistics import mean
+
+def analyze_documents_csv(check_folder, models, extract_text_from_file, output_file, save_interval=100):
     files = [f for f in os.listdir(check_folder) if os.path.isfile(os.path.join(check_folder, f))]
 
-    # CSV-Header
     header = ['Filename', 'r-base', 'ms-deberta', 'distilb', 'r-large', 'albert', 'Mittelwert']
-    print(','.join(header))
 
-    for file in tqdm(files, desc="Analysiere Dateien"):
-        file_path = os.path.join(check_folder, file)
-        text = extract_text_from_file(file_path)
+    # Überprüfen, ob die Datei bereits existiert
+    file_exists = os.path.isfile(output_file)
 
-        if text is None or len(text) == 0:
-            print(f'"{file}",N/A,N/A,N/A,N/A,N/A,N/A')
-            continue
+    with open(output_file, 'a', newline='', encoding='utf-8') as csvfile:
+        writer = csv.writer(csvfile)
+        if not file_exists:
+            writer.writerow(header)
 
-        results = []
-        for model_name, (model, tokenizer, le) in models.items():
-            confidence = calculate_lrh_confidence(model, tokenizer, text, le)
-            results.append(confidence)
+        for index, file in enumerate(tqdm(files, desc="Analysiere Dateien")):
+            file_path = os.path.join(check_folder, file)
+            text = extract_text_from_file(file_path)
 
-        avg_confidence = mean(results)
+            if text is None or len(text) == 0:
+                output = [file, 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A']
+            else:
+                results = []
+                for model_name, (model, tokenizer, le) in models.items():
+                    confidence = calculate_lrh_confidence(model, tokenizer, text, le)
+                    results.append(confidence)
 
-        # CSV-Zeile ausgeben
-        output = [f'"{file}"'] + [f"{conf:.1f}" for conf in results] + [f"{avg_confidence:.1f}"]
-        print(','.join(output))
+                avg_confidence = mean(results)
+                output = [file] + [f"{conf:.1f}" for conf in results] + [f"{avg_confidence:.1f}"]
 
-    sys.stdout.flush()
+            writer.writerow(output)
+            print(','.join(map(str, output)))
+
+            # Zwischenspeichern in regelmäßigen Intervallen
+            if (index + 1) % save_interval == 0:
+                csvfile.flush()
+                os.fsync(csvfile.fileno())
+                print(f"Zwischenergebnis gespeichert nach {index + 1} Dateien.")
+
+    print(f"Alle Ergebnisse wurden in {output_file} gespeichert.")
 
 def calculate_lrh_confidence(model, tokenizer, text, le):
     inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)

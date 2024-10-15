@@ -152,7 +152,8 @@ def main():
             }
 
             check_folder = config['Paths']['check_this']
-            analyze_documents_csv(check_folder, models, extract_text_from_file)
+            output_file = os.path.join(config['Paths']['output'], 'analysis_results.csv')
+            analyze_documents_csv(check_folder, models, extract_text_from_file, output_file, save_interval=100)
 
         if args.predict:
             result = analyze_new_article(args.predict, trainer, tokenizer, le, extract_text_from_file)
