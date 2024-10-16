@@ -13,17 +13,30 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from datetime import date
 
 # Daten laden
 # df = pd.read_csv('output/HCOBs-analysis_results.csv')
 
-df = pd.read_csv('output/results.csv')
+input_file = 'output/results-red-vols-1970s.csv'
+df = pd.read_csv(input_file)
 
 # Modellnamen
 models = ['r-base', 'ms-deberta', 'distilb', 'r-large', 'albert']
 
+
+# Überprüfen, ob alle Modellspalten numerisch sind
+for model in models:
+    if df[model].dtype == 'object':
+        df[model] = pd.to_numeric(df[model], errors='coerce')
+
+
 # Überschrift
-print("# 241016 Analyse Models Ausgabe.md")
+# Aktuelles Datum
+current_date = date.today().strftime("%y%m%d")
+# Name der Eingabedatei ohne Pfad und Erweiterung
+input_file_name = input_file.split('/')[-1].split('.')[0]
+print(f"# {current_date} Analyse Models Ausgabe {input_file_name}.md")
 
 # 1. Deskriptive Statistik
 print("## Deskriptive Statistik:")
