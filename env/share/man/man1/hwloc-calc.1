@@ -1,8 +1,8 @@
 .\" -*- nroff -*-
-.\" Copyright © 2010-2024 Inria.  All rights reserved.
+.\" Copyright © 2010-2023 Inria.  All rights reserved.
 .\" Copyright © 2009-2020 Cisco Systems, Inc.  All rights reserved.
 .\" See COPYING in top-level directory.
-.TH HWLOC-CALC "1" "Jul 04, 2024" "2.11.1" "hwloc"
+.TH HWLOC-CALC "1" "Sep 07, 2023" "2.9.3" "hwloc"
 .SH NAME
 hwloc-calc \- Operate on cpu mask strings and objects
 .
@@ -151,10 +151,6 @@ as well as NUMA-nodes that are local to multiple CPUs.
 \fB\-\-ni\fR \fB\-\-nodeset\-input\fR
 Interpret input sets as nodesets instead of CPU sets.
 .TP
-\fB\-\-oo\fR \fB\-\-object\-output\fR
-When reporting object indexes (e.g. with \fB\-I\fR or \fB\-\-local\-memory\fR),
-this option prefixes these indexes with types (e.g. \fICore:0\fR instead of \fI0\fR).
-.TP
 \fB\-N \-\-number\-of <type|depth>\fR
 Report the number of objects of the given type or depth that intersect the CPU set.
 This is convenient for finding how many cores, NUMA nodes or PUs are available
@@ -163,10 +159,6 @@ in a machine.
 When combined with \fB\-\-nodeset\fR or \fB\-\-nodeset-output\fR,
 the nodeset is considered instead of the CPU set for finding matching objects.
 This is useful when reporting the output as a number or set of NUMA nodes.
-
-\fI<type\fR may contain a filter to select specific objects among
-the type. For instance \fB\-N "numa[hbm]"\fR counts NUMA nodes marked with subtype "HBM",
-while \fB\-N "numa[mcdram]"\fR only counts MCDRAM NUMA nodes on KNL.
 
 If an OS device subtype such as \fIgpu\fR  is given instead of \fIosdev\fR,
 only the os devices of that subtype will be counted.
@@ -186,15 +178,8 @@ When combined with \fB\-\-nodeset\fR or \fB\-\-nodeset-output\fR,
 the nodeset is considered instead of the CPU set for finding matching objects.
 This is useful when reporting the output as a number or set of NUMA nodes.
 
-\fI<type\fR may contain a filter to select specific objects among
-the type. For instance \fB\-N "numa[hbm]"\fR lists NUMA nodes marked with subtype "HBM",
-while \fB\-N "numa[mcdram]"\fR only lists MCDRAM NUMA nodes on KNL.
-
 If an OS device subtype such as \fIgpu\fR is given instead of \fIosdev\fR,
 only the os devices of that subtype will be returned.
-
-If combined with \fB\-\-object\-output\fR, object indexes are prefixed
-with types (e.g. \fICore:0\fR instead of \fI0\fR).
 .TP
 \fB\-H \-\-hierarchical <type1>.<type2>...\fR
 Find the list of objects of type <type2> that intersect the CPU set and
@@ -230,9 +215,6 @@ The selection performed by \fB\-\-local\-memory\fR may be precisely
 configured with \fB\-\-local\-memory\-flags\fR,
 while \fB\-I numa\fR just selects all nodes that are somehow local to
 any of the input objects.
-
-If combined with \fB\-\-object\-output\fR, object indexes are prefixed
-with types (e.g. \fINUMANode:0\fR instead of \fI0\fR).
 .TP
 \fB\-\-local\-memory\-flags\fR
 Change the flags used to select local NUMA nodes.
@@ -248,7 +230,7 @@ This option enables \fB\-\-local\-memory\fR.
 .TP
 \fB\-\-best\-memattr\fR <name>
 Enable the listing of local memory nodes with \fB\-\-local\-memory\fR,
-but only display the local nodes that have the best value for the memory
+but only display the local node that has the best value for the memory
 attribute given by \fI<name>\fR (or as an index).
 
 If the memory attribute values depend on the initiator, the hwloc-calc
@@ -260,17 +242,6 @@ All existing attributes in the current topology may be listed with
 
     $ lstopo --memattrs
 
-If combined with \fB\-\-object\-output\fR, the object index is prefixed
-with its type (e.g. \fINUMANode:0\fR instead of \fI0\fR).
-
-\fI<name>\fR may be suffixed with flags to tune the selection of best nodes,
-for instance as \fBbandwidth,strict,default\fR.
-\fBdefault\fR means that all local nodes are reported if no best could be found.
-\fBstrict\fR means that nodes are selected only if their performance is the best
-for all the input CPUs. On a dual-socket machine with HBM in each socket,
-both HBMs are the best for their local socket, but not for the remote socket.
-Hence both HBM are also considered best for the entire machine by default,
-but none if \fBstrict\fR.
 .TP
 \fB\-\-sep <sep>\fR
 Change the field separator in the output.
@@ -282,26 +253,11 @@ while a comma is used to separate indexes
 \fB\-\-single\fR
 Singlify the output to a single CPU.
 .TP
-\fB\-\-cpuset\-output\-format\fR <hwloc|list|taskset> \fB\-\-cof\fR <hwloc|list|taskset>
-Change the format of displayed CPU set strings.
-By default, the hwloc-specific format is used.
-If \fIlist\fR is given, the output is a comma-separated of numbers or ranges,
-e.g. 2,4-5,8 .
-If \fItaskset\fR is given, the output is compatible with the taskset program
-(replaces the former \fB--taskset\fR option).
-
+\fB\-\-taskset\fR
+Display CPU set strings in the format recognized by the taskset command-line
+program instead of hwloc-specific CPU set string format.
 This option has no impact on the format of input CPU set strings,
-see \fB\-\-cpuset\-input\-format\fR.
-.TP
-\fB\-\-cpuset\-input\-format\fR <hwloc|list|taskset> \fB\-\-cif\fR <hwloc|list|taskset>
-Change the format of input CPU set strings.
-By default, the tool tries to guess the type automatically between hwloc, list or taskset
-formats.
-This option forces the parsing format to avoid ambiguity for instance when "1,3,5" may
-be parsed as a hwloc cpuset "0x1,0x00000003,0x00000005" or as list "1-1,3-3,5-5".
-
-This option has no impact on the format of output CPU set strings,
-see \fB\-\-cpuset\-output\-format\fR.
+both formats are always accepted.
 .TP
 \fB\-q\fR \fB\-\-quiet\fR
 Hide non-fatal error messages.
@@ -373,13 +329,13 @@ its even numbered logical processors:
 To convert a cpu mask to human-readable output, the -H option can be
 used to emit a space-delimited list of locations:
 
-    $ echo 0x000000f0 | hwloc-calc -q -H package.core
+    $ echo 0x000000f0 | hwloc-calc -H package.core
     Package:1.Core1 Package:1.Core:1 Package:1.Core:2 Package:1.Core:3
 
 To use some other character (e.g., a comma) instead of spaces in
 output, use the --sep option:
 
-    $ echo 0x000000f0 | hwloc-calc -q -H package.core --sep ,
+    $ echo 0x000000f0 | hwloc-calc -H package.core --sep ,
     Package:1.Core1,Package:1.Core:1,Package:1.Core:2,Package:1.Core:3
 
 To combine two (physical) CPU masks:
@@ -414,30 +370,14 @@ To find how many cores are in the second CPU kind
 To display the list of NUMA nodes, by physical indexes,
 whose locality is exactly equal to a Package:
 
-    $ hwloc-calc --local-memory-flags 0 --physical-output pack:1
+    $ hwloc-calc --local-memory-flags 0 pack:1
     4,7
 
-To display the best-capacity NUMA node(s), by physical indexes,
+To display the best-capacity NUMA node, by physical indexe,
 whose locality is exactly equal to a Package:
 
-    $ hwloc-calc --local-memory-flags 0 --best-memattr capacity --physical-output pack:1
+    $ hwloc-calc --local-memory-flags 0 --best-memattr capacity pack:1
     4
-
-To find the number of NUMA nodes with subtype "HBM":
-
-    $ hwloc-calc -N "numa[hbm]" all
-    4
-
-To find the number of NUMA nodes in memory tier 1
-(DRAM nodes on a server with HBM and DRAM):
-
-    $ hwloc-calc -N "numa[tier=1]" all
-    4
-
-To find the NUMA node of subtype MCDRAM (on KNL) near a PU:
-
-    $ hwloc-calc -I "numa[mcdram]" pu:157
-    1
 
 Converting object logical indexes (default) from/to physical/OS indexes
 may be performed with \fB--intersect\fR combined with either \fB--physical-output\fR

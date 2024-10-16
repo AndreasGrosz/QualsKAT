@@ -1,4 +1,4 @@
-.TH "hwlocality_info_attr" 3 "Version 2.11.1" "Hardware Locality (hwloc)" \" -*- nroff -*-
+.TH "hwlocality_info_attr" 3 "Thu Sep 7 2023" "Version 2.9.3" "Hardware Locality (hwloc)" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -14,9 +14,6 @@ hwlocality_info_attr \- Consulting and Adding Info Attributes
 .br
 .ti -1c
 .RI "int \fBhwloc_obj_add_info\fP (\fBhwloc_obj_t\fP obj, const char *name, const char *value)"
-.br
-.ti -1c
-.RI "int \fBhwloc_obj_set_subtype\fP (\fBhwloc_topology_t\fP topology, \fBhwloc_obj_t\fP obj, const char *subtype)"
 .br
 .in -1c
 .SH "Detailed Description"
@@ -59,26 +56,6 @@ A pointer to the value string if it exists\&.
 \fBNote\fP
 .RS 4
 The string should not be freed by the caller, it belongs to the hwloc library\&. 
-.RE
-.PP
-
-.SS "int hwloc_obj_set_subtype (\fBhwloc_topology_t\fP topology, \fBhwloc_obj_t\fP obj, const char * subtype)"
-
-.PP
-Set (or replace) the subtype of an object\&. The given \fCsubtype\fP is copied internally, the caller is responsible for freeing the original \fCsubtype\fP if needed\&.
-.PP
-If another subtype already exists in \fCobject\fP, it is replaced\&. The given \fCsubtype\fP may be \fCNULL\fP to remove the existing subtype\&.
-.PP
-\fBNote\fP
-.RS 4
-This function is mostly meant to initialize the subtype of user-added objects such as groups with \fBhwloc_topology_alloc_group_object()\fP\&.
-.RE
-.PP
-\fBReturns\fP
-.RS 4
-\fC0\fP on success\&. 
-.PP
-\fC-1\fP with \fCerrno\fP set to \fCENOMEM\fP on failure to allocate memory\&. 
 .RE
 .PP
 

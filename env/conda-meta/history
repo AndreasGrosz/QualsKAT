@@ -289,3 +289,102 @@
 +pytorch/linux-64::torchvision-0.19.1-py310_cpu
 +pytorch/noarch::pytorch-mutex-1.0-cpu
 # update specs: ['cudatoolkit=11.3', 'pytorch', 'torchaudio', 'torchvision']
+==> 2024-10-15 19:39:29 <==
+# cmd: /home/res/miniconda3/bin/conda install -c conda-forge olefile
+# conda version: 24.5.0
++conda-forge/noarch::olefile-0.47-pyhd8ed1ab_0
+# update specs: ['olefile']
+==> 2024-10-15 19:43:36 <==
+# cmd: /home/res/miniconda3/bin/conda install -c conda-forge python-docx
+# conda version: 24.5.0
++conda-forge/linux-64::libxslt-1.1.39-h76b75d6_0
++conda-forge/linux-64::lxml-5.2.2-py310h6a33d3d_0
++conda-forge/noarch::python-docx-1.1.2-pyhd8ed1ab_0
+# update specs: ['python-docx']
+==> 2024-10-15 19:44:47 <==
+# cmd: /home/res/miniconda3/bin/conda install -c conda-forge pdfplumber
+# conda version: 24.5.0
+-conda-forge/linux-64::azure-core-cpp-1.13.0-h935415a_0
+-conda-forge/linux-64::azure-identity-cpp-1.9.0-hd126650_0
+-conda-forge/linux-64::azure-storage-blobs-cpp-12.13.0-h1d30c4a_0
+-conda-forge/linux-64::azure-storage-common-cpp-12.8.0-ha3822c6_0
+-conda-forge/linux-64::azure-storage-files-datalake-cpp-12.12.0-h0f25b8a_0
+-conda-forge/linux-64::icu-73.2-h59595ed_0
+-conda-forge/linux-64::libhwloc-2.11.1-default_hecaa2ac_1000
+-conda-forge/linux-64::libwebp-base-1.4.0-hd590300_0
+-conda-forge/linux-64::libxml2-2.12.7-hc051c1a_1
+-conda-forge/linux-64::libxslt-1.1.39-h76b75d6_0
+-conda-forge/linux-64::lxml-5.2.2-py310h6a33d3d_0
+-conda-forge/linux-64::tbb-2021.13.0-h84d6215_0
++conda-forge/linux-64::atk-1.0-2.38.0-h04ea711_2
++conda-forge/linux-64::azure-core-cpp-1.10.3-h91d86a7_1
++conda-forge/linux-64::azure-identity-cpp-1.6.0-hf1915f5_0
++conda-forge/linux-64::azure-storage-blobs-cpp-12.10.0-h00ab1b0_0
++conda-forge/linux-64::azure-storage-common-cpp-12.5.0-h755215e_1
++conda-forge/linux-64::azure-storage-files-datalake-cpp-12.9.0-h00ab1b0_0
++conda-forge/linux-64::cairo-1.16.0-h35add3b_1015
++conda-forge/linux-64::cryptography-43.0.1-py310h6c63255_0
++conda-forge/linux-64::expat-2.6.3-h5888daf_0
++conda-forge/linux-64::fftw-3.3.10-nompi_hf1063bd_110
++conda-forge/linux-64::fontconfig-2.14.2-h14ed4e7_0
++conda-forge/linux-64::fribidi-1.0.10-h36c2ea0_0
++conda-forge/linux-64::gdk-pixbuf-2.42.10-h05c8ddd_0
++conda-forge/linux-64::gettext-0.22.5-he02047a_3
++conda-forge/linux-64::gettext-tools-0.22.5-he02047a_3
++conda-forge/linux-64::ghostscript-10.04.0-h5888daf_0
++conda-forge/linux-64::giflib-5.2.2-hd590300_0
++conda-forge/linux-64::graphite2-1.3.13-h59595ed_1003
++conda-forge/linux-64::graphviz-7.1.0-h2e5815a_0
++conda-forge/linux-64::gtk2-2.24.33-h90689f9_2
++conda-forge/linux-64::gts-0.7.6-h977cf35_4
++conda-forge/linux-64::harfbuzz-7.3.0-hdb3a94d_0
++conda-forge/linux-64::icu-72.1-hcb278e6_0
++conda-forge/linux-64::imagemagick-7.1.1_5-pl5321h211c493_1
++conda-forge/linux-64::jbig-2.1-h7f98852_2003
++conda-forge/linux-64::libasprintf-0.22.5-he8f35ee_3
++conda-forge/linux-64::libasprintf-devel-0.22.5-he8f35ee_3
++conda-forge/linux-64::libexpat-2.6.3-h5888daf_0
++conda-forge/linux-64::libgd-2.3.3-h8faadc7_5
++conda-forge/linux-64::libgettextpo-0.22.5-he02047a_3
++conda-forge/linux-64::libgettextpo-devel-0.22.5-he02047a_3
++conda-forge/linux-64::libglib-2.80.2-hf974151_0
++conda-forge/linux-64::libhwloc-2.9.3-default_h554bfaf_1009
++conda-forge/linux-64::librsvg-2.56.3-h98fae49_0
++conda-forge/linux-64::libtool-2.4.7-he02047a_1
++conda-forge/linux-64::libwebp-1.2.4-h1daa5a0_1
++conda-forge/linux-64::libwebp-base-1.2.4-h166bdaf_0
++conda-forge/linux-64::libxml2-2.11.5-h0d562d8_0
++conda-forge/linux-64::libxslt-1.1.37-h0054252_1
++conda-forge/linux-64::lxml-4.9.3-py310h9b7343a_1
++conda-forge/linux-64::pango-1.50.14-heaa33ce_1
++conda-forge/linux-64::pcre2-10.43-hcad00b1_0
++conda-forge/linux-64::perl-5.32.1-7_hd590300_perl5
++conda-forge/linux-64::pixman-0.43.2-h59595ed_0
++conda-forge/linux-64::pkg-config-0.29.2-h4bc722e_1009
++conda-forge/linux-64::tbb-2021.11.0-h00ab1b0_1
++conda-forge/linux-64::xorg-kbproto-1.0.7-hb9d3cd8_1003
++conda-forge/linux-64::xorg-libice-1.0.10-h7f98852_0
++conda-forge/linux-64::xorg-libsm-1.2.3-hd9c2040_1000
++conda-forge/linux-64::xorg-libx11-1.8.4-h0b41bf4_0
++conda-forge/linux-64::xorg-libxext-1.3.4-h0b41bf4_2
++conda-forge/linux-64::xorg-libxrender-0.9.10-h7f98852_1003
++conda-forge/linux-64::xorg-libxt-1.3.0-hd590300_0
++conda-forge/linux-64::xorg-renderproto-0.11.1-hb9d3cd8_1003
++conda-forge/linux-64::xorg-xextproto-7.3.0-hb9d3cd8_1004
++conda-forge/linux-64::xorg-xproto-7.0.31-hb9d3cd8_1008
++conda-forge/noarch::font-ttf-dejavu-sans-mono-2.37-hab24e00_0
++conda-forge/noarch::font-ttf-inconsolata-3.000-h77eed37_0
++conda-forge/noarch::font-ttf-source-code-pro-2.038-h77eed37_0
++conda-forge/noarch::font-ttf-ubuntu-0.83-h77eed37_3
++conda-forge/noarch::fonts-conda-ecosystem-1-0
++conda-forge/noarch::fonts-conda-forge-1-0
++conda-forge/noarch::pdfminer.six-20221105-pyhd8ed1ab_0
++conda-forge/noarch::pdfplumber-0.9.0-pyhd8ed1ab_0
++conda-forge/noarch::wand-0.6.10-pyhd8ed1ab_0
+# update specs: ['pdfplumber']
+==> 2024-10-15 19:46:50 <==
+# cmd: /home/res/miniconda3/bin/conda install -c conda-forge accelerate
+# conda version: 24.5.0
++conda-forge/linux-64::psutil-6.0.0-py310ha75aee5_2
++conda-forge/noarch::accelerate-1.0.1-pyhd8ed1ab_0
+# update specs: ['accelerate']

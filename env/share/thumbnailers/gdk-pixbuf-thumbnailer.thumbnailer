@@ -1,0 +1,4 @@
+[Thumbnailer Entry]
+TryExec=/home/res/projekte/kd0241-py/Q-KAT/AAUNaL/Beta-v1.2/env/bin/gdk-pixbuf-thumbnailer
+Exec=/home/res/projekte/kd0241-py/Q-KAT/AAUNaL/Beta-v1.2/env/bin/gdk-pixbuf-thumbnailer -s %s %u %o
+MimeType=image/png;image/jpeg;image/bmp;image/x-bmp;image/x-MS-bmp;image/gif;image/x-icon;image/x-ico;image/x-win-bitmap;image/vnd.microsoft.icon;application/ico;image/ico;image/icon;text/ico;application/x-navi-animation;image/x-portable-anymap;image/x-portable-bitmap;image/x-portable-graymap;image/x-portable-pixmap;image/tiff;image/x-xpixmap;image/x-xbitmap;image/x-tga;image/x-icns;image/x-quicktime;image/qtif;

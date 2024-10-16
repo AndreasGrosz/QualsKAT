@@ -1,10 +1,10 @@
 .\" -*- nroff -*-
-.\" Copyright © 2009-2024 Inria.  All rights reserved.
+.\" Copyright © 2009-2023 Inria.  All rights reserved.
 .\" Copyright © 2009-2010 Université of Bordeaux
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
 .\" See COPYING in top-level directory.
-.TH LSTOPO "1" "Jul 04, 2024" "2.11.1" "hwloc"
+.TH LSTOPO "1" "Sep 07, 2023" "2.9.3" "hwloc"
 .SH NAME
 lstopo, lstopo-no-graphics, hwloc-ls \- Show the topology of the system
 .
@@ -86,7 +86,7 @@ Include additional detail.
 The hwloc-info tool may be used to display even more information
 about specific objects.
 .TP
-\fB\-q\fR \fB\-\-quiet\fR \fB\-s\fR \fB\-\-silent\fR
+\fB\-s\fR \fB\-\-silent\fR
 Reduce the amount of details to show.
 .TP
 \fB\-\-distances\fR
@@ -141,24 +141,14 @@ Display the cpuset of each object.
 Only display the cpuset of each object; do not display anything else
 about the object.
 .TP
-\fB\-\-cpuset\-output\-format\fR <hwloc|list|taskset> \fB\-\-cof\fR <hwloc|list|taskset>
-Change the format of displayed CPU set strings.
-By default, the hwloc-specific format is used.
-If \fIlist\fR is given, the output is a comma-separated of numbers or ranges,
-e.g. 2,4-5,8 .
-If \fItaskset\fR is given, output cpusets are compatible with the taskset program
-(replaces the former \fB--taskset\fR option).
-
+\fB\-\-taskset\fR
+Show CPU set strings in the format recognized by the taskset command-line
+program instead of hwloc-specific CPU set string format.
 This option should be combined with \fB\-\-cpuset\fR or \fB\-\-cpuset\-only\fR,
 otherwise it will imply \fB\-\-cpuset\fR.
 .TP
 \fB\-\-only\fR <type>
 Only show objects of the given type in the textual output.
-
-\fI<type>\fR may contain a filter to select specific objects among
-the type. For instance \fB\-\-only NUMA[HBM]\fR only shows NUMA nodes
-marked with subtype "HBM", while \fB\-\-only "numa[mcdram]"\fR only
-shows MCDRAM NUMA nodes on KNL.
 .TP
 \fB\-\-filter\fR <type>:<kind>, \fB\-\-filter\fR <type>
 Filter objects of type <type>, or of any type if <type> is "all".
@@ -326,21 +316,6 @@ cluttering the output, only processes that are restricted to some part of the
 machine are shown.  On Linux, kernel threads are not shown.
 If many processes appear, the output may become hard to read anyway,
 making the hwloc-ps program more practical.
-
-See \fB\-\-misc\-from\fR for a customizable variant using \fBhwloc-ps\fR.
-.TP
-\fB\-\-misc\-from\fR <file>
-Add Misc objects as described in <file> containing entries such as:
-
-    name=myMisc1
-    cpuset=0x5
-
-    name=myMisc2
-    cpuset=0x7
-    subtype=myOptionalSubtype
-
-This is useful for combining with \fBhwloc-ps --lstopo-misc\fR (see EXAMPLES below)
-because hwloc-ps is far more customizable than lstopo's \fB\-\-top\fR option.
 .TP
 \fB\-\-children\-order\fR <order>
 Change the order of the different kinds of children with respect to
@@ -375,7 +350,7 @@ on the right.
 
 Up to hwloc 2.5, the default was rather to \fImemory:above,plain\fR.
 
-Additionally, \fImemory:above\fR, \fIio:right\fR, \fIio:below\fR, \fImisc:right\fR
+Additionally, \fIio:right\fR, \fIio:below\fR, \fImisc:right\fR
 and \fImisc:below\fR may be suffixed with
 \fI:horiz\fR, \fI:vert\fR or \fI:rect\fR to force the horizontal,
 vertical or rectangular layout of children inside these sections.
@@ -504,7 +479,6 @@ Or change the color to the given 3x8bit hexadecimal RGB combination (e.g. \fI#00
 \fB\-\-top\-color\fR <none|#rrggbb>
 Do not colorize task objects in the graphical output when \-\-top is given.
 Or change the color to the given 3x8bit hexadecimal RGB combination (e.g. \fI#0000ff\fR is blue).
-This is actually applied to Misc objects of subtype \fIProcess\fR or \fIThread\fR.
 .TP
 \fB\-\-version\fR
 Report version and exit.
@@ -890,11 +864,6 @@ To count the number of logical processors in the system
 To append the kernel release and version to the graphical legend:
 
    lstopo --append-legend "Kernel release: $(uname -r)" --append-legend "Kernel version: $(uname -v)"
-
-To show where a process and its children are bound by combining with hwloc-ps:
-
-   hwloc-ps --pid-children 23 --lstopo-misc - | lstopo --misc-from -
-
 .
 .\" **************************
 .\"    Notes Section

@@ -1,4 +1,4 @@
-.TH "hwlocality_membinding" 3 "Version 2.11.1" "Hardware Locality (hwloc)" \" -*- nroff -*-
+.TH "hwlocality_membinding" 3 "Thu Sep 7 2023" "Version 2.9.3" "Hardware Locality (hwloc)" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -10,7 +10,7 @@ hwlocality_membinding \- Memory binding
 
 .in +1c
 .ti -1c
-.RI "enum \fBhwloc_membind_policy_t\fP { \fBHWLOC_MEMBIND_DEFAULT\fP, \fBHWLOC_MEMBIND_FIRSTTOUCH\fP, \fBHWLOC_MEMBIND_BIND\fP, \fBHWLOC_MEMBIND_INTERLEAVE\fP, \fBHWLOC_MEMBIND_WEIGHTED_INTERLEAVE\fP, \fBHWLOC_MEMBIND_NEXTTOUCH\fP, \fBHWLOC_MEMBIND_MIXED\fP }"
+.RI "enum \fBhwloc_membind_policy_t\fP { \fBHWLOC_MEMBIND_DEFAULT\fP, \fBHWLOC_MEMBIND_FIRSTTOUCH\fP, \fBHWLOC_MEMBIND_BIND\fP, \fBHWLOC_MEMBIND_INTERLEAVE\fP, \fBHWLOC_MEMBIND_NEXTTOUCH\fP, \fBHWLOC_MEMBIND_MIXED\fP }"
 .br
 .ti -1c
 .RI "enum \fBhwloc_membind_flags_t\fP { \fBHWLOC_MEMBIND_PROCESS\fP, \fBHWLOC_MEMBIND_THREAD\fP, \fBHWLOC_MEMBIND_STRICT\fP, \fBHWLOC_MEMBIND_MIGRATE\fP, \fBHWLOC_MEMBIND_NOCPUBIND\fP, \fBHWLOC_MEMBIND_BYNODESET\fP }"
@@ -151,9 +151,6 @@ Allocate memory on the specified nodes\&. The actual behavior may slightly vary 
 .TP
 \fB\fIHWLOC_MEMBIND_INTERLEAVE \fP\fP
 Allocate memory on the given nodes in an interleaved / round-robin manner\&. The precise layout of the memory across multiple NUMA nodes is OS/system specific\&. Interleaving can be useful when threads distributed across the specified NUMA nodes will all be accessing the whole memory range concurrently, since the interleave will then balance the memory references\&. 
-.TP
-\fB\fIHWLOC_MEMBIND_WEIGHTED_INTERLEAVE \fP\fP
-Allocate memory on the given nodes in an interleaved / weighted manner\&. The precise layout of the memory across multiple NUMA nodes is OS/system specific\&. Weighted interleaving can be useful when threads distributed across the specified NUMA nodes with different bandwidth capabilities will all be accessing the whole memory range concurrently, since the interleave will then balance the memory references\&. 
 .TP
 \fB\fIHWLOC_MEMBIND_NEXTTOUCH \fP\fP
 For each page bound with this policy, by next time it is touched (and next time only), it is moved from its current location to the local NUMA node of the thread where the memory reference occurred (if it needs to be moved at all)\&. 

@@ -1,4 +1,4 @@
-.TH "hwlocality_distances_get" 3 "Version 2.11.1" "Hardware Locality (hwloc)" \" -*- nroff -*-
+.TH "hwlocality_distances_get" 3 "Thu Sep 7 2023" "Version 2.9.3" "Hardware Locality (hwloc)" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -58,7 +58,9 @@ hwlocality_distances_get \- Retrieve distances between objects
 .PP
 Kinds of distance matrices\&. The \fCkind\fP attribute of struct \fBhwloc_distances_s\fP is a OR'ed set of kinds\&.
 .PP
-Each distance matrix may have only one kind among HWLOC_DISTANCES_KIND_FROM_* specifying where distance information comes from, and one kind among HWLOC_DISTANCES_KIND_MEANS_* specifying whether values are latencies or bandwidths\&. 
+A kind of format HWLOC_DISTANCES_KIND_FROM_* specifies where the distance information comes from, if known\&.
+.PP
+A kind of format HWLOC_DISTANCES_KIND_MEANS_* specifies whether values are latencies or bandwidths, if applicable\&. 
 .PP
 \fBEnumerator\fP
 .in +1c

@@ -1,4 +1,4 @@
-.TH "hwlocality_memattrs" 3 "Version 2.11.1" "Hardware Locality (hwloc)" \" -*- nroff -*-
+.TH "hwlocality_memattrs" 3 "Thu Sep 7 2023" "Version 2.9.3" "Hardware Locality (hwloc)" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -63,8 +63,6 @@ There are also some attributes that are system-wide\&. Their value does not depe
 One way to use this API is to start with a cpuset describing the Cores where a program is bound\&. The best target NUMA node for allocating memory in this program on these Cores may be obtained by passing this cpuset as an initiator to \fBhwloc_memattr_get_best_target()\fP with the relevant memory attribute\&. For instance, if the code is latency limited, use the Latency attribute\&.
 .PP
 A more flexible approach consists in getting the list of local NUMA nodes by passing this cpuset to \fBhwloc_get_local_numanode_objs()\fP\&. Attribute values for these nodes, if any, may then be obtained with \fBhwloc_memattr_get_value()\fP and manually compared with the desired criteria\&.
-.PP
-Memory attributes are also used internally to build Memory Tiers which provide an easy way to distinguish NUMA nodes of different kinds, as explained in \fBHeterogeneous Memory\fP\&.
 .PP
 \fBSee also\fP
 .RS 4

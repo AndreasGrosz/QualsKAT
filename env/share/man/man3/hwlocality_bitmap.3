@@ -1,4 +1,4 @@
-.TH "hwlocality_bitmap" 3 "Version 2.11.1" "Hardware Locality (hwloc)" \" -*- nroff -*-
+.TH "hwlocality_bitmap" 3 "Thu Sep 7 2023" "Version 2.9.3" "Hardware Locality (hwloc)" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -194,7 +194,7 @@ Bitmaps are used by hwloc for sets of OS processors (which may actually be hardw
 .nf
 hwloc_obj_t core1 = \&.\&.\&. , core2 = \&.\&.\&. ;
 hwloc_bitmap_t set = hwloc_bitmap_alloc();
-hwloc_bitmap_or(set, core1\->cpuset, core2\->cpuset);
+hwloc_bitmap_or(set, core1->cpuset, core2->cpuset);
 hwloc_set_cpubind(topology, set, HWLOC_CPUBIND_THREAD);
 hwloc_bitmap_free(set);
 
