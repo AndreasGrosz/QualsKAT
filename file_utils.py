@@ -7,13 +7,13 @@ import logging
 import configparser
 from huggingface_hub import HfApi
 from requests.exceptions import HTTPError
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoConfig
 import torch
 from striprtf.striprtf import rtf_to_text
 import docx
 import pdfplumber
-from analysis_utils import analyze_new_article
-
+from analysis_utils import analyze_new_article, save_results_to_csv
+import re
 
 def check_environment():
     device = get_device()
@@ -57,35 +57,58 @@ def check_environment():
     if not any(os.scandir(documents_path)):
         raise FileNotFoundError(f"Keine Dateien im Verzeichnis '{documents_path}' gefunden.")
 
+    models = {}
     model_names = config['Model']['model_name'].split(',')
+    base_path = config['Paths']['models']
+
     for model_name in model_names:
         model_name = model_name.strip()
         if not model_name:
             logging.warning("Leerer Modellname in der Konfiguration gefunden. Bitte überprüfen Sie die config.txt")
             continue
-        try:
-            model_path = os.path.join("fresh-models", model_name)
-            if not os.path.exists(model_path):
-                raise ValueError(f"Modellverzeichnis nicht gefunden: {model_path}")
 
-            config_path = os.path.join(model_path, "config.json")
-            if not os.path.exists(config_path):
-                raise ValueError(f"config.json nicht gefunden in: {model_path}")
+        tokenizer, model = load_model(model_name, base_path)
+        if tokenizer and model:
+            models[model_name] = (tokenizer, model)
+        else:
+            logging.error(f"Modell {model_name} konnte nicht geladen werden.")
 
-            AutoTokenizer.from_pretrained(model_path)
-            AutoModelForSequenceClassification.from_pretrained(model_path)
-            logging.info(f"Modell erfolgreich geladen: {model_name}")
-        except Exception as e:
-            logging.error(f"Fehler beim Laden des Modells {model_name}: {str(e)}")
-            raise ValueError(f"Ungültiges oder nicht verfügbares Modell: {model_name}. Fehler: {str(e)}")
+    if not models:
+        raise ValueError("Keine Modelle konnten geladen werden. Bitte überprüfen Sie die Modellpfade und Namen.")
 
+    return config, models, device
+
+def load_model(model_name, base_path):
+    try:
+        logging.info(f"Versuche, Modell zu laden: {model_name}")
+        model_path = os.path.join(base_path, model_name)
+
+        if not os.path.exists(model_path):
+            raise ValueError(f"Modellverzeichnis nicht gefunden: {model_path}")
+
+        logging.debug(f"Inhalt des Modellverzeichnisses: {os.listdir(model_path)}")
+
+        config_path = os.path.join(model_path, "config.json")
+        if not os.path.exists(config_path):
+            raise ValueError(f"config.json nicht gefunden in: {model_path}")
+
+        config = AutoConfig.from_pretrained(model_path, local_files_only=True)
+        tokenizer = AutoTokenizer.from_pretrained(model_path, local_files_only=True)
+        model = AutoModelForSequenceClassification.from_pretrained(model_path, config=config, local_files_only=True)
+
+        logging.info(f"Modell erfolgreich geladen: {model_name}")
+        return tokenizer, model
+    except Exception as e:
+        logging.error(f"Fehler beim Laden des Modells {model_name}: {str(e)}", exc_info=True)
+        return None, None
+
+def get_device():
     if torch.cuda.is_available():
-        logging.info(f"GPU verfügbar: {torch.cuda.get_device_name(0)}")
+        return torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        return torch.device("mps")
     else:
-        logging.warning("Keine GPU verfügbar. Das Training wird auf der CPU durchgeführt und kann sehr lange dauern.")
-
-    return config
-
+        return torch.device("cpu")
 
 
 def check_hf_token():
@@ -100,75 +123,51 @@ def check_hf_token():
         raise ValueError("Invalid Hugging Face API token. Please check the token and try again.")
 
 
-def check_files(trainer, tokenizer, le, config, model_name):
+def natural_sort_key(s):
+    return [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', s)]
+
+def check_files(model, tokenizer, le, config, model_name):
     start_time = time.time()
     check_folder = config['Paths']['check_this']
     if not os.path.exists(check_folder):
         logging.error(f"Der Ordner '{check_folder}' existiert nicht.")
         return
 
-    files = [f for f in os.listdir(check_folder) if os.path.isfile(os.path.join(check_folder, f))]
+    # Holen und sortieren Sie alle Dateien im Voraus
+    all_files = [f for f in os.listdir(check_folder) if os.path.isfile(os.path.join(check_folder, f))]
+    all_files.sort(key=natural_sort_key)
 
-    if not files:
+    logging.info("Sortierte Dateiliste:")
+    for file in all_files:
+        logging.info(file)
+
+    if not all_files:
         logging.info(f"Keine Dateien im Ordner '{check_folder}' gefunden.")
         return
 
     results = []
-    for file in files:
+    for file in all_files:
         file_path = os.path.join(check_folder, file)
         logging.info(f"Analysiere Datei: {file}")
-        result = analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_file)
+        result = analyze_new_article(file_path, model, tokenizer, le, extract_text_from_file)
         if result:
             result['Model'] = model_name
             results.append(result)
+            print(f"Verarbeitet: {result['Dateiname']} - LRH: {result['LRH']}, Nicht-LRH: {result['Nicht-LRH']}")
 
     end_time = time.time()
     total_duration = end_time - start_time
     logging.info(f"Gesamtausführungszeit für Modell {model_name}: {total_duration:.2f} Sekunden")
 
     if results:
-        csv_filename = os.path.join(config['Paths']['output'], "CheckThisResults.csv")
-        file_exists = os.path.exists(csv_filename)
-
-        with open(csv_filename, 'a', newline='', encoding='utf-8') as csvfile:
-            fieldnames = results[0].keys()
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-
-            if not file_exists:
-                writer.writeheader()
-
-            for result in results:
-                writer.writerow(result)
-
-        logging.info(f"Ergebnisse wurden an {csv_filename} angehängt.")
-    else:
-        logging.info("Keine Ergebnisse zur Ausgabe.")
-
-    end_time = time.time()
-    total_duration = end_time - start_time
-    logging.info(f"Gesamtausführungszeit für Modell {model_name}: {total_duration:.2f} Sekunden")
-
-    if results:
-        csv_filename = os.path.join(config['Paths']['output'], "CheckThisResults.csv")
-        file_exists = os.path.exists(csv_filename)
-
-        with open(csv_filename, 'a', newline='', encoding='utf-8') as csvfile:
-            fieldnames = results[0].keys()
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-
-            if not file_exists:
-                writer.writeheader()
-
-            for result in results:
-                writer.writerow(result)
-
+        csv_filename = os.path.join(config['Paths']['output'], f"CheckThisResults_{model_name}.csv")
+        save_results_to_csv(results, csv_filename)
         logging.info(f"Ergebnisse wurden in {csv_filename} gespeichert.")
 
         lrh_count = sum(1 for r in results if r["Schlussfolgerung"] == "Wahrscheinlich LRH")
-        logging.info(f"\nZusammenfassung: {len(results)} Dateien analysiert, {lrh_count} wahrscheinlich von LRH.")
+        logging.info(f"\nZusammenfassung für {model_name}: {len(results)} Dateien analysiert, {lrh_count} wahrscheinlich von LRH.")
     else:
-        logging.info("Keine Ergebnisse zur Ausgabe.")
-
+        logging.info(f"Keine Ergebnisse zur Ausgabe für Modell {model_name}.")
 
 def extract_text_from_file(file_path):
 
@@ -233,10 +232,4 @@ def handle_rtf_error(file_path):
         logging.error(f"Error reading .rtf file {file_path}: {str(e)}")
         return None
 
-def get_device():
-    if torch.cuda.is_available():
-        return torch.device("cuda")
-    elif torch.backends.mps.is_available():
-        return torch.device("mps")
-    else:
-        return torch.device("cpu")
+

@@ -34,7 +34,7 @@ def predict_for_model(model, tokenizer, text, le):
 
 def get_model_and_tokenizer(model_name, num_labels):
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=len(le.classes_))
     return tokenizer, model
 
 
@@ -119,41 +119,46 @@ def compute_metrics(eval_pred):
     return {'accuracy': (predictions == labels).astype(np.float32).mean().item()}
 
 
-def predict_top_n(trainer, tokenizer, text, le, n=None):
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
-    inputs = {k: v.to(trainer.model.device) for k, v in inputs.items()}
+def predict_top_n(model, tokenizer, text, le, n=2):  # Wir brauchen nur die Top 2 Vorhersagen
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
+    inputs = {k: v.to(model.device) for k, v in inputs.items()}
 
     with torch.no_grad():
-        outputs = trainer.model(**inputs)
-        logits = outputs.logits
+        outputs = model(**inputs)
 
-    probabilities = torch.nn.functional.softmax(logits, dim=-1)[0]
-    results = []
-    for idx, prob in enumerate(probabilities):
-        category = le.inverse_transform([idx])[0]
-        results.append((category, prob.item()))
+    logits = outputs.logits
+    probabilities = torch.nn.functional.softmax(logits, dim=-1)
 
-    if n is None:
-        n = len(le.classes_)
+    top_n_probs, top_n_indices = torch.topk(probabilities, n)
 
-    return sorted(results, key=lambda x: x[1], reverse=True)[:n]
+    predictions = []
+    for prob, idx in zip(top_n_probs[0], top_n_indices[0]):
+        predictions.append((idx.item(), prob.item()))
 
+    return sorted(predictions, key=lambda x: x[0])  # Sortiere nach Index, nicht nach Wahrscheinlichkeit
 
-def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_file):
-    top_predictions = predict_top_n(trainer, tokenizer, text, le, n=5)  # Top 5 Vorhersagen
+def analyze_new_article(file_path, model, tokenizer, le, extract_text_func):
+    # ... (bestehender Code)
 
-    print(f"")
-    print(f"Vorhersagen für    {os.path.basename(file_path)}:")
-    for category, prob in top_predictions:
-        print(f"{category}: {prob:.4f}")
+    top_predictions = predict_top_n(model, tokenizer, text, le)
 
-    # Berechnen Sie hier die Gesamtwahrscheinlichkeiten für übergeordnete Kategorien
-    # z.B. LRH, Ghostwriter, etc.
+    lrh_probability = next((prob for cat, prob in top_predictions if cat == "LRH"), 0)
+    nicht_lrh_probability = next((prob for cat, prob in top_predictions if cat == "Non-LRH"), 0)
+
+    threshold = 0.1  # 10% Unterschied als Schwellenwert
+    if abs(lrh_probability - nicht_lrh_probability) < threshold:
+        conclusion = "Nicht eindeutig"
+    elif lrh_probability > nicht_lrh_probability:
+        conclusion = "Wahrscheinlich LRH"
+    else:
+        conclusion = "Wahrscheinlich Non-LRH"
 
     return {
         "Dateiname": os.path.basename(file_path),
-        "Dateigröße": file_size,
+        "Dateigröße": len(text.encode('utf-8')),
         "Datum": datetime.now().strftime("%d-%m-%y %H:%M"),
-        "Top_Vorhersagen": dict(top_predictions[:5]),
-        "Schlussfolgerung": "Komplexe Schlussfolgerung basierend auf den Top-Vorhersagen"
+        "LRH": f"{lrh_probability:.2f}",
+        "Non-LRH": f"{nicht_lrh_probability:.2f}",
+        "Schlussfolgerung": conclusion,
+        "Model": model.name_or_path
     }

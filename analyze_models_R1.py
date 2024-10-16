@@ -1,46 +1,36 @@
-"""
-Dieses Script führt folgende Analysen durch:
-
-Berechnet deskriptive Statistiken für jedes Modell.
-Erstellt eine Korrelationsmatrix und visualisiert sie als Heatmap.
-Analysiert die Konsistenz der Vorhersagen zwischen den Modellen.
-Visualisiert die Verteilung der Vorhersagen für jedes Modell.
-Identifiziert interessante Fälle, bei denen die Modelle stark voneinander abweichen.
-Gibt eine Übersicht über die Performanz jedes Modells.
-"""
-
+import sys
+import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from datetime import date
 
-# Daten laden
-# df = pd.read_csv('output/HCOBs-analysis_results.csv')
+OUTPUT_DIR = 'output'
 
-input_file = 'output/results-red-vols-1970s.csv'
-df = pd.read_csv(input_file)
+if len(sys.argv) < 2:
+    print("Bitte geben Sie den Dateinamen als Parameter an.")
+    sys.exit(1)
+
+input_file = sys.argv[1]
+input_file_path = os.path.join(OUTPUT_DIR, input_file)
+df = pd.read_csv(input_file_path)
 
 # Modellnamen
-models = ['r-base', 'ms-deberta', 'distilb', 'r-large', 'albert']
+models = [col for col in df.columns if col not in ['Dateiname', 'Dateigröße', 'Datum', 'Mittelwert']]
 
-
-# Überprüfen, ob alle Modellspalten numerisch sind
-for model in models:
-    if df[model].dtype == 'object':
-        df[model] = pd.to_numeric(df[model], errors='coerce')
-
+if 'Mittelwert' in df.columns:
+    models.remove('Mittelwert')
 
 # Überschrift
-# Aktuelles Datum
 current_date = date.today().strftime("%y%m%d")
-# Name der Eingabedatei ohne Pfad und Erweiterung
-input_file_name = input_file.split('/')[-1].split('.')[0]
+input_file_name = os.path.splitext(input_file)[0]
 print(f"# {current_date} Analyse Models Ausgabe {input_file_name}.md")
 
 # 1. Deskriptive Statistik
 print("## Deskriptive Statistik:")
-print(df[models].describe().round(2))
+stats_columns = models + (['Mittelwert'] if 'Mittelwert' in df.columns else [])
+print(df[stats_columns].describe().round(2))
 print("\n")
 
 # 2. Korrelationsanalyse
@@ -57,15 +47,15 @@ plt.savefig('correlation_heatmap.png')
 plt.close()
 
 # 3. Konsistenzanalyse
-threshold = 10  # Schwellenwert für Übereinstimmung in Prozentpunkten
+threshold = 10
 consistency = (df[models].max(axis=1) - df[models].min(axis=1)) <= threshold
 print(f"## Prozentsatz der konsistenten Vorhersagen: {consistency.mean()*100:.2f}%")
 print("\n")
 
 # 4. Verteilung der Vorhersagen
 plt.figure(figsize=(12, 6))
-df[models].hist(bins=20)
-plt.title('## Verteilung der Vorhersagen für jedes Modell')
+df[models + ['Mittelwert']].hist(bins=20)
+plt.title('Verteilung der Vorhersagen für jedes Modell')
 plt.savefig('prediction_distribution.png')
 plt.close()
 
@@ -73,81 +63,47 @@ plt.close()
 def find_interesting_cases(df, models):
     cases = []
     for index, row in df.iterrows():
-        if row[models].max() - row[models].min() > 90:  # Große Diskrepanz
-            cases.append((index, row['Filename'], row[models].to_dict()))
+        if row[models].max() - row[models].min() > 90:
+            cases.append((index, row['Dateiname'], row[models].to_dict()))
     return cases
 
 interesting_cases = find_interesting_cases(df, models)
 print("## Interessante Fälle (große Diskrepanz zwischen Modellen):")
-for case in interesting_cases[:5]:  # Zeige die ersten 5 Fälle
+for case in interesting_cases[:5]:
     print(f"### Dokument: {case[1]}")
     for model, score in case[2].items():
-        print(f"  {model:<12}\t{score:6.2f}")
+        print(f"  {model:<12}\t{score:6d}")
     print()
 
 # 6. Modellperformanz-Übersicht
-model_performance = pd.DataFrame({
-    'Mean': df[models].mean(),
-    'Median': df[models].median(),
-    'Std': df[models].std(),
-    'Min': df[models].min(),
-    'Max': df[models].max()
+print("## Modellperformanz-Übersicht:")
+performance_columns = models + (['Mittelwert'] if 'Mittelwert' in df.columns else [])
+performance_summary = df[performance_columns].agg(['mean', 'median', 'std', 'min', 'max']).round(2)
+print(performance_summary)
 
-})
-
-
-# Modellnamen
-models = ['r-base', 'ms-deberta', 'distilb', 'r-large', 'albert']
-
-
-# Prozentwerte in einem Array
+# Schwellenwertanalyse
 thresholds = [50, 60, 70, 80, 90]
 
-# Funktion zur Berechnung der Prozentsätze
-def calculate_percentages(df, models, threshold):
-    return [round((df[model] > threshold).mean() * 100, 2) for model in models]
-
-# Erstellen der Tabelle
-data = []
-for threshold in thresholds:
-    row = [f">{threshold}%"] + calculate_percentages(df, models, threshold)
-    data.append(row)
-
-# Tabelle erstellen und ausgeben
-headers = ["Threshold"] + models
 print("## Prozentsatz der Dokumente über Schwellenwerten:")
+header_columns = models + (['Mittelwert'] if 'Mittelwert' in df.columns else [])
+print(f"{'Threshold':<12}" + "".join(f"{model:>12}" for model in header_columns))
+print("-" * (12 + 12 * len(header_columns)))
 
-# Kopfzeile der Tabelle
-print(f"{'Threshold':<12}" + "".join(f"{model:>12}" for model in models))
-print("-" * (12 + 12 * len(models)))
-
-# Datenzeilen
-for row in data:
+for threshold in thresholds:
+    row = [f">{threshold}%"] + [round((df[model] > threshold).mean() * 100, 2) for model in header_columns]
     print(f"{row[0]:<12}" + "".join(f"{value:12.2f}" for value in row[1:]))
 
-print()
-
-
-# Histogramme erstellen
+# Histogramme
 fig, axes = plt.subplots(2, 3, figsize=(15, 10))
 axes = axes.flatten()
 
-for i, model in enumerate(models):
-    axes[i].hist(df[model], bins=50)
-    axes[i].set_title(model)
-    axes[i].set_xlabel('Konfidenz (%)')
-    axes[i].set_ylabel('Anzahl der Dokumente')
+for i, model in enumerate(header_columns):
+    if i < len(axes):
+        axes[i].hist(df[model], bins=50)
+        axes[i].set_title(model)
+        axes[i].set_xlabel('Konfidenz (%)')
+        axes[i].set_ylabel('Anzahl der Dokumente')
 
 plt.tight_layout()
 plt.savefig('model_distributions.png')
 plt.close()
-
-# Detaillierte Statistiken
-# print(df[models].describe())
-
-
-# 4. Modellperformanz-Übersicht (Prozente, gerundet)
-
-print("## Modellperformanz-Übersicht:")
-performance_summary = df[models].agg(['mean', 'median', 'std', 'min', 'max']).round(2)
-print(performance_summary)

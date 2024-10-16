@@ -15,10 +15,15 @@ from sklearn.preprocessing import LabelEncoder
 import numpy as np
 
 
-import csv
-import os
-from tqdm import tqdm
-from statistics import mean
+def save_results_to_csv(results, csv_filename):
+    with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
+        fieldnames = ['Dateiname', 'Dateigröße', 'Datum', 'LRH', 'Nicht-LRH', 'Schlussfolgerung', 'Model']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for result in results:
+            writer.writerow(result)
+            print(f"In CSV geschrieben: {result['Dateiname']} - LRH: {result['LRH']}, Nicht-LRH: {result['Nicht-LRH']}")
+
 
 def analyze_documents_csv(check_folder, models, extract_text_from_file, output_file, save_interval=100):
     files = [f for f in os.listdir(check_folder) if os.path.isfile(os.path.join(check_folder, f))]
@@ -98,27 +103,20 @@ def analyze_document(file_path, models, extract_text_from_file):
     return results
 
 
-def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_file):
-    text = extract_text_from_file(file_path)
-
+def analyze_new_article(file_path, model, tokenizer, le, extract_text_func):
+    logging.info(f"Beginne Analyse von: {os.path.basename(file_path)}")
+    text = extract_text_func(file_path)
     if text is None or len(text) == 0:
         logging.warning(f"Konnte Text aus {file_path} nicht extrahieren oder Text ist leer.")
         return None
 
-    file_size = len(text.encode('utf-8'))
-    top_predictions = predict_top_n(trainer, tokenizer, text, le)
+    top_predictions = predict_top_n(model, tokenizer, text, le)
 
-    print(f"Vorhersagen für {os.path.basename(file_path)}:")
-    logging.info(f"Vorhersagen für {os.path.basename(file_path)}:")
-    for category, prob in top_predictions:
-        print(f"{category}: {prob*100:.1f}%")
-        logging.info(f"{category}: {prob*100:.1f}%")
+    # Vereinfachte Zuordnung basierend auf dem Index
+    lrh_probability = top_predictions[0][1]  # Annahme: Index 0 entspricht LRH
+    nicht_lrh_probability = top_predictions[1][1]  # Annahme: Index 1 entspricht Nicht-LRH
 
-    lrh_probability = next((prob for cat, prob in top_predictions if cat == "LRH"), 0)
-    nicht_lrh_probability = next((prob for cat, prob in top_predictions if cat == "Nicht-LRH"), 0)
-
-    threshold = 0.1  # 10% Unterschied als Schwellenwert
-    if abs(lrh_probability - nicht_lrh_probability) < threshold:
+    if abs(lrh_probability - nicht_lrh_probability) < 0.1:
         conclusion = "Nicht eindeutig"
     elif lrh_probability > nicht_lrh_probability:
         conclusion = "Wahrscheinlich LRH"
@@ -127,9 +125,11 @@ def analyze_new_article(file_path, trainer, tokenizer, le, extract_text_from_fil
 
     return {
         "Dateiname": os.path.basename(file_path),
-        "Dateigröße": file_size,
+        "Dateigröße": len(text.encode('utf-8')),
         "Datum": datetime.now().strftime("%d-%m-%y %H:%M"),
-        "LRH": f"{lrh_probability:.2f}",
-        "Nicht-LRH": f"{nicht_lrh_probability:.2f}",
-        "Schlussfolgerung": conclusion
+        "LRH": f"{lrh_probability:.4f}",
+        "Nicht-LRH": f"{nicht_lrh_probability:.4f}",
+        "Schlussfolgerung": conclusion,
+        "Model": model.name_or_path
     }
+

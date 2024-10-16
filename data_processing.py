@@ -70,11 +70,13 @@ def get_files_and_categories(config):
 def load_categories_from_csv(config):
     categories_file = os.path.join(config['Paths']['output'], 'categories.csv')
     if not os.path.exists(categories_file):
-        raise FileNotFoundError(f"Kategorien-Datei nicht gefunden: {categories_file}. Bitte führen Sie zuerst update_categories.py aus.")
+        raise FileNotFoundError(f"Kategorien-Datei nicht gefunden: {categories_file}")
 
     with open(categories_file, 'r', newline='', encoding='utf-8') as f:
         reader = csv.reader(f)
-        return [row[0] for row in reader]
+        categories = [row[0] for row in reader]
+
+    return categories
 
 
 def create_dataset(config, quick=False):

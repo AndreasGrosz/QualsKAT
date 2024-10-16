@@ -43,7 +43,7 @@ def check_cuda():
 if hasattr(torch.cuda.amp, 'GradScaler'):
     torch.cuda.amp.GradScaler = lambda **kwargs: torch.amp.GradScaler('cuda', **kwargs)
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename='classifier.log')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename='AANaL-errors.log')
 
 def main():
     logging.info("")
@@ -82,7 +82,7 @@ def main():
         sys.exit(1)
 
     try:
-        config = check_environment()
+        config, models, device = check_environment()
         check_hf_token()
 
         categories = load_categories_from_csv(config)
