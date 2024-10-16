@@ -1,5 +1,0 @@
-#!/bin/sh
-
-IBPATH=${IBPATH:-/home/res/projekte/kd0241-py/Q-KAT/AAUNaL/Beta-v1.2/env/sbin}
-
-$IBPATH/ibhosts $@; $IBPATH/ibswitches $@

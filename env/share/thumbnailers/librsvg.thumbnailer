@@ -1,4 +1,0 @@
-[Thumbnailer Entry]
-TryExec=/home/res/projekte/kd0241-py/Q-KAT/AAUNaL/Beta-v1.2/env/bin/gdk-pixbuf-thumbnailer
-Exec=/home/res/projekte/kd0241-py/Q-KAT/AAUNaL/Beta-v1.2/env/bin/gdk-pixbuf-thumbnailer -s %s %u %o
-MimeType=image/svg+xml;image/svg+xml-compressed;

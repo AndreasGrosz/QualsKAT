@@ -1,7 +1,0 @@
-
-datadir=/home/res/projekte/kd0241-py/Q-KAT/AAUNaL/Beta-v1.2/env/share
-xkb_base=/home/res/projekte/kd0241-py/Q-KAT/AAUNaL/Beta-v1.2/env/share/X11/xkb
-
-Name: XKeyboardConfig
-Description: X Keyboard configuration data
-Version: 2.38
