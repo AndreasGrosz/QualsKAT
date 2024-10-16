@@ -1,0 +1,128 @@
+{
+  "build": "h3358134_0",
+  "build_number": 0,
+  "channel": "https://conda.anaconda.org/conda-forge/linux-64",
+  "constrains": [],
+  "depends": [
+    "libgcc-ng >=12",
+    "openssl >=3.1.0,<4.0a0"
+  ],
+  "extracted_package_dir": "/home/res/miniconda3/pkgs/s2n-1.3.41-h3358134_0",
+  "files": [
+    "include/s2n.h",
+    "include/s2n/unstable/crl.h",
+    "include/s2n/unstable/fingerprint.h",
+    "include/s2n/unstable/npn.h",
+    "include/s2n/unstable/renegotiate.h",
+    "lib/libs2n.so",
+    "lib/libs2n.so.1",
+    "lib/libs2n.so.1.0.0",
+    "lib/s2n/cmake/modules/Findcrypto.cmake",
+    "lib/s2n/cmake/s2n-config.cmake",
+    "lib/s2n/cmake/shared/s2n-targets-release.cmake",
+    "lib/s2n/cmake/shared/s2n-targets.cmake"
+  ],
+  "fn": "s2n-1.3.41-h3358134_0.conda",
+  "license": "Apache-2.0",
+  "link": {
+    "source": "/home/res/miniconda3/pkgs/s2n-1.3.41-h3358134_0",
+    "type": 1
+  },
+  "md5": "6e3b75864fd97aef652c0d61bc2804be",
+  "name": "s2n",
+  "package_tarball_full_path": "/home/res/miniconda3/pkgs/s2n-1.3.41-h3358134_0.conda",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "include/s2n.h",
+        "path_type": "hardlink",
+        "sha256": "7d04f5edcbc09d52b6eac4f33012c8cef359b4c9ffbce2448a2ef60ccd9bf44b",
+        "sha256_in_prefix": "7d04f5edcbc09d52b6eac4f33012c8cef359b4c9ffbce2448a2ef60ccd9bf44b",
+        "size_in_bytes": 145259
+      },
+      {
+        "_path": "include/s2n/unstable/crl.h",
+        "path_type": "hardlink",
+        "sha256": "72216ec0174b81f7823de93ce6dc33b19ac6df46cb71184de4389ae708e78200",
+        "sha256_in_prefix": "72216ec0174b81f7823de93ce6dc33b19ac6df46cb71184de4389ae708e78200",
+        "size_in_bytes": 6991
+      },
+      {
+        "_path": "include/s2n/unstable/fingerprint.h",
+        "path_type": "hardlink",
+        "sha256": "9a961f7a26aadbc5727cb894f2a48de0ccef4c65cc45236188a88e8d09d522a0",
+        "sha256_in_prefix": "9a961f7a26aadbc5727cb894f2a48de0ccef4c65cc45236188a88e8d09d522a0",
+        "size_in_bytes": 4232
+      },
+      {
+        "_path": "include/s2n/unstable/npn.h",
+        "path_type": "hardlink",
+        "sha256": "e47cbbed2b7832095fb954b8ced0f342b33f13d1f4a790f49c2e3fba38f99be4",
+        "sha256_in_prefix": "e47cbbed2b7832095fb954b8ced0f342b33f13d1f4a790f49c2e3fba38f99be4",
+        "size_in_bytes": 2072
+      },
+      {
+        "_path": "include/s2n/unstable/renegotiate.h",
+        "path_type": "hardlink",
+        "sha256": "6ce3be962fb68efe3b6f536a921e0180d367e3819dee1b15681910b0e0ae0a2e",
+        "sha256_in_prefix": "6ce3be962fb68efe3b6f536a921e0180d367e3819dee1b15681910b0e0ae0a2e",
+        "size_in_bytes": 6899
+      },
+      {
+        "_path": "lib/libs2n.so",
+        "path_type": "softlink",
+        "sha256": "8b63f61f23e1b0b2bdbe797c041a930434d451ba138f046582ce36fe4c0743aa",
+        "size_in_bytes": 1407280
+      },
+      {
+        "_path": "lib/libs2n.so.1",
+        "path_type": "softlink",
+        "sha256": "8b63f61f23e1b0b2bdbe797c041a930434d451ba138f046582ce36fe4c0743aa",
+        "size_in_bytes": 1407280
+      },
+      {
+        "_path": "lib/libs2n.so.1.0.0",
+        "path_type": "hardlink",
+        "sha256": "8b63f61f23e1b0b2bdbe797c041a930434d451ba138f046582ce36fe4c0743aa",
+        "sha256_in_prefix": "8b63f61f23e1b0b2bdbe797c041a930434d451ba138f046582ce36fe4c0743aa",
+        "size_in_bytes": 1407280
+      },
+      {
+        "_path": "lib/s2n/cmake/modules/Findcrypto.cmake",
+        "path_type": "hardlink",
+        "sha256": "89b68f53fbd081d684c85347a2c1b2a6f4b28a8bc73eb2edc2c0aec050ae43dc",
+        "sha256_in_prefix": "89b68f53fbd081d684c85347a2c1b2a6f4b28a8bc73eb2edc2c0aec050ae43dc",
+        "size_in_bytes": 3874
+      },
+      {
+        "_path": "lib/s2n/cmake/s2n-config.cmake",
+        "path_type": "hardlink",
+        "sha256": "a12dff5dd700667a7faa53845074dc011dcafc2597729c1349eb276210edd18e",
+        "sha256_in_prefix": "a12dff5dd700667a7faa53845074dc011dcafc2597729c1349eb276210edd18e",
+        "size_in_bytes": 785
+      },
+      {
+        "_path": "lib/s2n/cmake/shared/s2n-targets-release.cmake",
+        "path_type": "hardlink",
+        "sha256": "063de9a6f04e6e8d5b1a6f4fedc1867b50afb4f96a113cf6ea6d6d3b929de1ec",
+        "sha256_in_prefix": "063de9a6f04e6e8d5b1a6f4fedc1867b50afb4f96a113cf6ea6d6d3b929de1ec",
+        "size_in_bytes": 811
+      },
+      {
+        "_path": "lib/s2n/cmake/shared/s2n-targets.cmake",
+        "path_type": "hardlink",
+        "sha256": "36fbff72216611b5289261c63de5325a5e7a52fa6c797fd55cf631be6915072d",
+        "sha256_in_prefix": "36fbff72216611b5289261c63de5325a5e7a52fa6c797fd55cf631be6915072d",
+        "size_in_bytes": 4490
+      }
+    ],
+    "paths_version": 1
+  },
+  "requested_spec": "None",
+  "sha256": "41b9f0d94ffeb6f7c30fcb7c21416a24e569e2d4edaadf50c93b43dc9d4b7793",
+  "size": 362068,
+  "subdir": "linux-64",
+  "timestamp": 1679620486000,
+  "url": "https://conda.anaconda.org/conda-forge/linux-64/s2n-1.3.41-h3358134_0.conda",
+  "version": "1.3.41"
+}

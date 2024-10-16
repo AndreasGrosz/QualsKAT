@@ -4,7 +4,7 @@
 .\" Copyright © 2009-2010 Cisco Systems, Inc.  All rights reserved.
 .\" Copyright © 2020 Hewlett Packard Enterprise.  All rights reserved.
 .\" See COPYING in top-level directory.
-.TH LSTOPO "1" "Sep 07, 2023" "2.9.3" "hwloc"
+.TH LSTOPO "1" "Mar 28, 2023" "2.9.1" "hwloc"
 .SH NAME
 lstopo, lstopo-no-graphics, hwloc-ls \- Show the topology of the system
 .
@@ -41,7 +41,7 @@ See the OUTPUT FORMATS section below.
 \fB\-i\fR <path>, \fB\-\-input\fR <path>
 Read the topology from <path> instead of discovering the topology of the local machine.
 
-If <path> is a file,
+If <path> is a file and XML support has been compiled in hwloc,
 it may be a XML file exported by a previous hwloc program.
 If <path> is "\-", the standard input may be used as a XML file.
 
@@ -247,27 +247,15 @@ and bold font may be used to display PU boxes of different kinds.
 .TP
 \fB\-\-restrict\fR <cpuset>
 Restrict the topology to the given cpuset.
-This removes some PUs and their now-child-less parents.
-
-Beware that restricting the PUs in a topology may change the
-logical indexes of many objects, including NUMA nodes.
 .TP
 \fB\-\-restrict\fR nodeset=<nodeset>
-Restrict the topology to the given nodeset.
-(unless \fB\-\-restrict\-flags\fR specifies something different).
-This removes some NUMA nodes and their now-child-less parents.
-
-Beware that restricting the NUMA nodes in a topology may change the
-logical indexes of many objects, including PUs.
+Restrict the topology to the given nodeset, unless --restrict-flags specifies something different.
 .TP
 \fB\-\-restrict\fR binding
 Restrict the topology to the current process binding.
 This option requires the use of the actual current machine topology
 (or any other topology with \fB\-\-thissystem\fR or with
 HWLOC_THISSYSTEM set to 1 in the environment).
-
-Beware that restricting the topology may change the
-logical indexes of many objects, including PUs and NUMA nodes.
 .TP
 \fB\-\-restrict\-flags\fR <flags>
 Enforce flags when restricting the topology.
@@ -610,7 +598,8 @@ Note that Misc and I/O devices are ignored during this export.
 .
 .TP
 .B xml
-lstopo outputs an XML representation of the map.
+If lstopo was compiled with the proper
+support, lstopo outputs an XML representation of the map.
 It may be reused later, even on another machine, with lstopo \-\-input,
 the HWLOC_XMLFILE environment variable, or the hwloc_topology_set_xml()
 function.

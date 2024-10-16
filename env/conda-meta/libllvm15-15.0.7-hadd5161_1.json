@@ -1,0 +1,61 @@
+{
+  "build": "hadd5161_1",
+  "build_number": 1,
+  "channel": "https://conda.anaconda.org/conda-forge/linux-64",
+  "constrains": [],
+  "depends": [
+    "libgcc-ng >=12",
+    "libstdcxx-ng >=12",
+    "libxml2 >=2.10.3,<3.0.0a0",
+    "libzlib >=1.2.13,<2.0.0a0",
+    "zstd >=1.5.2,<1.6.0a0"
+  ],
+  "extracted_package_dir": "/home/res/miniconda3/pkgs/libllvm15-15.0.7-hadd5161_1",
+  "files": [
+    "lib/libLLVM-15.so",
+    "lib/libLTO.so.15",
+    "lib/libRemarks.so.15"
+  ],
+  "fn": "libllvm15-15.0.7-hadd5161_1.conda",
+  "license": "Apache-2.0 WITH LLVM-exception",
+  "link": {
+    "source": "/home/res/miniconda3/pkgs/libllvm15-15.0.7-hadd5161_1",
+    "type": 1
+  },
+  "md5": "17d91085ccf5934ce652cb448d0cb65a",
+  "name": "libllvm15",
+  "package_tarball_full_path": "/home/res/miniconda3/pkgs/libllvm15-15.0.7-hadd5161_1.conda",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "lib/libLLVM-15.so",
+        "path_type": "hardlink",
+        "sha256": "df0bebe31b500ebbbb3328a257880316e1f6c1dff55da6a7a3991b90ba481de2",
+        "sha256_in_prefix": "df0bebe31b500ebbbb3328a257880316e1f6c1dff55da6a7a3991b90ba481de2",
+        "size_in_bytes": 140405976
+      },
+      {
+        "_path": "lib/libLTO.so.15",
+        "path_type": "hardlink",
+        "sha256": "83c33f1a4ae59c682fd355138323caea101e0a1417900795f501b8fd0c8bc977",
+        "sha256_in_prefix": "83c33f1a4ae59c682fd355138323caea101e0a1417900795f501b8fd0c8bc977",
+        "size_in_bytes": 104640
+      },
+      {
+        "_path": "lib/libRemarks.so.15",
+        "path_type": "hardlink",
+        "sha256": "37df80f67612fdc301b3716f5c87896cf48a53f193be6b3992fdd087939b1c4c",
+        "sha256_in_prefix": "37df80f67612fdc301b3716f5c87896cf48a53f193be6b3992fdd087939b1c4c",
+        "size_in_bytes": 15256
+      }
+    ],
+    "paths_version": 1
+  },
+  "requested_spec": "None",
+  "sha256": "f649fac60cb122bf0d85c4955725d94c353fdbd768bcd44f0444979b363cc9ab",
+  "size": 33016652,
+  "subdir": "linux-64",
+  "timestamp": 1678862492000,
+  "url": "https://conda.anaconda.org/conda-forge/linux-64/libllvm15-15.0.7-hadd5161_1.conda",
+  "version": "15.0.7"
+}

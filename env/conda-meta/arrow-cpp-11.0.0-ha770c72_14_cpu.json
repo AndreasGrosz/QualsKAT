@@ -1,0 +1,31 @@
+{
+  "build": "ha770c72_14_cpu",
+  "build_number": 14,
+  "channel": "https://conda.anaconda.org/conda-forge/linux-64",
+  "constrains": [],
+  "depends": [
+    "libarrow 11.0.0 h93537a5_14_cpu"
+  ],
+  "extracted_package_dir": "/home/res/miniconda3/pkgs/arrow-cpp-11.0.0-ha770c72_14_cpu",
+  "files": [],
+  "fn": "arrow-cpp-11.0.0-ha770c72_14_cpu.conda",
+  "license": "Apache-2.0",
+  "link": {
+    "source": "/home/res/miniconda3/pkgs/arrow-cpp-11.0.0-ha770c72_14_cpu",
+    "type": 1
+  },
+  "md5": "bcdf40be057d22b71351806f274dca2b",
+  "name": "arrow-cpp",
+  "package_tarball_full_path": "/home/res/miniconda3/pkgs/arrow-cpp-11.0.0-ha770c72_14_cpu.conda",
+  "paths_data": {
+    "paths": [],
+    "paths_version": 1
+  },
+  "requested_spec": "None",
+  "sha256": "49c234366f8d42492b9614072fa512d8f61b0c52a82183683e226214c9618985",
+  "size": 35352,
+  "subdir": "linux-64",
+  "timestamp": 1682155045000,
+  "url": "https://conda.anaconda.org/conda-forge/linux-64/arrow-cpp-11.0.0-ha770c72_14_cpu.conda",
+  "version": "11.0.0"
+}

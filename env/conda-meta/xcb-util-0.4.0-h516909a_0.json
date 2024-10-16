@@ -1,0 +1,136 @@
+{
+  "build": "h516909a_0",
+  "build_number": 0,
+  "channel": "https://conda.anaconda.org/conda-forge/linux-64",
+  "constrains": [],
+  "depends": [
+    "libgcc-ng >=7.3.0",
+    "libxcb >=1.13"
+  ],
+  "extracted_package_dir": "/home/res/miniconda3/pkgs/xcb-util-0.4.0-h516909a_0",
+  "files": [
+    "include/xcb/xcb_atom.h",
+    "include/xcb/xcb_aux.h",
+    "include/xcb/xcb_event.h",
+    "include/xcb/xcb_util.h",
+    "lib/libxcb-util.a",
+    "lib/libxcb-util.so",
+    "lib/libxcb-util.so.1",
+    "lib/libxcb-util.so.1.0.0",
+    "lib/pkgconfig/xcb-atom.pc",
+    "lib/pkgconfig/xcb-aux.pc",
+    "lib/pkgconfig/xcb-event.pc",
+    "lib/pkgconfig/xcb-util.pc"
+  ],
+  "fn": "xcb-util-0.4.0-h516909a_0.tar.bz2",
+  "license": "MIT",
+  "link": {
+    "source": "/home/res/miniconda3/pkgs/xcb-util-0.4.0-h516909a_0",
+    "type": 1
+  },
+  "md5": "a88ab22508ba067b689dc12696157cee",
+  "name": "xcb-util",
+  "package_tarball_full_path": "/home/res/miniconda3/pkgs/xcb-util-0.4.0-h516909a_0.tar.bz2",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "include/xcb/xcb_atom.h",
+        "path_type": "hardlink",
+        "sha256": "668135ed7ed0da0e87f4bc97320bc6a0cdbe42bbca41bd81f623ac539c8de609",
+        "sha256_in_prefix": "668135ed7ed0da0e87f4bc97320bc6a0cdbe42bbca41bd81f623ac539c8de609",
+        "size_in_bytes": 361
+      },
+      {
+        "_path": "include/xcb/xcb_aux.h",
+        "path_type": "hardlink",
+        "sha256": "8e174c39d5dcc7ccb7b6e38938a37897746666ceb8ab7df89a71b8bcb942025f",
+        "sha256_in_prefix": "8e174c39d5dcc7ccb7b6e38938a37897746666ceb8ab7df89a71b8bcb942025f",
+        "size_in_bytes": 6832
+      },
+      {
+        "_path": "include/xcb/xcb_event.h",
+        "path_type": "hardlink",
+        "sha256": "a29545f9f254904e4623b622d08f10a2950940344694e7e9fdbd85b5bed88503",
+        "sha256_in_prefix": "a29545f9f254904e4623b622d08f10a2950940344694e7e9fdbd85b5bed88503",
+        "size_in_bytes": 3000
+      },
+      {
+        "_path": "include/xcb/xcb_util.h",
+        "path_type": "hardlink",
+        "sha256": "d9ada3243b135069328498f049983a300598129b6312963c051b7ea8eb9f0b46",
+        "sha256_in_prefix": "d9ada3243b135069328498f049983a300598129b6312963c051b7ea8eb9f0b46",
+        "size_in_bytes": 154
+      },
+      {
+        "_path": "lib/libxcb-util.a",
+        "path_type": "hardlink",
+        "sha256": "370e5f4fe1c10b6fe7dea659733122a9c4ac3b3e3a7dc2e28e448d508e1604c2",
+        "sha256_in_prefix": "370e5f4fe1c10b6fe7dea659733122a9c4ac3b3e3a7dc2e28e448d508e1604c2",
+        "size_in_bytes": 27502
+      },
+      {
+        "_path": "lib/libxcb-util.so",
+        "path_type": "softlink",
+        "sha256": "138b7ea22c320b304aaa9feea917f51f054c62c890bdbb0e5d250cf5b0b4a888",
+        "size_in_bytes": 30952
+      },
+      {
+        "_path": "lib/libxcb-util.so.1",
+        "path_type": "softlink",
+        "sha256": "138b7ea22c320b304aaa9feea917f51f054c62c890bdbb0e5d250cf5b0b4a888",
+        "size_in_bytes": 30952
+      },
+      {
+        "_path": "lib/libxcb-util.so.1.0.0",
+        "path_type": "hardlink",
+        "sha256": "138b7ea22c320b304aaa9feea917f51f054c62c890bdbb0e5d250cf5b0b4a888",
+        "sha256_in_prefix": "138b7ea22c320b304aaa9feea917f51f054c62c890bdbb0e5d250cf5b0b4a888",
+        "size_in_bytes": 30952
+      },
+      {
+        "_path": "lib/pkgconfig/xcb-atom.pc",
+        "file_mode": "text",
+        "path_type": "hardlink",
+        "prefix_placeholder": "/opt/anaconda1anaconda2anaconda3",
+        "sha256": "64112705dd90d93f8d7c2c6d7e1fbf7ff0a4b5b4f57df208f1fd73de2ffba36e",
+        "sha256_in_prefix": "779db16d5974ab2ff45f1e9ee11a5e418f6a78ef19410fc5be7277f624d02ae8",
+        "size_in_bytes": 251
+      },
+      {
+        "_path": "lib/pkgconfig/xcb-aux.pc",
+        "file_mode": "text",
+        "path_type": "hardlink",
+        "prefix_placeholder": "/opt/anaconda1anaconda2anaconda3",
+        "sha256": "48472c1a144dbb18064abe0c9ad9b6e8f8f1606f55e0445e8bad92afd6e2d780",
+        "sha256_in_prefix": "adedcc8fc2b7be58dc2647d25fbe14ff77f7bbe858872ed1cded232ab97962a2",
+        "size_in_bytes": 260
+      },
+      {
+        "_path": "lib/pkgconfig/xcb-event.pc",
+        "file_mode": "text",
+        "path_type": "hardlink",
+        "prefix_placeholder": "/opt/anaconda1anaconda2anaconda3",
+        "sha256": "964e5137253c2b5ba8306686e536e3e2b7b7529d4fee36a0972b88fe496a2249",
+        "sha256_in_prefix": "43e19a8b7145c4e81acb6b8318fdd9ff2cacc608061d4d7015ba1a04e40ee5ee",
+        "size_in_bytes": 266
+      },
+      {
+        "_path": "lib/pkgconfig/xcb-util.pc",
+        "file_mode": "text",
+        "path_type": "hardlink",
+        "prefix_placeholder": "/opt/anaconda1anaconda2anaconda3",
+        "sha256": "4537858ea4b442c0de8a332da2c343374dcbe7aa59329e83c845126dbd6aee0f",
+        "sha256_in_prefix": "bcfe917076c04b6cfdbddd5382c66e8fad9ad0b9ecd529588715613b8bea8cbd",
+        "size_in_bytes": 265
+      }
+    ],
+    "paths_version": 1
+  },
+  "requested_spec": "None",
+  "sha256": "d797cecb10d9d20970656db803186b2d87e51f58202a87a359b18bae6f0b0d1e",
+  "size": 20109,
+  "subdir": "linux-64",
+  "timestamp": 1574273086000,
+  "url": "https://conda.anaconda.org/conda-forge/linux-64/xcb-util-0.4.0-h516909a_0.tar.bz2",
+  "version": "0.4.0"
+}

@@ -1,4 +1,4 @@
-.TH "hwlocality_bitmap" 3 "Thu Sep 7 2023" "Version 2.9.3" "Hardware Locality (hwloc)" \" -*- nroff -*-
+.TH "hwlocality_bitmap" 3 "Tue Mar 28 2023" "Version 2.9.1" "Hardware Locality (hwloc)" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -203,7 +203,7 @@ hwloc_bitmap_free(set);
 .PP
 \fBNote\fP
 .RS 4
-Most functions below return 0 on success and -1 on error\&. The usual error case would be an internal failure to realloc/extend the storage of the bitmap (\fCerrno\fP would be set to \fCENOMEM\fP)\&. See also \fBError reporting in the API\fP\&.
+Most functions below return an int that may be negative in case of error\&. The usual error case would be an internal failure to realloc/extend the storage of the bitmap (\fCerrno\fP would be set to \fCENOMEM\fP)\&.
 .PP
 Several examples of using the bitmap API are available under the doc/examples/ directory in the source tree\&. Regression tests such as tests/hwloc/hwloc_bitmap*\&.c also make intensive use of this API\&. 
 .RE
@@ -261,13 +261,6 @@ The bitmap should be freed by a corresponding call to \fBhwloc_bitmap_free()\fP\
 
 .PP
 Allocate a new full bitmap\&. 
-.PP
-\fBReturns\fP
-.RS 4
-A valid bitmap or \fCNULL\fP\&.
-.RE
-.PP
-The bitmap should be freed by a corresponding call to \fBhwloc_bitmap_free()\fP\&. 
 .SS "int hwloc_bitmap_and (\fBhwloc_bitmap_t\fP res, \fBhwloc_const_bitmap_t\fP bitmap1, \fBhwloc_const_bitmap_t\fP bitmap2)"
 
 .PP
@@ -283,7 +276,7 @@ Stringify a bitmap into a newly allocated string\&.
 .PP
 \fBReturns\fP
 .RS 4
-0 on success, -1 on error\&. 
+-1 on error\&. 
 .RE
 .PP
 
@@ -356,9 +349,7 @@ Compute the first index (least significant bit) in bitmap \fCbitmap\fP\&.
 .PP
 \fBReturns\fP
 .RS 4
-the first index set in \fCbitmap\fP\&. 
-.PP
--1 if \fCbitmap\fP is empty\&. 
+-1 if no index is set in \fCbitmap\fP\&. 
 .RE
 .PP
 
@@ -369,9 +360,7 @@ Compute the first unset index (least significant bit) in bitmap \fCbitmap\fP\&.
 .PP
 \fBReturns\fP
 .RS 4
-the first unset index in \fCbitmap\fP\&. 
-.PP
--1 if \fCbitmap\fP is full\&. 
+-1 if no index is unset in \fCbitmap\fP\&. 
 .RE
 .PP
 
@@ -398,12 +387,7 @@ Test whether bitmaps \fCbitmap1\fP and \fCbitmap2\fP intersects\&.
 .PP
 \fBReturns\fP
 .RS 4
-1 if bitmaps intersect, 0 otherwise\&.
-.RE
-.PP
-\fBNote\fP
-.RS 4
-The empty bitmap does not intersect any other bitmap\&. 
+1 if bitmaps intersect, 0 otherwise\&. 
 .RE
 .PP
 
@@ -479,9 +463,7 @@ Compute the last index (most significant bit) in bitmap \fCbitmap\fP\&.
 .PP
 \fBReturns\fP
 .RS 4
-the last index set in \fCbitmap\fP\&. 
-.PP
--1 if \fCbitmap\fP is empty, or if \fCbitmap\fP is infinitely set\&. 
+-1 if no index is set in \fCbitmap\fP, or if \fCbitmap\fP is infinitely set\&. 
 .RE
 .PP
 
@@ -492,9 +474,7 @@ Compute the last unset index (most significant bit) in bitmap \fCbitmap\fP\&.
 .PP
 \fBReturns\fP
 .RS 4
-the last index unset in \fCbitmap\fP\&. 
-.PP
--1 if \fCbitmap\fP is full, or if \fCbitmap\fP is not infinitely set\&. 
+-1 if no index is unset in \fCbitmap\fP, or if \fCbitmap\fP is infinitely set\&. 
 .RE
 .PP
 
@@ -505,7 +485,7 @@ Stringify a bitmap into a newly allocated list string\&.
 .PP
 \fBReturns\fP
 .RS 4
-0 on success, -1 on error\&. 
+-1 on error\&. 
 .RE
 .PP
 
@@ -528,24 +508,13 @@ the number of characters that were actually written if not truncating, or that w
 
 .PP
 Parse a list string and stores it in bitmap \fCbitmap\fP\&. 
-.PP
-\fBReturns\fP
-.RS 4
-0 on success, -1 on error\&. 
-.RE
-.PP
-
 .SS "int hwloc_bitmap_next (\fBhwloc_const_bitmap_t\fP bitmap, int prev)"
 
 .PP
-Compute the next index in bitmap \fCbitmap\fP which is after index \fCprev\fP\&. 
+Compute the next index in bitmap \fCbitmap\fP which is after index \fCprev\fP\&. If \fCprev\fP is -1, the first index is returned\&.
 .PP
 \fBReturns\fP
 .RS 4
-the first index set in \fCbitmap\fP if \fCprev\fP is \fC-1\fP\&. 
-.PP
-the next index set in \fCbitmap\fP if \fCprev\fP is not \fC-1\fP\&. 
-.PP
 -1 if no index with higher index is set in \fCbitmap\fP\&. 
 .RE
 .PP
@@ -553,14 +522,10 @@ the next index set in \fCbitmap\fP if \fCprev\fP is not \fC-1\fP\&.
 .SS "int hwloc_bitmap_next_unset (\fBhwloc_const_bitmap_t\fP bitmap, int prev)"
 
 .PP
-Compute the next unset index in bitmap \fCbitmap\fP which is after index \fCprev\fP\&. 
+Compute the next unset index in bitmap \fCbitmap\fP which is after index \fCprev\fP\&. If \fCprev\fP is -1, the first unset index is returned\&.
 .PP
 \fBReturns\fP
 .RS 4
-the first index unset in \fCbitmap\fP if \fCprev\fP is \fC-1\fP\&. 
-.PP
-the next index unset in \fCbitmap\fP if \fCprev\fP is not \fC-1\fP\&. 
-.PP
 -1 if no index with higher index is unset in \fCbitmap\fP\&. 
 .RE
 .PP
@@ -578,8 +543,6 @@ When called on the output of \fBhwloc_topology_get_topology_cpuset()\fP, the ret
 .PP
 \fBReturns\fP
 .RS 4
-the number of unsigned longs required\&. 
-.PP
 -1 if \fCbitmap\fP is infinite\&. 
 .RE
 .PP
@@ -634,13 +597,6 @@ the number of characters that were actually written if not truncating, or that w
 
 .PP
 Parse a bitmap string and stores it in bitmap \fCbitmap\fP\&. 
-.PP
-\fBReturns\fP
-.RS 4
-0 on success, -1 on error\&. 
-.RE
-.PP
-
 .SS "int hwloc_bitmap_taskset_asprintf (char ** strp, \fBhwloc_const_bitmap_t\fP bitmap)"
 
 .PP
@@ -648,7 +604,7 @@ Stringify a bitmap into a newly allocated taskset-specific string\&.
 .PP
 \fBReturns\fP
 .RS 4
-0 on success, -1 on error\&. 
+-1 on error\&. 
 .RE
 .PP
 
@@ -671,13 +627,6 @@ the number of characters that were actually written if not truncating, or that w
 
 .PP
 Parse a taskset-specific bitmap string and stores it in bitmap \fCbitmap\fP\&. 
-.PP
-\fBReturns\fP
-.RS 4
-0 on success, -1 on error\&. 
-.RE
-.PP
-
 .SS "unsigned long hwloc_bitmap_to_ith_ulong (\fBhwloc_const_bitmap_t\fP bitmap, unsigned i)"
 
 .PP
@@ -704,7 +653,7 @@ Compute the 'weight' of bitmap \fCbitmap\fP (i\&.e\&., number of indexes that ar
 .PP
 \fBReturns\fP
 .RS 4
-the number of indexes that are in the bitmap\&. 
+the number of indexes that are in the bitmap\&.
 .PP
 -1 if \fCbitmap\fP is infinitely set\&. 
 .RE

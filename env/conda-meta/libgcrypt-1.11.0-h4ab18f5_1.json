@@ -1,0 +1,138 @@
+{
+  "build": "h4ab18f5_1",
+  "build_number": 1,
+  "channel": "https://conda.anaconda.org/conda-forge/linux-64",
+  "constrains": [],
+  "depends": [
+    "libgcc-ng >=12",
+    "libgpg-error >=1.50,<2.0a0"
+  ],
+  "extracted_package_dir": "/home/res/miniconda3/pkgs/libgcrypt-1.11.0-h4ab18f5_1",
+  "files": [
+    "bin/dumpsexp",
+    "bin/hmac256",
+    "bin/mpicalc",
+    "include/gcrypt.h",
+    "lib/libgcrypt.so",
+    "lib/libgcrypt.so.20",
+    "lib/libgcrypt.so.20.5.0",
+    "lib/pkgconfig/libgcrypt.pc",
+    "share/aclocal/libgcrypt.m4",
+    "share/info/gcrypt.info",
+    "share/info/gcrypt.info-1",
+    "share/info/gcrypt.info-2",
+    "share/man/man1/hmac256.1"
+  ],
+  "fn": "libgcrypt-1.11.0-h4ab18f5_1.conda",
+  "license": "LGPL-2.1-or-later AND GPL-2.0-or-later",
+  "link": {
+    "source": "/home/res/miniconda3/pkgs/libgcrypt-1.11.0-h4ab18f5_1",
+    "type": 1
+  },
+  "md5": "14858a47d4cc995892e79f2b340682d7",
+  "name": "libgcrypt",
+  "package_tarball_full_path": "/home/res/miniconda3/pkgs/libgcrypt-1.11.0-h4ab18f5_1.conda",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "bin/dumpsexp",
+        "path_type": "hardlink",
+        "sha256": "0bfdf5150c7c988b233b87ff15a6bd390f75a9824871d3c3120dca1064ae448a",
+        "sha256_in_prefix": "0bfdf5150c7c988b233b87ff15a6bd390f75a9824871d3c3120dca1064ae448a",
+        "size_in_bytes": 21608
+      },
+      {
+        "_path": "bin/hmac256",
+        "path_type": "hardlink",
+        "sha256": "a01f5cfd6403bc712734f387216fa6172aa6d124610dd8ac05c354852da784de",
+        "sha256_in_prefix": "a01f5cfd6403bc712734f387216fa6172aa6d124610dd8ac05c354852da784de",
+        "size_in_bytes": 21688
+      },
+      {
+        "_path": "bin/mpicalc",
+        "path_type": "hardlink",
+        "sha256": "9c0c9d1658bedc1b8b5a3ea957114674bacbeb330f58ce41ac2b6866211ca873",
+        "sha256_in_prefix": "9c0c9d1658bedc1b8b5a3ea957114674bacbeb330f58ce41ac2b6866211ca873",
+        "size_in_bytes": 30768
+      },
+      {
+        "_path": "include/gcrypt.h",
+        "path_type": "hardlink",
+        "sha256": "caa198bc604c55afc03249584a9eb869e6ffd4150eb436965cb7abafe550c570",
+        "sha256_in_prefix": "caa198bc604c55afc03249584a9eb869e6ffd4150eb436965cb7abafe550c570",
+        "size_in_bytes": 83204
+      },
+      {
+        "_path": "lib/libgcrypt.so",
+        "path_type": "softlink",
+        "sha256": "9cb650170dfb94924324274d738def41dcdb0de5c0b0cc04649e50bfdb40cdc9",
+        "size_in_bytes": 2349312
+      },
+      {
+        "_path": "lib/libgcrypt.so.20",
+        "path_type": "softlink",
+        "sha256": "9cb650170dfb94924324274d738def41dcdb0de5c0b0cc04649e50bfdb40cdc9",
+        "size_in_bytes": 2349312
+      },
+      {
+        "_path": "lib/libgcrypt.so.20.5.0",
+        "path_type": "hardlink",
+        "sha256": "9cb650170dfb94924324274d738def41dcdb0de5c0b0cc04649e50bfdb40cdc9",
+        "sha256_in_prefix": "9cb650170dfb94924324274d738def41dcdb0de5c0b0cc04649e50bfdb40cdc9",
+        "size_in_bytes": 2349312
+      },
+      {
+        "_path": "lib/pkgconfig/libgcrypt.pc",
+        "file_mode": "text",
+        "path_type": "hardlink",
+        "prefix_placeholder": "/home/conda/feedstock_root/build_artifacts/libgcrypt_1721392152438/_h_env_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_p",
+        "sha256": "78f784e694daca66bc79bce5825f0f0593638c44812dbfcbea05df8f57a0ba93",
+        "sha256_in_prefix": "2b8df7645f176d58f11ea1f15ae9632bd155298f6ebb199ee9699e90f8054e6a",
+        "size_in_bytes": 891
+      },
+      {
+        "_path": "share/aclocal/libgcrypt.m4",
+        "path_type": "hardlink",
+        "sha256": "46025f7c993a4d715e23806ce239b94fc54cf9ba1534efd4f9a34d67908b02d6",
+        "sha256_in_prefix": "46025f7c993a4d715e23806ce239b94fc54cf9ba1534efd4f9a34d67908b02d6",
+        "size_in_bytes": 9619
+      },
+      {
+        "_path": "share/info/gcrypt.info",
+        "path_type": "hardlink",
+        "sha256": "88023f5aaa9482a80764c5b91711bbaebf84b3d2748f1df01ed3521b89ab3e5c",
+        "sha256_in_prefix": "88023f5aaa9482a80764c5b91711bbaebf84b3d2748f1df01ed3521b89ab3e5c",
+        "size_in_bytes": 4418
+      },
+      {
+        "_path": "share/info/gcrypt.info-1",
+        "path_type": "hardlink",
+        "sha256": "a2c372251213aabedd5f730e4c405f9e90b67c627eceeac5a9fa661fa42dc215",
+        "sha256_in_prefix": "a2c372251213aabedd5f730e4c405f9e90b67c627eceeac5a9fa661fa42dc215",
+        "size_in_bytes": 312909
+      },
+      {
+        "_path": "share/info/gcrypt.info-2",
+        "path_type": "hardlink",
+        "sha256": "dc629a462aa6a12717a4caefa54e92c02ae9fc5c4a822f710330cf035a2160cd",
+        "sha256_in_prefix": "dc629a462aa6a12717a4caefa54e92c02ae9fc5c4a822f710330cf035a2160cd",
+        "size_in_bytes": 37658
+      },
+      {
+        "_path": "share/man/man1/hmac256.1",
+        "path_type": "hardlink",
+        "sha256": "1cc404bac9d9d0355d953fab943fc8ec10d04b3d2d52fced9ee9d234ea86c2d8",
+        "sha256_in_prefix": "1cc404bac9d9d0355d953fab943fc8ec10d04b3d2d52fced9ee9d234ea86c2d8",
+        "size_in_bytes": 1218
+      }
+    ],
+    "paths_version": 1
+  },
+  "requested_spec": "None",
+  "sha256": "9e97e4a753d2ee238cfc7375f0882830f0d8c1667431bc9d070a0f6718355570",
+  "size": 684307,
+  "subdir": "linux-64",
+  "timestamp": 1721392291000,
+  "url": "https://conda.anaconda.org/conda-forge/linux-64/libgcrypt-1.11.0-h4ab18f5_1.conda",
+  "version": "1.11.0"
+}

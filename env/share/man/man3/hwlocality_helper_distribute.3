@@ -1,4 +1,4 @@
-.TH "hwlocality_helper_distribute" 3 "Thu Sep 7 2023" "Version 2.9.3" "Hardware Locality (hwloc)" \" -*- nroff -*-
+.TH "hwlocality_helper_distribute" 3 "Tue Mar 28 2023" "Version 2.9.1" "Hardware Locality (hwloc)" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -49,11 +49,6 @@ This is typically useful when an application wants to distribute \fCn\fP threads
 The caller may typically want to also call \fBhwloc_bitmap_singlify()\fP before binding a thread so that it does not move at all\&.
 .PP
 \fCflags\fP should be 0 or a OR'ed set of \fBhwloc_distrib_flags_e\fP\&.
-.PP
-\fBReturns\fP
-.RS 4
-0 on success, -1 on error\&.
-.RE
 .PP
 \fBNote\fP
 .RS 4

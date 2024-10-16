@@ -1,4 +1,4 @@
-.TH "hwlocality_memattrs" 3 "Thu Sep 7 2023" "Version 2.9.3" "Hardware Locality (hwloc)" \" -*- nroff -*-
+.TH "hwlocality_memattrs" 3 "Tue Mar 28 2023" "Version 2.9.1" "Hardware Locality (hwloc)" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -176,11 +176,6 @@ If \fClocation\fP is given as an explicit object, its CPU set is used to find NU
 .PP
 On input, \fCnr\fP points to the number of nodes that may be stored in the \fCnodes\fP array\&. On output, \fCnr\fP will be changed to the number of stored nodes, or the number of nodes that would have been stored if there were enough room\&.
 .PP
-\fBReturns\fP
-.RS 4
-0 on success or -1 on error\&.
-.RE
-.PP
 \fBNote\fP
 .RS 4
 Some of these NUMA nodes may not have any memory attribute values and hence not be reported as actual targets in other functions\&.
@@ -194,7 +189,9 @@ When an object CPU set is given as locality, for instance a Package, and when fl
 .SS "int hwloc_memattr_get_best_initiator (\fBhwloc_topology_t\fP topology, \fBhwloc_memattr_id_t\fP attribute, \fBhwloc_obj_t\fP target, unsigned long flags, struct \fBhwloc_location\fP * best_initiator, hwloc_uint64_t * value)"
 
 .PP
-Return the best initiator for the given attribute and target NUMA node\&. If \fCvalue\fP is non \fCNULL\fP, the corresponding value is returned there\&.
+Return the best initiator for the given attribute and target NUMA node\&. If the attribute does not relate to a specific initiator (it does not have the flag \fBHWLOC_MEMATTR_FLAG_NEED_INITIATOR\fP), \fC-1\fP is returned and \fCerrno\fP is set to \fCEINVAL\fP\&.
+.PP
+If \fCvalue\fP is non \fCNULL\fP, the corresponding value is returned there\&.
 .PP
 If multiple initiators have the same attribute values, only one is returned (and there is no way to clarify how that one is chosen)\&. Applications that want to detect initiators with identical/similar values, or that want to look at values for multiple attributes, should rather get all values using \fBhwloc_memattr_get_value()\fP and manually select the initiator they consider the best\&.
 .PP
@@ -202,16 +199,7 @@ The returned initiator should not be modified or freed, it belongs to the topolo
 .PP
 \fCflags\fP must be \fC0\fP for now\&.
 .PP
-\fBReturns\fP
-.RS 4
-0 on success\&. 
-.PP
--1 with errno set to \fCENOENT\fP if there are no matching initiators\&. 
-.PP
--1 with errno set to \fCEINVAL\fP if the attribute does not relate to a specific initiator (it does not have the flag \fBHWLOC_MEMATTR_FLAG_NEED_INITIATOR\fP)\&. 
-.RE
-.PP
-
+If there are no matching initiators, \fC-1\fP is returned with \fCerrno\fP set to \fCENOENT\fP; 
 .SS "int hwloc_memattr_get_best_target (\fBhwloc_topology_t\fP topology, \fBhwloc_memattr_id_t\fP attribute, struct \fBhwloc_location\fP * initiator, unsigned long flags, \fBhwloc_obj_t\fP * best_target, hwloc_uint64_t * value)"
 
 .PP
@@ -223,14 +211,7 @@ If multiple targets have the same attribute values, only one is returned (and th
 .PP
 \fCflags\fP must be \fC0\fP for now\&.
 .PP
-\fBReturns\fP
-.RS 4
-0 on success\&. 
-.PP
--1 with errno set to \fCENOENT\fP if there are no matching targets\&. 
-.PP
--1 with errno set to \fCEINVAL\fP if flags are invalid, or no such attribute exists\&.
-.RE
+If there are no matching targets, \fC-1\fP is returned with \fCerrno\fP set to \fCENOENT\fP;
 .PP
 \fBNote\fP
 .RS 4
@@ -242,28 +223,12 @@ The initiator \fCinitiator\fP should be of type \fBHWLOC_LOCATION_TYPE_CPUSET\fP
 
 .PP
 Return the identifier of the memory attribute with the given name\&. 
-.PP
-\fBReturns\fP
-.RS 4
-0 on success\&. 
-.PP
--1 with errno set to \fCEINVAL\fP if no such attribute exists\&. 
-.RE
-.PP
-
 .SS "int hwloc_memattr_get_value (\fBhwloc_topology_t\fP topology, \fBhwloc_memattr_id_t\fP attribute, \fBhwloc_obj_t\fP target_node, struct \fBhwloc_location\fP * initiator, unsigned long flags, hwloc_uint64_t * value)"
 
 .PP
 Return an attribute value for a specific target NUMA node\&. If the attribute does not relate to a specific initiator (it does not have the flag \fBHWLOC_MEMATTR_FLAG_NEED_INITIATOR\fP), location \fCinitiator\fP is ignored and may be \fCNULL\fP\&.
 .PP
 \fCflags\fP must be \fC0\fP for now\&.
-.PP
-\fBReturns\fP
-.RS 4
-0 on success\&. 
-.PP
--1 on error, for instance with errno set to \fCEINVAL\fP if flags are invalid or no such attribute exists\&.
-.RE
 .PP
 \fBNote\fP
 .RS 4

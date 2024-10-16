@@ -1,17 +1,27 @@
 # Urheberrechtszuordnung und QKAT CUDA-Projekt
 
 ## Überblick
-Dieses Projekt kombiniert Techniken zur Urheberrechtszuordnung mit CUDA-beschleunigten Berechnungen und Modellladevorgängen. Ziel ist es, den Autor eines bestimmten Textes sowohl mit generativen (n-Gramm-Sprachmodell) als auch mit diskriminativen (Sequenzklassifikator) Ansätzen zu ermitteln und dabei CUDA zur Leistungsoptimierung zu nutzen.
+Dieses Projekt kombiniert Techniken zur Urheberrechtszuordnung mit CUDA-beschleunigten Berechnungen und Modellladevorgängen. Ziel ist es, den Autor eines bestimmten Textes sowohl mit generativen (n-Gramm-Sprachmodell, noch nicht realisiert) als auch mit diskriminativen (Sequenzklassifikator) Ansätzen zu ermitteln und dabei CUDA zur Leistungsoptimierung zu nutzen.
+
+Hier geht es nur um einen Autor (L. Ron Hubbard, kurz LRH), dem viele 10000 docs zugeordnet werden, wobei viele davon von Ghostwritern geschrieben wurden. Wir hätten gerne eine Wahrscheinlichkeit, ob der jeweils untersuchte Text von LRH stammt oder nicht.
 
 ## Systemanforderungen
 
+- **Captiva**
+- **Prozessor** Intel Core i9 13th Gen mit 2.60 GHz
+- **Prozessorkerne** 14 -Core
+- **Performance Kerne** 6 -Core
+- **Arbeitsspeicher** 64 GB
+- **Kapazität** SSD 2000 GB
+- **Pixelauflösungi** 1920 x 1080 Pixel
+- **Grafikkarte** GeForce RTX 4060
 - **Betriebssystem**: Kubuntu 24.04 LTS
 - **Hardware**: NVIDIA-GPU (für CUDA-Unterstützung)
-- **CPU-Architektur**: PowerPC-Unterstützung (für bestimmte PowerPC-Umgebungen)
+- **CPU-Architektur**: PowerPC-Unterstützung
 
 ## Projektkomponenten
 
-1. Urheberrechtsvermerk
+1. Urheberrechts-Analyse
 - **Generativer Klassifikator**:
 - Verwendet das LM-Paket von NLTK für n-Gramm-Sprachmodelle
 - Experimentiert mit verschiedenen Glättungstechniken und Backoff-Strategien
@@ -46,8 +56,11 @@ chsh -s /usr/bin/fish
 
 4. Klone das Repository:
 ```
-git clone [your-repository-url]
-cd [your-project-directory]
+git clone https://github.com/AndreasGrosz/QualsKAT.git
+
+auf dem Captiva-PC
+
+cd /home/res/projekte/kd0241-py/Q-KAT/AAUNaL/Beta-v1.2/
 ```
 
 5. Erstelle und aktiviere die lokale Conda-Umgebung:
@@ -146,12 +159,25 @@ conda activate ./env
 Füge Folgendes zu `~/.config/fish/config.fish` hinzu:
 ```
 function fish_prompt
-set -l conda_env (basename „$CONDA_DEFAULT_ENV“)
-echo -n „($conda_env) “
-set_color $fish_color_cwd
-echo -n (prompt_pwd)
-set_color normal
-echo -n ' > '
+    set -l user (whoami)
+    set -l host (hostname -s)
+    set -l cwd (prompt_pwd)
+    set -l env_name (basename "$CONDA_DEFAULT_ENV")
+
+    set_color blue
+    echo -n "$user@$host "
+    set_color yellow
+    echo -n "$cwd"
+    if test -n "$env_name"
+        set_color blue
+        echo -n "($env_name)"
+    end
+    set_color normal
+    echo -n "/$"
+end
+
+function fish_right_prompt
+    # Leer, um den rechten Prompt zu entfernen
 end
 ```
 
@@ -161,7 +187,7 @@ end
 
 ## Lizenz
 
-[Gib die Lizenz an, unter der dein Projekt veröffentlicht wird]
+Copyright by Andreas Groß, Morgarten, Schweiz
 
 ## Umgebung aktivieren
 ```
