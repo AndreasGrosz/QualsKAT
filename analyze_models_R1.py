@@ -16,11 +16,12 @@ input_file = sys.argv[1]
 input_file_path = os.path.join(OUTPUT_DIR, input_file)
 df = pd.read_csv(input_file_path)
 
-# Modellnamen
-models = [col for col in df.columns if col not in ['Dateiname', 'Dateigröße', 'Datum', 'Mittelwert']]
+# Identifiziere die Modellspalten
+non_model_columns = ['Dateiname', 'Dateigröße', 'Datum']
+models = [col for col in df.columns if col not in non_model_columns and col != 'Mittelwert']
 
-if 'Mittelwert' in df.columns:
-    models.remove('Mittelwert')
+# Überprüfe, ob eine Mittelwertspalte existiert
+mittelwert_spalte = 'Mittelwert' if 'Mittelwert' in df.columns else None
 
 # Überschrift
 current_date = date.today().strftime("%y%m%d")
@@ -29,7 +30,7 @@ print(f"# {current_date} Analyse Models Ausgabe {input_file_name}.md")
 
 # 1. Deskriptive Statistik
 print("## Deskriptive Statistik:")
-stats_columns = models + (['Mittelwert'] if 'Mittelwert' in df.columns else [])
+stats_columns = models + ([mittelwert_spalte] if mittelwert_spalte else [])
 print(df[stats_columns].describe().round(2))
 print("\n")
 
@@ -54,7 +55,7 @@ print("\n")
 
 # 4. Verteilung der Vorhersagen
 plt.figure(figsize=(12, 6))
-df[models + ['Mittelwert']].hist(bins=20)
+df[stats_columns].hist(bins=20)
 plt.title('Verteilung der Vorhersagen für jedes Modell')
 plt.savefig('prediction_distribution.png')
 plt.close()
@@ -77,27 +78,25 @@ for case in interesting_cases[:5]:
 
 # 6. Modellperformanz-Übersicht
 print("## Modellperformanz-Übersicht:")
-performance_columns = models + (['Mittelwert'] if 'Mittelwert' in df.columns else [])
-performance_summary = df[performance_columns].agg(['mean', 'median', 'std', 'min', 'max']).round(2)
+performance_summary = df[stats_columns].agg(['mean', 'median', 'std', 'min', 'max']).round(2)
 print(performance_summary)
 
 # Schwellenwertanalyse
 thresholds = [50, 60, 70, 80, 90]
 
 print("## Prozentsatz der Dokumente über Schwellenwerten:")
-header_columns = models + (['Mittelwert'] if 'Mittelwert' in df.columns else [])
-print(f"{'Threshold':<12}" + "".join(f"{model:>12}" for model in header_columns))
-print("-" * (12 + 12 * len(header_columns)))
+print(f"{'Threshold':<12}" + "".join(f"{model:>12}" for model in stats_columns))
+print("-" * (12 + 12 * len(stats_columns)))
 
 for threshold in thresholds:
-    row = [f">{threshold}%"] + [round((df[model] > threshold).mean() * 100, 2) for model in header_columns]
+    row = [f">{threshold}%"] + [round((df[model] > threshold).mean() * 100, 2) for model in stats_columns]
     print(f"{row[0]:<12}" + "".join(f"{value:12.2f}" for value in row[1:]))
 
 # Histogramme
 fig, axes = plt.subplots(2, 3, figsize=(15, 10))
 axes = axes.flatten()
 
-for i, model in enumerate(header_columns):
+for i, model in enumerate(stats_columns):
     if i < len(axes):
         axes[i].hist(df[model], bins=50)
         axes[i].set_title(model)
