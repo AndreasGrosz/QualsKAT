@@ -2,11 +2,10 @@
 documents = documents
 check_this = CheckThis
 output = output
-models = models
+models = models-240815
 
 [Model]
-# models für power-pc
-model_name = distilbert-base-uncased,roberta-large,roberta-base,microsoft/deberta-base,albert-base-v2
+model_name = distilbert-base-uncased,roberta-large,roberta-base,albert-base-v2,microsoft_deberta-base
 
 # models für CPU
 #model_name = distilbert-base-uncased, albert-base-v2

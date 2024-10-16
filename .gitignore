@@ -8,6 +8,7 @@ venv/
 models/
 fresh-models/
 CheckThis/
+env/
 
 # Andere zu ignorierende Dateien:
 sync_data.sh
