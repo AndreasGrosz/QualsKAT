@@ -14,6 +14,9 @@ import docx
 import pdfplumber
 from analysis_utils import analyze_new_article, save_results_to_csv
 import re
+from data_processing import extract_text_from_file
+
+print("file_utils_ag.py wird geladen")
 
 def check_environment():
     device = get_device()
@@ -126,6 +129,7 @@ def check_hf_token():
 def natural_sort_key(s):
     return [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', s)]
 
+
 def check_files(model, tokenizer, le, config, model_name, output_path):
     start_time = time.time()
     check_folder = config['Paths']['check_this']
@@ -133,27 +137,20 @@ def check_files(model, tokenizer, le, config, model_name, output_path):
         logging.error(f"Der Ordner '{check_folder}' existiert nicht.")
         return
 
-    # Holen und sortieren Sie alle Dateien im Voraus
-    all_files = [f for f in os.listdir(check_folder) if os.path.isfile(os.path.join(check_folder, f))]
-    all_files.sort(key=natural_sort_key)
+    files = [f for f in os.listdir(check_folder) if os.path.isfile(os.path.join(check_folder, f))]
 
-    logging.info("Sortierte Dateiliste:")
-    for file in all_files:
-        logging.info(file)
-
-    if not all_files:
+    if not files:
         logging.info(f"Keine Dateien im Ordner '{check_folder}' gefunden.")
         return
 
     results = []
-    for file in all_files:
+    for file in files:
         file_path = os.path.join(check_folder, file)
         logging.info(f"Analysiere Datei: {file}")
         result = analyze_new_article(file_path, model, tokenizer, le, extract_text_from_file)
         if result:
             result['Model'] = model_name
             results.append(result)
-            print(f"Verarbeitet: {result['Dateiname']} - LRH: {result['LRH']}, Nicht-LRH: {result['Nicht-LRH']}")
 
     end_time = time.time()
     total_duration = end_time - start_time
