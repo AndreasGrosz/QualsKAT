@@ -84,9 +84,12 @@ print(performance_summary)
 # Schwellenwertanalyse
 thresholds = [50, 60, 70, 80, 90]
 
+print()
 print("## Prozentsatz der Dokumente über Schwellenwerten:")
-print(f"{'Threshold':<12}" + "".join(f"{model:>12}" for model in stats_columns))
-print("-" * (12 + 12 * len(stats_columns)))
+
+max_len = 12
+print(f"{'Threshold':<12}|" + "|".join(f"{model[:max_len]:>12}" for model in stats_columns))
+print("-" * (12 + (len(stats_columns) * (max_len + 3))))  # Passe die Trennlinie entsprechend an
 
 for threshold in thresholds:
     row = [f">{threshold}%"] + [round((df[model] > threshold).mean() * 100, 2) for model in stats_columns]
@@ -102,6 +105,8 @@ for i, model in enumerate(stats_columns):
         axes[i].set_title(model)
         axes[i].set_xlabel('Konfidenz (%)')
         axes[i].set_ylabel('Anzahl der Dokumente')
+
+print()
 
 plt.tight_layout()
 plt.savefig('model_distributions.png')

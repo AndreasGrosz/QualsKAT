@@ -85,7 +85,7 @@ def consolidate_results(config, prefix):
 
     # Erstellen des Ausgabedateinamens
     common_part = "_".join(csv_files[0].split("_")[1:-1])  # Nimmt alles zwischen dem Präfix und dem Modellnamen
-    output_filename = f"{prefix}All-Results_{common_part}.csv"
+    output_filename = f"{prefix}-All-Results_{common_part}.csv"
 
     output_file = os.path.join(output_folder, output_filename)
     result_df = result_df.drop(columns=[f"{prefix}ConsolidatedResults"], errors='ignore')
