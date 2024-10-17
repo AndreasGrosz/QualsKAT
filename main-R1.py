@@ -19,8 +19,8 @@ from sklearn.preprocessing import LabelEncoder
 
 def load_label_encoder(config):
     categories = load_categories_from_csv(config)
-    if len(categories) != 2 or 'LRH' not in categories or 'Non-LRH' not in categories:
-        raise ValueError("Die categories.csv Datei muss genau zwei Zeilen enthalten: 'Non-LRH' und 'LRH'")
+    if len(categories) != 2 or 'LRH' not in categories or 'Nicht-LRH' not in categories:
+        raise ValueError("Die categories.csv Datei muss genau zwei Zeilen enthalten: 'Nicht-LRH' und 'LRH'")
     le = LabelEncoder()
     le.fit(categories)
     print("Label-Encoder Klassen:", le.classes_)
@@ -80,20 +80,29 @@ def check_files(model, tokenizer, le, config, model_name):
         logging.info(f"Keine Ergebnisse zur Ausgabe für Modell {model_name}.")
 
 def main():
+    parser = argparse.ArgumentParser(description="Analyse von Texten mit verschiedenen Modellen")
+    parser.add_argument("thema", help="Thema oder Bezeichnung für diesen Analysedurchlauf")
+    parser.add_argument("--checkthis", action="store_true", help="Führe die Analyse für den 'check_this' Ordner durch")
+    args = parser.parse_args()
+
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
     try:
         check_hf_token()
         config, models, device = check_environment()
 
-        # Laden Sie den Label-Encoder einmal für alle Modelle
         le = load_label_encoder(config)
+
+        timestamp = datetime.now().strftime("%y%m%d-%Hh%M")
 
         for model_name, (tokenizer, model) in models.items():
             model.to(device)
             logging.info(f"Verarbeite Modell: {model_name}")
 
-            check_files(model, tokenizer, le, config, model_name)
+            if args.checkthis:
+                output_filename = f"{timestamp}-Results_{args.thema}_{model_name}.csv"
+                output_path = os.path.join(config['Paths']['output'], output_filename)
+                check_files(model, tokenizer, le, config, model_name, output_path)
 
             if device.type == "cuda":
                 torch.cuda.empty_cache()

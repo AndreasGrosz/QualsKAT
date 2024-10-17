@@ -73,9 +73,11 @@ def calculate_lrh_confidence(model, tokenizer, text, le):
         logits = outputs.logits
 
     probabilities = torch.nn.functional.softmax(logits, dim=-1)[0]
+    print(f"Debug: probabilities = {probabilities}")
     lrh_index = le.transform(['LRH'])[0]
+    print(f"Debug: LRH index according to LabelEncoder = {lrh_index}")
     lrh_probability = probabilities[lrh_index].item()
-
+    print(f"Debug: LRH probability = {lrh_probability}")
     return lrh_probability * 100  # Umwandlung in Prozent
 
 
