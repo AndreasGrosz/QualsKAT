@@ -21,21 +21,26 @@
 import pandas as pd
 import os
 import re
+import sys
 import configparser
 from datetime import datetime
+
 
 def natural_sort_key(s):
     return [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', s)]
 
-def consolidate_results(config):
+def consolidate_results(config, prefix):
     output_folder = config['Paths']['output']
-    csv_files = [f for f in os.listdir(output_folder) if f.startswith("CheckThisResults_") and f.endswith(".csv")]
+    csv_files = [f for f in os.listdir(output_folder) if f.startswith(prefix) and f.endswith(".csv")]
+
+    # Begrenzen Sie die Anzahl der zu verarbeitenden Dateien auf 10
+    csv_files = sorted(csv_files)[:10]
 
     all_data = []
     first_timestamp = None
 
     for csv_file in csv_files:
-        model_name = csv_file.split("_")[1].split(".")[0]
+        model_name = csv_file.split("_")[-1].split(".")[0]
         df = pd.read_csv(os.path.join(output_folder, csv_file))
         df['Model'] = model_name
         all_data.append(df)
@@ -71,26 +76,29 @@ def consolidate_results(config):
     result_df = file_info.merge(pivot_df.reset_index(), on='Dateiname')
 
     # Berechnen Sie den Mittelwert
-    models = [col for col in result_df.columns if col not in ['Dateiname', 'Dateigröße', 'Datum']]
+    models = [col for col in result_df.columns if col not in ['Dateiname', 'Dateigröße', 'Datum', 'LRH-Vorträge']]
     result_df['Mittelwert'] = result_df[models].mean(axis=1).astype(int)
 
-    # Sortieren der Spalten
+    # Sortieren der Spalten und Entfernen der überflüssigen Spalte
     columns = ['Dateiname', 'Dateigröße', 'Datum'] + sorted(models) + ['Mittelwert']
     result_df = result_df[columns]
 
     # Erstellen des Ausgabedateinamens
-    if first_timestamp:
-        timestamp = datetime.strptime(first_timestamp, "%d-%m-%y %H:%M")
-        output_filename = f"{timestamp.strftime('%y%m%d-%Hh%M')}-Results.csv"
-    else:
-        output_filename = "ConsolidatedResults.csv"
+    common_part = "_".join(csv_files[0].split("_")[1:-1])  # Nimmt alles zwischen dem Präfix und dem Modellnamen
+    output_filename = f"{prefix}All-Results_{common_part}.csv"
 
     output_file = os.path.join(output_folder, output_filename)
+    result_df = result_df.drop(columns=[f"{prefix}ConsolidatedResults"], errors='ignore')
     result_df.to_csv(output_file, index=False)
     print(f"Konsolidierte Ergebnisse wurden in {output_file} gespeichert.")
 
 # Hauptausführung
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Bitte geben Sie den Präfix für die zu verarbeitenden CSV-Dateien an.")
+        sys.exit(1)
+
+    prefix = sys.argv[1]
     config = configparser.ConfigParser()
     config.read('config.txt')
-    consolidate_results(config)
+    consolidate_results(config, prefix)
