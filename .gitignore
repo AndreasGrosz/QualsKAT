@@ -13,7 +13,7 @@ env/
 import/
 # Andere zu ignorierende Dateien:
 sync_data.sh
-
+ScnWortListe/
 
 
 # Ignore Python cache files
