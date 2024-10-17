@@ -126,7 +126,7 @@ def check_hf_token():
 def natural_sort_key(s):
     return [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', s)]
 
-def check_files(model, tokenizer, le, config, model_name):
+def check_files(model, tokenizer, le, config, model_name, output_path):
     start_time = time.time()
     check_folder = config['Paths']['check_this']
     if not os.path.exists(check_folder):
@@ -160,9 +160,8 @@ def check_files(model, tokenizer, le, config, model_name):
     logging.info(f"Gesamtausführungszeit für Modell {model_name}: {total_duration:.2f} Sekunden")
 
     if results:
-        csv_filename = os.path.join(config['Paths']['output'], f"CheckThisResults_{model_name}.csv")
-        save_results_to_csv(results, csv_filename)
-        logging.info(f"Ergebnisse wurden in {csv_filename} gespeichert.")
+        save_results_to_csv(results, output_path)
+        logging.info(f"Ergebnisse wurden in {output_path} gespeichert.")
 
         lrh_count = sum(1 for r in results if r["Schlussfolgerung"] == "Wahrscheinlich LRH")
         logging.info(f"\nZusammenfassung für {model_name}: {len(results)} Dateien analysiert, {lrh_count} wahrscheinlich von LRH.")
