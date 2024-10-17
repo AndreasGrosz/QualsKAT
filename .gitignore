@@ -10,7 +10,7 @@ fresh-models/
 models-fresh/
 CheckThis/
 env/
-
+import/
 # Andere zu ignorierende Dateien:
 sync_data.sh
 
