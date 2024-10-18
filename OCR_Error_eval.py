@@ -7,12 +7,10 @@ from nltk.stem import PorterStemmer
 import configparser
 import argparse
 from collections import Counter
-import nltk
 import string
-import re  # Fügen Sie diesen Import
+import re
 
-
-FILENAME = "700826 — HCO Bulletin — Incomplete Cases  [B043-093].txt"
+FILENAME = "600129 — HCO Bulletin — Congresses  [B036-023].txt"
 
 # Download NLTK words if not already present
 nltk.download('words', quiet=True)
@@ -27,65 +25,6 @@ def load_scn_words(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         return set(word.strip().lower() for word in f)
 
-def load_english_words():
-    us_words = set(word.lower() for word in nltk_words.words())
-    gb_words = set(word.lower() for word in brown.words())
-    return us_words, gb_words
-
-
-# Funktion zum Laden von Wörterbüchern für andere Sprachen
-def load_language_words(language):
-    # Hier können Sie Logik zum Laden von Wörterbüchern für andere Sprachen hinzufügen
-    # Beispiel: return set(word.lower() for word in open(f'{language}_words.txt', 'r').read().split())
-    return set()
-
-# Wörterbücher für andere Sprachen (Platzhalter)
-de_words = load_language_words('de')
-ru_words = load_language_words('ru')
-fr_words = load_language_words('fr')
-it_words = load_language_words('it')
-es_words = load_language_words('es')
-
-
-def display_colored_text(file_name, EN_SCN_words, EN_US_words, EN_GB_words, config):
-    ocr_config = config['OCR_Error_Evaluation']
-    min_word_length = int(ocr_config['min_word_length'])
-
-    file_path = os.path.join('CheckThis', file_name)
-
-    if not os.path.exists(file_path):
-        print(f"Error: File {file_path} not found.")
-        return
-
-    with open(file_path, 'r', encoding='utf-8') as f:
-        text = f.read()
-
-    tokens = re.findall(r'\S+|\n|\s+|[^\w\s]', text)
-
-    colored_text = ""
-    for token in tokens:
-        if token.isspace() or token == '\n' or token in string.punctuation:
-            colored_text += token
-        elif is_word_known(token, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length):
-            # Wenn das Wort bekannt ist, füge es ohne Färbung hinzu
-            colored_text += token
-        elif len(token.strip(WORD_SEPARATORS)) < min_word_length:
-            # Nur wenn das Wort NICHT bekannt ist UND kurz ist, markiere es als Fragment
-            colored_text += f"\033[93m{token}\033[0m"  # Gelb für Fragmente
-        else:
-            # Wenn das Wort nicht bekannt ist und keine anderen Bedingungen zutreffen
-            colored_text += f"\033[92m{token}\033[0m"  # Grün für unbekannte Wörter
-
-    print(f"\nColored text for file: {file_name}")
-    print("\033[92mUnbekannte Wörter\033[0m und \033[93mWortfragmente\033[0m")
-    print(colored_text)
-
-
-def load_scn_words(file_path):
-    with open(file_path, 'r', encoding='utf-8') as f:
-        return set(word.strip().lower() for word in f)
-
-
 def tokenize_text(text):
     return re.findall(r"\b[\w/'.-]+\b", text)
 
@@ -96,10 +35,6 @@ def is_valid_date_or_number(word):
 def is_contraction(word):
     contractions = ["can't", "couldn't", "didn't", "don't", "isn't", "weren't", "you're"]
     return word.lower() in contractions
-
-
-def is_single_letter_or_number(word):
-    return len(word) == 1 and (word.isalpha() or word.isdigit())
 
 def is_word_known(word, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length):
     # Entferne Satzzeichen und konvertiere zu Kleinbuchstaben
@@ -134,7 +69,35 @@ def is_word_known(word, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length)
 
     return False
 
+def display_colored_text(file_name, EN_SCN_words, EN_US_words, EN_GB_words, config):
+    ocr_config = config['OCR_Error_Evaluation']
+    min_word_length = int(ocr_config['min_word_length'])
 
+    file_path = os.path.join('CheckThis', file_name)
+
+    if not os.path.exists(file_path):
+        print(f"Error: File {file_path} not found.")
+        return
+
+    with open(file_path, 'r', encoding='utf-8') as f:
+        text = f.read()
+
+    tokens = re.findall(r'\S+|\n|\s+|[^\w\s]', text)
+
+    colored_text = ""
+    for token in tokens:
+        if token.isspace() or token == '\n' or token in string.punctuation:
+            colored_text += token
+        elif is_word_known(token, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length):
+            colored_text += token
+        elif len(token.strip(WORD_SEPARATORS)) < min_word_length:
+            colored_text += f"\033[93m{token}\033[0m"  # Gelb für Fragmente
+        else:
+            colored_text += f"\033[92m{token}\033[0m"  # Grün für unbekannte Wörter
+
+    print(f"\nColored text for file: {file_name}")
+    """print("\033[92mUnbekannte Wörter\033[0m und \033[93mWortfragmente\033[0m")"""
+    print(colored_text)
 
 def debug_file(file_name, EN_SCN_words, EN_US_words, EN_GB_words, config):
     ocr_config = config['OCR_Error_Evaluation']
@@ -148,7 +111,6 @@ def debug_file(file_name, EN_SCN_words, EN_US_words, EN_GB_words, config):
         print(f"Error: File {file_path} not found.")
         return None
 
-    # Dateigröße berechnen
     file_size = os.path.getsize(file_path)
 
     with open(file_path, 'r', encoding='utf-8') as f:
@@ -179,8 +141,10 @@ def debug_file(file_name, EN_SCN_words, EN_US_words, EN_GB_words, config):
     RED = "\033[31m"
     RESET = "\033[0m"
 
+    display_colored_text(file_name, EN_SCN_words, EN_US_words, EN_GB_words, config)
+
     # Statistik-Ausgabe
-    print("============================")
+    print("\n============================")
     print(f"Analyzing file: \n{file_name}")
     print(f"Total words:            {total_words}")
     print(f"\033[92mUnbekannte Wörter\033[0m       {len(unknown_words)} = {unknown_percentage:.1f}%, " +
@@ -191,8 +155,6 @@ def debug_file(file_name, EN_SCN_words, EN_US_words, EN_GB_words, config):
           f" {word_fragments_threshold}%")
     print(f"Entscheidung:           " +
           (f"{GREEN}Geeignet{RESET}" if decision == "Geeignet" else f"{RED}Ungeeignet{RESET}"))
-
-    display_colored_text(file_name, EN_SCN_words, EN_US_words, EN_GB_words, config)
 
     return {
         "Dateiname": os.path.basename(file_path),
@@ -207,34 +169,19 @@ def debug_file(file_name, EN_SCN_words, EN_US_words, EN_GB_words, config):
         "Dateigröße_Bytes": file_size
     }
 
-def load_config():
-    config = configparser.ConfigParser()
-    config.read('config.txt')
-    return config
-
-def load_scn_words(file_path):
-    with open(file_path, 'r', encoding='utf-8') as f:
-        return set(word.strip().lower() for word in f)
-
-def is_word_fragment(word, min_length):
-    return len(word) < min_length
-
 def analyze_file(file_path, EN_SCN_words, EN_US_words, EN_GB_words, config):
     ocr_config = config['OCR_Error_Evaluation']
     min_word_length = int(ocr_config['min_word_length'])
     unknown_words_threshold = float(ocr_config['unknown_words_threshold'])
     word_fragments_threshold = float(ocr_config['word_fragments_threshold'])
-    unknown_weight = float(ocr_config['unknown_words_weight'])
-    fragment_weight = float(ocr_config['word_fragments_weight'])
 
     try:
         file_size = os.path.getsize(file_path)
 
         with open(file_path, 'r', encoding='utf-8') as f:
-            lines = f.readlines()[6:-6]  # Ignore first 6 and last 6 lines
+            text = f.read()  # Lesen des kompletten Textes ohne Zeilen zu ignorieren
 
-        text = ' '.join(lines).lower()
-        words_in_text = text.split()
+        words_in_text = tokenize_text(text)
         total_words = len(words_in_text)
 
         if total_words == 0:
@@ -254,26 +201,34 @@ def analyze_file(file_path, EN_SCN_words, EN_US_words, EN_GB_words, config):
         unknown_percentage = (len(unknown_words) / total_words) * 100
         fragment_percentage = (len(fragments) / total_words) * 100
 
-        if unknown_percentage <= unknown_words_threshold and fragment_percentage <= word_fragments_threshold:
-            decision = "Geeignet"
-        else:
-            decision = "Ungeeignet"
+        unknown_ok = unknown_percentage <= unknown_words_threshold
+        fragments_ok = fragment_percentage <= word_fragments_threshold
+        decision = "Geeignet" if (unknown_ok and fragments_ok) else "Ungeeignet"
 
-        score = ((unknown_percentage * unknown_weight / 100) +
-        (fragment_percentage * fragment_weight / 100))
-        decision = "Ungeeignet" if score >= score_threshold else "Geeignet"
+        # Farbcodes
+        GREEN = "\033[32m"
+        RED = "\033[31m"
+        RESET = "\033[0m"
+
+        print(f"\nAnalyse für {os.path.basename(file_path)}:")
+        print(f"Total words:            {total_words}")
+        print(f"\033[92mUnbekannte Wörter\033[0m       {len(unknown_words)} = {unknown_percentage:.1f}%, " +
+              (f"{GREEN}unter Grenzwert{RESET}" if unknown_ok else f"{RED}über Grenzwert{RESET}") +
+              f" {unknown_words_threshold}%")
+        print(f"\033[93mWortfragmente\033[0m           {len(fragments)} = {fragment_percentage:.1f}%, " +
+              (f"{GREEN}unter Grenzwert{RESET}" if fragments_ok else f"{RED}über Grenzwert{RESET}") +
+              f" {word_fragments_threshold}%")
+        print(f"Entscheidung:           " +
+              (f"{GREEN}Geeignet{RESET}" if decision == "Geeignet" else f"{RED}Ungeeignet{RESET}"))
 
         return {
             "Dateiname": os.path.basename(file_path),
-            "Gesamtscore": f"{score:.2f}%",
             "Unbekannte_Wörter": f"{unknown_percentage:.2f}%",
             "Wortfragmente": f"{fragment_percentage:.2f}%",
             "Wortanzahl": total_words,
             "Entscheidung": decision,
             "Unbekannte_Wörter_Anzahl": len(unknown_words),
             "Wortfragmente_Anzahl": len(fragments),
-            "Unbekannte_Wörter_Schwellenwert": f"{unknown_words_threshold}%",
-            "Wortfragmente_Schwellenwert": f"{word_fragments_threshold}%",
             "Dateigröße_Bytes": file_size
         }
     except Exception as e:
@@ -290,7 +245,6 @@ def main():
     config = configparser.ConfigParser()
     config.read('config.txt')
 
-    # Lade die Pfade aus der Konfiguration
     input_dir = config['Paths']['check_this']
     output_dir = config['Paths']['output']
 
@@ -298,12 +252,12 @@ def main():
     EN_US_words = set(word.lower() for word in nltk_words.words())
     EN_GB_words = set(word.lower() for word in brown.words())
 
-    results = []  # Initialize results list
+    results = []
 
     if args.debug:
         debug_result = debug_file(filename, EN_SCN_words, EN_US_words, EN_GB_words, config)
         if debug_result:
-            print("\nDebug-Modus: Ergebnisse werden nur im Terminal angezeigt.")
+            results.append(debug_result)
     else:
         print("Normal mode: Processing all files")
         for filename in os.listdir(input_dir):
@@ -313,30 +267,22 @@ def main():
                     result = analyze_file(file_path, EN_SCN_words, EN_US_words, EN_GB_words, config)
                     if result:
                         results.append(result)
-
-                        print(f"\nAnalyse für {result['Dateiname']}:")
-                        print(f"Gesamtscore: {result['Gesamtscore']}")
-                        print(f"Unbekannte Wörter: {result['Unbekannte_Wörter']} ({result['Unbekannte_Wörter_Anzahl']} von {result['Wortanzahl']})")
-                        print(f"Wortfragmente: {result['Wortfragmente']} ({result['Wortfragmente_Anzahl']} von {result['Wortanzahl']})")
-                        print(f"Entscheidung: {result['Entscheidung']}")
-                        print(f"Dateigröße: {result['Dateigröße_Bytes']} Bytes")
                 except Exception as e:
                     print(f"Fehler bei der Verarbeitung von {filename}: {str(e)}")
 
-    if results:  # Only write to CSV if we have results
-        output_file = os.path.join(output_dir, 'ocr_evaluation_results.csv')
-        with open(output_file, 'w', newline='', encoding='utf-8') as csvfile:
-            fieldnames = ["Dateiname", "Gesamtscore", "Unbekannte_Wörter", "Wortfragmente", "Wortanzahl", "Entscheidung",
-                          "Unbekannte_Wörter_Anzahl", "Wortfragmente_Anzahl", "Unbekannte_Wörter_Schwellenwert",
-                          "Wortfragmente_Schwellenwert", "Dateigröße_Bytes"]
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-            for result in results:
-                writer.writerow(result)
-
-        print(f"Ergebnisse wurden in {output_file} gespeichert.")
-    else:
-        print("Keine Ergebnisse zum Speichern.")
+        if results:  # Only write to CSV if we have results
+            output_file = os.path.join(output_dir, 'ocr_evaluation_results.csv')
+            with open(output_file, 'w', newline='', encoding='utf-8') as csvfile:
+                fieldnames = ["Dateiname", "Unbekannte_Wörter", "Wortfragmente",
+                            "Wortanzahl", "Entscheidung", "Unbekannte_Wörter_Anzahl",
+                            "Wortfragmente_Anzahl", "Dateigröße_Bytes"]
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writeheader()
+                for result in results:
+                    # Entfernen der nicht benötigten Felder aus dem result Dictionary
+                    result.pop("Unbekannte_Wörter_Schwellenwert", None)
+                    result.pop("Wortfragmente_Schwellenwert", None)
+                    writer.writerow(result)
 
 if __name__ == "__main__":
     main()
