@@ -16,7 +16,7 @@ from analysis_utils import analyze_new_article, save_results_to_csv
 import re
 from data_processing import extract_text_from_file
 
-print("file_utils_ag.py wird geladen")
+# print("file_utils_ag.py wird geladen")
 
 def check_environment():
     device = get_device()

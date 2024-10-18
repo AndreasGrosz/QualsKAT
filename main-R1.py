@@ -18,7 +18,7 @@ import file_utils_ag
 from file_utils_ag import check_environment, extract_text_from_file, get_device, check_files
 from data_processing import load_categories_from_csv
 from sklearn.preprocessing import LabelEncoder
-
+from OCR_Error_eval import main as ocr_eval_main
 
 
 def load_label_encoder(config):
@@ -44,39 +44,47 @@ def check_hf_token():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Analyse von Texten mit verschiedenen Modellen")
+    parser = argparse.ArgumentParser(description="Hauptprogramm für Textanalyse")
+    parser.add_argument("--ocr", action="store_true", help="Führe OCR-Fehlererkennung durch")
+    parser.add_argument("--scn_words", default="preproc/ScnWortListe/ScnWorte.txt", help="Pfad zur Scientology-Wortliste")
     parser.add_argument("thema", help="Thema oder Bezeichnung für diesen Analysedurchlauf")
     parser.add_argument("--checkthis", action="store_true", help="Führe die Analyse für den 'check_this' Ordner durch")
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-    try:
-        check_hf_token()
-        config, models, device = check_environment()
+    if args.ocr:
+        ocr_eval_main(args)
+    else:
 
-        le = load_label_encoder(config)
+        try:
+            check_hf_token()
+            config, models, device = check_environment()
 
-        timestamp = datetime.now().strftime("%y%m%d-%Hh%M")
+            le = load_label_encoder(config)
 
-        for model_name, (tokenizer, model) in models.items():
-            model.to(device)
-            logging.info(f"Verarbeite Modell: {model_name}")
+            timestamp = datetime.now().strftime("%y%m%d-%Hh%M")
 
-            if args.checkthis:
-                output_filename = f"{timestamp}-Results_{args.thema}_{model_name}.csv"
-                output_path = os.path.join(config['Paths']['output'], output_filename)
-                print(f"Debug: Calling check_files with {model_name} and {output_path}")
-                check_files(model, tokenizer, le, config, model_name, output_path)
+            for model_name, (tokenizer, model) in models.items():
+                model.to(device)
+                logging.info(f"Verarbeite Modell: {model_name}")
 
-            if device.type == "cuda":
-                torch.cuda.empty_cache()
+                if args.checkthis:
+                    output_filename = f"{timestamp}-Results_{args.thema}_{model_name}.csv"
+                    output_path = os.path.join(config['Paths']['output'], output_filename)
+                    print(f"Debug: Calling check_files with {model_name} and {output_path}")
+                    check_files(model, tokenizer, le, config, model_name, output_path)
 
-        logging.info("Alle Modelle wurden verarbeitet.")
+                if device.type == "cuda":
+                    torch.cuda.empty_cache()
 
-    except Exception as e:
-        logging.error(f"Ein kritischer Fehler ist aufgetreten: {str(e)}")
-        raise
+            logging.info("Alle Modelle wurden verarbeitet.")
+
+        except Exception as e:
+            logging.error(f"Ein kritischer Fehler ist aufgetreten: {str(e)}")
+            raise
 
 if __name__ == "__main__":
     main()
+
+
