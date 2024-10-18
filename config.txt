@@ -27,9 +27,9 @@ eval_steps = 500
 save_steps = 1000
 
 [OCR_Error_Evaluation]
-unknown_words_threshold = 7
-word_fragments_threshold = 18
+unknown_words_threshold = 8
 unknown_words_weight = 60
+word_fragments_threshold = 12
 word_fragments_weight = 40
 min_word_length = 3
-
+score_threshold = 10

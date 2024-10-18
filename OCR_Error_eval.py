@@ -23,13 +23,15 @@ ps = PorterStemmer()
 # Definiere Worttrenner (alle Satzzeichen außer '/' und ''')
 WORD_SEPARATORS = string.punctuation.replace('/', '').replace("'", "") + ' \t\n\r\v\f'
 
+def load_scn_words(file_path):
+    with open(file_path, 'r', encoding='utf-8') as f:
+        return set(word.strip().lower() for word in f)
+
 def load_english_words():
     us_words = set(word.lower() for word in nltk_words.words())
     gb_words = set(word.lower() for word in brown.words())
     return us_words, gb_words
 
-us_words = set(word.lower() for word in nltk_words.words())
-gb_words = set(word.lower() for word in brown.words())
 
 # Funktion zum Laden von Wörterbüchern für andere Sprachen
 def load_language_words(language):
@@ -45,7 +47,7 @@ it_words = load_language_words('it')
 es_words = load_language_words('es')
 
 
-def display_colored_text(file_name, scn_words, english_words, config):
+def display_colored_text(file_name, EN_SCN_words, EN_US_words, EN_GB_words, config):
     ocr_config = config['OCR_Error_Evaluation']
     min_word_length = int(ocr_config['min_word_length'])
 
@@ -58,14 +60,13 @@ def display_colored_text(file_name, scn_words, english_words, config):
     with open(file_path, 'r', encoding='utf-8') as f:
         text = f.read()
 
-    # Tokenisiere den Text, aber behalte Zeilenumbrüche und Satzzeichen bei
     tokens = re.findall(r'\S+|\n|\s+|[^\w\s]', text)
 
     colored_text = ""
     for token in tokens:
         if token.isspace() or token == '\n' or token in string.punctuation:
             colored_text += token
-        elif not is_word_known(token, scn_words, english_words, min_word_length):
+        elif not is_word_known(token, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length):
             colored_text += f"\033[92m{token}\033[0m"  # Grün für unbekannte Wörter
         elif len(token.strip(WORD_SEPARATORS)) < min_word_length:
             colored_text += f"\033[93m{token}\033[0m"  # Gelb für Fragmente
@@ -96,53 +97,53 @@ def is_contraction(word):
 def is_single_letter_or_number(word):
     return len(word) == 1 and (word.isalpha() or word.isdigit())
 
-def is_word_known(word, scn_words, english_words, min_word_length):
+def is_word_known(word, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length):
+    # Entferne Satzzeichen und konvertiere zu Kleinbuchstaben
     original_word = word
     word = word.strip(WORD_SEPARATORS).lower()
 
-    # Überprüfe die Stammform des Wortes
-    stem = ps.stem(word)
+    # Sonderfall für "I" und "a"
+    if word in ["I", "a"]:
+        return True
 
-    # Wenn das Wort kürzer als die Mindestlänge ist, markiere es als unbekannt
-    if len(word) < min_word_length:
+    # Wenn Wortlänge < 2, als unbekannt betrachten
+    if len(word) < 2:
         return False
 
-    # Überprüfe zuerst US-Englisch
-    if word in us_words or stem in us_words:
-        return True
+    # Bilde den Wortstamm
+    stem = ps.stem(word)
 
-    # , dann GB-Englisch als Fallback
-    if word in gb_words or stem in gb_words:
-        return True
+    # Prüfe das Originalwort und den Stamm in den Wörterbüchern
+    for w in [word, stem]:
+        if w in EN_US_words:
+            return True
+        if w in EN_GB_words:
+            return True
+        if w in EN_SCN_words:
+            return True
 
-# Überprüfe, ob das Wort im Scientology-Wörterbuch ist
-    if original_word in scn_words or word in scn_words or stem in scn_words:
-        return True
-
-    # Überprüfe dann auf Datumsangaben, Zahlen und Kontraktionen
+    # Prüfe auf Datumsangaben, Zahlen und Kontraktionen
     if is_valid_date_or_number(original_word) or is_contraction(original_word):
         return True
 
-    # Überprüfe auf zusammengesetzte Wörter
+    # Prüfe auf zusammengesetzte Wörter
     if '-' in word:
         parts = word.split('-')
-        if all(part in scn_words or part in us_words or part in gb_words for part in parts):
+        if all(part in EN_US_words or part in EN_GB_words or part in EN_SCN_words for part in parts):
             return True
 
     return False
 
-def load_scn_words(file_path):
-    with open(file_path, 'r', encoding='utf-8') as f:
-        return set(word.strip().lower() for word in f)
 
 
-def debug_file(file_name, scn_words, english_words, config):
+def debug_file(file_name, EN_SCN_words, EN_US_words, EN_GB_words, config):
     ocr_config = config['OCR_Error_Evaluation']
     min_word_length = int(ocr_config['min_word_length'])
     unknown_words_threshold = float(ocr_config['unknown_words_threshold'])
     word_fragments_threshold = float(ocr_config['word_fragments_threshold'])
     unknown_weight = float(ocr_config['unknown_words_weight'])
     fragment_weight = float(ocr_config['word_fragments_weight'])
+    score_threshold = float(ocr_config['score_threshold'])
 
     file_path = os.path.join('CheckThis', file_name)
 
@@ -159,11 +160,9 @@ def debug_file(file_name, scn_words, english_words, config):
     unknown_words = []
     fragments = []
 
-    print("\nWord-by-word analysis:")
-
     for word in words_in_text:
         issues = []
-        if not is_word_known(word, scn_words, english_words, min_word_length):
+        if not is_word_known(word, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length):
             unknown_words.append(word)
             issues.append("Unknown")
         if len(word.strip(WORD_SEPARATORS)) < min_word_length:
@@ -176,28 +175,21 @@ def debug_file(file_name, scn_words, english_words, config):
     unknown_percentage = (len(unknown_words) / total_words) * 100
     fragment_percentage = (len(fragments) / total_words) * 100
 
-    display_colored_text(file_name, scn_words, english_words, config)
-
-    print()
-    print(f"Analyzing file: {file_name}")
-    print(f"Total words: {total_words}")
-    print()
-    print(f"\nUnknown words: {len(unknown_words)} ({unknown_percentage:.2f}%)")
-    print(f"Word fragments: {len(fragments)} ({fragment_percentage:.2f}%)")
-
-    # Calculate weighted score and decision
-    score = 100 - ((unknown_percentage * unknown_weight / 100) +
+    score = ((unknown_percentage * unknown_weight / 100) +
                    (fragment_percentage * fragment_weight / 100))
 
-    if unknown_percentage <= unknown_words_threshold and fragment_percentage <= word_fragments_threshold:
-        decision = "Geeignet"
-    else:
-        decision = "Ungeeignet"
+    decision = "Geeignet" if score >= score_threshold else "Ungeeignet"
 
-    print(f"\nGewichtete Auswertung:")
-    print(f"Gesamtscore: {score:.2f}%")
-    print(f"Entscheidung: {decision}")
-    print(f"Schwellenwerte: Unbekannte Wörter {unknown_words_threshold}%, Wortfragmente {word_fragments_threshold}%")
+    display_colored_text(file_name, EN_SCN_words, EN_US_words, EN_GB_words, config)
+
+    print("============================")
+    print(f"Analyzing file: \n{file_name}")
+    print(f"Total words:            {total_words}")
+    print(f"Unbekannte Wörter       {len(unknown_words)} = {unknown_percentage:.0f}%, {'über' if unknown_percentage > unknown_words_threshold else 'unter'} Grenzw {unknown_words_threshold}%")
+    print(f"Wortfragmente           {len(fragments)} = {fragment_percentage:.0f}%, {'über' if fragment_percentage > word_fragments_threshold else 'unter'} Grenzw {word_fragments_threshold}%")
+    print(f"Gesamtscore:            {score:.0f}% {'unter' if score < score_threshold else 'über'} {score_threshold}%  ({unknown_percentage:.0f}% x {unknown_weight}% + {fragment_percentage:.0f}% x {fragment_weight}%)")
+    print(f"Entscheidung:           {decision}")
+
 
     return {
         "Dateiname": os.path.basename(file_path),
@@ -225,7 +217,7 @@ def load_scn_words(file_path):
 def is_word_fragment(word, min_length):
     return len(word) < min_length
 
-def analyze_file(file_path, scn_words, english_words, config):
+def analyze_file(file_path, EN_SCN_words, EN_US_words, EN_GB_words, config):
     ocr_config = config['OCR_Error_Evaluation']
     min_word_length = int(ocr_config['min_word_length'])
     unknown_words_threshold = float(ocr_config['unknown_words_threshold'])
@@ -247,7 +239,7 @@ def analyze_file(file_path, scn_words, english_words, config):
             print(f"Warning: No words found in {file_path}")
             return None
 
-        unknown_words = [w for w in words_in_text if not is_word_known(w, scn_words, english_words, min_word_length)]
+        unknown_words = [w for w in words_in_text if not is_word_known(w, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length)]
         fragments = [w for w in words_in_text if is_word_fragment(w, min_word_length)]
 
         unknown_percentage = (len(unknown_words) / total_words) * 100
@@ -288,26 +280,27 @@ def main():
     config = configparser.ConfigParser()
     config.read('config.txt')
 
-    scn_words = load_scn_words(args.scn_words)
-    english_words = set(word.lower() for word in nltk_words.words())
-
+    # Lade die Pfade aus der Konfiguration
     input_dir = config['Paths']['check_this']
     output_dir = config['Paths']['output']
 
-    results = []  # Initialize results here
+    EN_SCN_words = load_scn_words(args.scn_words)
+    EN_US_words = set(word.lower() for word in nltk_words.words())
+    EN_GB_words = set(word.lower() for word in brown.words())
+
+    results = []  # Initialize results list
 
     if args.debug:
-        debug_result = debug_file(filename, scn_words, english_words, config)
+        debug_result = debug_file(filename, EN_SCN_words, EN_US_words, EN_GB_words, config)
         if debug_result:
-            print()
-           # results.append(debug_result)
+            print("\nDebug-Modus: Ergebnisse werden nur im Terminal angezeigt.")
     else:
         print("Normal mode: Processing all files")
         for filename in os.listdir(input_dir):
             if filename.endswith('.txt'):
                 file_path = os.path.join(input_dir, filename)
                 try:
-                    result = analyze_file(file_path, scn_words, english_words, config)
+                    result = analyze_file(file_path, EN_SCN_words, EN_US_words, EN_GB_words, config)
                     if result:
                         results.append(result)
 
