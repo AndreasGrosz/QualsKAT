@@ -25,9 +25,6 @@ def load_scn_words(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         return set(word.strip().lower() for word in f)
 
-def tokenize_text(text):
-    return re.findall(r"\b[\w/'.-]+\b", text)
-
 def is_valid_date_or_number(word):
     return bool(re.match(r'^\d{1,2}([./-])\d{1,2}\1\d{2,4}$', word) or  # Dates like 28.9.80
                 re.match(r'^\d+(/\d+)?$', word))  # Numbers like 1/2
@@ -69,171 +66,136 @@ def is_word_known(word, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length)
 
     return False
 
-def display_colored_text(file_name, EN_SCN_words, EN_US_words, EN_GB_words, config):
-    ocr_config = config['OCR_Error_Evaluation']
-    min_word_length = int(ocr_config['min_word_length'])
+def analyze_word(token, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length):
+    """Zentrale Funktion zur Wortanalyse"""
+    if token.isspace() or token in string.punctuation:
+        return "space"
 
-    file_path = os.path.join('CheckThis', file_name)
+    # Entferne Nummerierung am Zeilenanfang
+    if re.match(r'^\s*\d+\.\s*$', token):
+        return "number"
 
-    if not os.path.exists(file_path):
-        print(f"Error: File {file_path} not found.")
-        return
+    if is_word_known(token, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length):
+        return "known"
+    elif len(token.strip(WORD_SEPARATORS)) < min_word_length:
+        return "fragment"
+    else:
+        return "unknown"
 
-    with open(file_path, 'r', encoding='utf-8') as f:
-        text = f.read()
-
-    tokens = re.findall(r'\S+|\n|\s+|[^\w\s]', text)
-
-    colored_text = ""
-    for token in tokens:
-        if token.isspace() or token == '\n' or token in string.punctuation:
-            colored_text += token
-        elif is_word_known(token, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length):
-            colored_text += token
-        elif len(token.strip(WORD_SEPARATORS)) < min_word_length:
-            colored_text += f"\033[93m{token}\033[0m"  # Gelb für Fragmente
-        else:
-            colored_text += f"\033[92m{token}\033[0m"  # Grün für unbekannte Wörter
-
-    print(f"\nColored text for file: {file_name}")
-    """print("\033[92mUnbekannte Wörter\033[0m und \033[93mWortfragmente\033[0m")"""
-    print(colored_text)
-
-def debug_file(file_name, EN_SCN_words, EN_US_words, EN_GB_words, config):
-    ocr_config = config['OCR_Error_Evaluation']
-    min_word_length = int(ocr_config['min_word_length'])
-    unknown_words_threshold = float(ocr_config['unknown_words_threshold'])
-    word_fragments_threshold = float(ocr_config['word_fragments_threshold'])
-
-    file_path = os.path.join('CheckThis', file_name)
-
-    if not os.path.exists(file_path):
-        print(f"Error: File {file_path} not found.")
-        return None
-
-    file_size = os.path.getsize(file_path)
-
-    with open(file_path, 'r', encoding='utf-8') as f:
-        text = f.read()
-
-    words_in_text = tokenize_text(text)
-    total_words = len(words_in_text)
-
+def analyze_text(text, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length):
+    """Zentrale Analysefunktion für einen Text"""
+    tokens = re.findall(r'\S+|\s+|[^\w\s]', text)
     unknown_words = []
     fragments = []
+    total_words = 0
+    word_analysis = []  # Speichert Tokens mit ihrem Status
 
-    for word in words_in_text:
-        if not is_word_known(word, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length):
-            if len(word.strip(WORD_SEPARATORS)) < min_word_length:
-                fragments.append(word)
-            else:
-                unknown_words.append(word)
+    for token in tokens:
+        result = analyze_word(token, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length)
+        word_analysis.append((token, result))
 
-    unknown_percentage = (len(unknown_words) / total_words) * 100
-    fragment_percentage = (len(fragments) / total_words) * 100
+        if result in ["known", "unknown", "fragment"]:
+            total_words += 1
+            if result == "unknown":
+                unknown_words.append(token)
+            elif result == "fragment":
+                fragments.append(token)
+
+    return {
+        "word_analysis": word_analysis,
+        "unknown_words": unknown_words,
+        "fragments": fragments,
+        "total_words": total_words
+    }
+
+def display_colored_text(file_name, analysis_results):
+    colored_text = ""
+    for token, result in analysis_results["word_analysis"]:
+        if result == "space" or result == "number":
+            colored_text += token
+        elif result == "known":
+            colored_text += token
+        elif result == "fragment":
+            colored_text += f"\033[93m{token}\033[0m"  # Gelb
+        elif result == "unknown":
+            colored_text += f"\033[92m{token}\033[0m"  # Grün
+    print(f"\nColored text for file: {file_name}")
+    print(colored_text)
+
+def generate_statistics(analysis_results, config):
+    """Generiert die statistischen Daten für Debug und CSV"""
+    total_words = analysis_results["total_words"]
+    unknown_count = len(analysis_results["unknown_words"])
+    fragment_count = len(analysis_results["fragments"])
+
+    unknown_percentage = (unknown_count / total_words) * 100 if total_words > 0 else 0
+    fragment_percentage = (fragment_count / total_words) * 100 if total_words > 0 else 0
+
+    # Schwellenwerte aus der Konfiguration lesen
+    unknown_words_threshold = float(config['OCR_Error_Evaluation']['unknown_words_threshold'])
+    word_fragments_threshold = float(config['OCR_Error_Evaluation']['word_fragments_threshold'])
 
     unknown_ok = unknown_percentage <= unknown_words_threshold
     fragments_ok = fragment_percentage <= word_fragments_threshold
     decision = "Geeignet" if (unknown_ok and fragments_ok) else "Ungeeignet"
 
-    # Farbcodes
-    GREEN = "\033[32m"
-    RED = "\033[31m"
-    RESET = "\033[0m"
-
-    display_colored_text(file_name, EN_SCN_words, EN_US_words, EN_GB_words, config)
-
-    # Statistik-Ausgabe
-    print("\n============================")
-    print(f"Analyzing file: \n{file_name}")
-    print(f"Total words:            {total_words}")
-    print(f"\033[92mUnbekannte Wörter\033[0m       {len(unknown_words)} = {unknown_percentage:.1f}%, " +
-          (f"{GREEN}unter Grenzwert{RESET}" if unknown_ok else f"{RED}über Grenzwert{RESET}") +
-          f" {unknown_words_threshold}%")
-    print(f"\033[93mWortfragmente\033[0m           {len(fragments)} = {fragment_percentage:.1f}%, " +
-          (f"{GREEN}unter Grenzwert{RESET}" if fragments_ok else f"{RED}über Grenzwert{RESET}") +
-          f" {word_fragments_threshold}%")
-    print(f"Entscheidung:           " +
-          (f"{GREEN}Geeignet{RESET}" if decision == "Geeignet" else f"{RED}Ungeeignet{RESET}"))
-
     return {
-        "Dateiname": os.path.basename(file_path),
+        "Wortanzahl": total_words,
+        "Unbekannte_Wörter_Anzahl": unknown_count,
+        "Wortfragmente_Anzahl": fragment_count,
         "Unbekannte_Wörter": f"{unknown_percentage:.2f}%",
         "Wortfragmente": f"{fragment_percentage:.2f}%",
-        "Wortanzahl": total_words,
         "Entscheidung": decision,
-        "Unbekannte_Wörter_Anzahl": len(unknown_words),
-        "Wortfragmente_Anzahl": len(fragments),
-        "Unbekannte_Wörter_Schwellenwert": f"{unknown_words_threshold}%",
-        "Wortfragmente_Schwellenwert": f"{word_fragments_threshold}%",
-        "Dateigröße_Bytes": file_size
+        "unknown_percentage": unknown_percentage,  # für Debug-Ausgabe
+        "fragment_percentage": fragment_percentage,  # für Debug-Ausgabe
+        "unknown_ok": unknown_ok,  # für Debug-Ausgabe
+        "fragments_ok": fragments_ok  # für Debug-Ausgabe
     }
 
-def analyze_file(file_path, EN_SCN_words, EN_US_words, EN_GB_words, config):
-    ocr_config = config['OCR_Error_Evaluation']
-    min_word_length = int(ocr_config['min_word_length'])
-    unknown_words_threshold = float(ocr_config['unknown_words_threshold'])
-    word_fragments_threshold = float(ocr_config['word_fragments_threshold'])
+def process_file(file_path, EN_SCN_words, EN_US_words, EN_GB_words, config, debug=False):
+    """Hauptfunktion für die Verarbeitung einer Datei"""
+    with open(file_path, 'r', encoding='utf-8') as f:
+        text = f.read()
 
-    try:
-        file_size = os.path.getsize(file_path)
+    # Zentrale Analyse durchführen
+    analysis_results = analyze_text(text, EN_SCN_words, EN_US_words, EN_GB_words,
+                                  int(config['OCR_Error_Evaluation']['min_word_length']))
 
-        with open(file_path, 'r', encoding='utf-8') as f:
-            text = f.read()  # Lesen des kompletten Textes ohne Zeilen zu ignorieren
+    # Statistiken generieren
+    stats = generate_statistics(analysis_results, config)
 
-        words_in_text = tokenize_text(text)
-        total_words = len(words_in_text)
+    if debug:
+        # Farbige Textanzeige
+        display_colored_text(os.path.basename(file_path), analysis_results)
 
-        if total_words == 0:
-            print(f"Warning: No words found in {file_path}")
-            return None
-
-        unknown_words = []
-        fragments = []
-
-        for word in words_in_text:
-            if not is_word_known(word, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length):
-                if len(word.strip(WORD_SEPARATORS)) < min_word_length:
-                    fragments.append(word)
-                else:
-                    unknown_words.append(word)
-
-        unknown_percentage = (len(unknown_words) / total_words) * 100
-        fragment_percentage = (len(fragments) / total_words) * 100
-
-        unknown_ok = unknown_percentage <= unknown_words_threshold
-        fragments_ok = fragment_percentage <= word_fragments_threshold
-        decision = "Geeignet" if (unknown_ok and fragments_ok) else "Ungeeignet"
-
-        # Farbcodes
+        # Debug-Statistik ausgeben
         GREEN = "\033[32m"
         RED = "\033[31m"
         RESET = "\033[0m"
 
-        print(f"\nAnalyse für {os.path.basename(file_path)}:")
-        print(f"Total words:            {total_words}")
-        print(f"\033[92mUnbekannte Wörter\033[0m       {len(unknown_words)} = {unknown_percentage:.1f}%, " +
-              (f"{GREEN}unter Grenzwert{RESET}" if unknown_ok else f"{RED}über Grenzwert{RESET}") +
-              f" {unknown_words_threshold}%")
-        print(f"\033[93mWortfragmente\033[0m           {len(fragments)} = {fragment_percentage:.1f}%, " +
-              (f"{GREEN}unter Grenzwert{RESET}" if fragments_ok else f"{RED}über Grenzwert{RESET}") +
-              f" {word_fragments_threshold}%")
+        print("\n============================")
+        print(f"Analyzing file: \n{os.path.basename(file_path)}")
+        print(f"Total words:            {stats['Wortanzahl']}")
+        print(f"\033[92mUnbekannte Wörter\033[0m       {stats['Unbekannte_Wörter_Anzahl']} = {stats['unknown_percentage']:.1f}%, " +
+              (f"{GREEN}unter Grenzwert{RESET}" if stats['unknown_ok'] else f"{RED}über Grenzwert{RESET}") +
+              f" {config['OCR_Error_Evaluation']['unknown_words_threshold']}%")
+        print(f"\033[93mWortfragmente\033[0m           {stats['Wortfragmente_Anzahl']} = {stats['fragment_percentage']:.1f}%, " +
+              (f"{GREEN}unter Grenzwert{RESET}" if stats['fragments_ok'] else f"{RED}über Grenzwert{RESET}") +
+              f" {config['OCR_Error_Evaluation']['word_fragments_threshold']}%")
         print(f"Entscheidung:           " +
-              (f"{GREEN}Geeignet{RESET}" if decision == "Geeignet" else f"{RED}Ungeeignet{RESET}"))
+              (f"{GREEN}Geeignet{RESET}" if stats['Entscheidung'] == 'Geeignet' else f"{RED}Ungeeignet{RESET}"))
 
-        return {
-            "Dateiname": os.path.basename(file_path),
-            "Unbekannte_Wörter": f"{unknown_percentage:.2f}%",
-            "Wortfragmente": f"{fragment_percentage:.2f}%",
-            "Wortanzahl": total_words,
-            "Entscheidung": decision,
-            "Unbekannte_Wörter_Anzahl": len(unknown_words),
-            "Wortfragmente_Anzahl": len(fragments),
-            "Dateigröße_Bytes": file_size
-        }
-    except Exception as e:
-        print(f"Error processing {file_path}: {str(e)}")
-        return None
+    # Ergänze Dateiinformationen für CSV
+    stats["Dateiname"] = os.path.basename(file_path)
+    stats["Dateigröße_Bytes"] = os.path.getsize(file_path)
+
+    # Entferne Debug-spezifische Felder für CSV
+    stats.pop("unknown_percentage", None)
+    stats.pop("fragment_percentage", None)
+    stats.pop("unknown_ok", None)
+    stats.pop("fragments_ok", None)
+
+    return stats
 
 def main():
     filename = FILENAME
@@ -253,18 +215,18 @@ def main():
     EN_GB_words = set(word.lower() for word in brown.words())
 
     results = []
-
     if args.debug:
-        debug_result = debug_file(filename, EN_SCN_words, EN_US_words, EN_GB_words, config)
-        if debug_result:
-            results.append(debug_result)
+        file_path = os.path.join('CheckThis', filename)
+        result = process_file(file_path, EN_SCN_words, EN_US_words, EN_GB_words, config, debug=True)
+        if result:
+            results.append(result)
     else:
         print("Normal mode: Processing all files")
         for filename in os.listdir(input_dir):
             if filename.endswith('.txt'):
                 file_path = os.path.join(input_dir, filename)
                 try:
-                    result = analyze_file(file_path, EN_SCN_words, EN_US_words, EN_GB_words, config)
+                    result = process_file(file_path, EN_SCN_words, EN_US_words, EN_GB_words, config)
                     if result:
                         results.append(result)
                 except Exception as e:
@@ -279,9 +241,6 @@ def main():
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writeheader()
                 for result in results:
-                    # Entfernen der nicht benötigten Felder aus dem result Dictionary
-                    result.pop("Unbekannte_Wörter_Schwellenwert", None)
-                    result.pop("Wortfragmente_Schwellenwert", None)
                     writer.writerow(result)
 
 if __name__ == "__main__":
