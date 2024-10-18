@@ -12,7 +12,7 @@ import string
 import re  # Fügen Sie diesen Import
 
 
-FILENAME = "610202 — HCO Bulletin — Command Sheet - Prehavingness Scale  [B001-009].txt"
+FILENAME = "700826 — HCO Bulletin — Incomplete Cases  [B043-093].txt"
 
 # Download NLTK words if not already present
 nltk.download('words', quiet=True)
@@ -66,14 +66,18 @@ def display_colored_text(file_name, EN_SCN_words, EN_US_words, EN_GB_words, conf
     for token in tokens:
         if token.isspace() or token == '\n' or token in string.punctuation:
             colored_text += token
-        elif not is_word_known(token, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length):
-            colored_text += f"\033[92m{token}\033[0m"  # Grün für unbekannte Wörter
+        elif is_word_known(token, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length):
+            # Wenn das Wort bekannt ist, füge es ohne Färbung hinzu
+            colored_text += token
         elif len(token.strip(WORD_SEPARATORS)) < min_word_length:
+            # Nur wenn das Wort NICHT bekannt ist UND kurz ist, markiere es als Fragment
             colored_text += f"\033[93m{token}\033[0m"  # Gelb für Fragmente
         else:
-            colored_text += token
+            # Wenn das Wort nicht bekannt ist und keine anderen Bedingungen zutreffen
+            colored_text += f"\033[92m{token}\033[0m"  # Grün für unbekannte Wörter
 
-    print(f"\nColored text for file: {file_name}\n")
+    print(f"\nColored text for file: {file_name}")
+    print("\033[92mUnbekannte Wörter\033[0m und \033[93mWortfragmente\033[0m")
     print(colored_text)
 
 
@@ -102,13 +106,9 @@ def is_word_known(word, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length)
     original_word = word
     word = word.strip(WORD_SEPARATORS).lower()
 
-    # Sonderfall für "I" und "a"
-    if word in ["I", "a"]:
+    # Sonderfälle für einbuchstabige Wörter
+    if word in ["i", "a"]:
         return True
-
-    # Wenn Wortlänge < 2, als unbekannt betrachten
-    if len(word) < 2:
-        return False
 
     # Bilde den Wortstamm
     stem = ps.stem(word)
@@ -141,15 +141,15 @@ def debug_file(file_name, EN_SCN_words, EN_US_words, EN_GB_words, config):
     min_word_length = int(ocr_config['min_word_length'])
     unknown_words_threshold = float(ocr_config['unknown_words_threshold'])
     word_fragments_threshold = float(ocr_config['word_fragments_threshold'])
-    unknown_weight = float(ocr_config['unknown_words_weight'])
-    fragment_weight = float(ocr_config['word_fragments_weight'])
-    score_threshold = float(ocr_config['score_threshold'])
 
     file_path = os.path.join('CheckThis', file_name)
 
     if not os.path.exists(file_path):
         print(f"Error: File {file_path} not found.")
         return None
+
+    # Dateigröße berechnen
+    file_size = os.path.getsize(file_path)
 
     with open(file_path, 'r', encoding='utf-8') as f:
         text = f.read()
@@ -161,39 +161,41 @@ def debug_file(file_name, EN_SCN_words, EN_US_words, EN_GB_words, config):
     fragments = []
 
     for word in words_in_text:
-        issues = []
         if not is_word_known(word, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length):
-            unknown_words.append(word)
-            issues.append("Unknown")
-        if len(word.strip(WORD_SEPARATORS)) < min_word_length:
-            fragments.append(word)
-            issues.append("Fragment")
-
-        if issues:
-            print(f"- {word}: {', '.join(issues)}")
+            if len(word.strip(WORD_SEPARATORS)) < min_word_length:
+                fragments.append(word)
+            else:
+                unknown_words.append(word)
 
     unknown_percentage = (len(unknown_words) / total_words) * 100
     fragment_percentage = (len(fragments) / total_words) * 100
 
-    score = ((unknown_percentage * unknown_weight / 100) +
-                   (fragment_percentage * fragment_weight / 100))
+    unknown_ok = unknown_percentage <= unknown_words_threshold
+    fragments_ok = fragment_percentage <= word_fragments_threshold
+    decision = "Geeignet" if (unknown_ok and fragments_ok) else "Ungeeignet"
 
-    decision = "Geeignet" if score >= score_threshold else "Ungeeignet"
+    # Farbcodes
+    GREEN = "\033[32m"
+    RED = "\033[31m"
+    RESET = "\033[0m"
 
-    display_colored_text(file_name, EN_SCN_words, EN_US_words, EN_GB_words, config)
-
+    # Statistik-Ausgabe
     print("============================")
     print(f"Analyzing file: \n{file_name}")
     print(f"Total words:            {total_words}")
-    print(f"Unbekannte Wörter       {len(unknown_words)} = {unknown_percentage:.0f}%, {'über' if unknown_percentage > unknown_words_threshold else 'unter'} Grenzw {unknown_words_threshold}%")
-    print(f"Wortfragmente           {len(fragments)} = {fragment_percentage:.0f}%, {'über' if fragment_percentage > word_fragments_threshold else 'unter'} Grenzw {word_fragments_threshold}%")
-    print(f"Gesamtscore:            {score:.0f}% {'unter' if score < score_threshold else 'über'} {score_threshold}%  ({unknown_percentage:.0f}% x {unknown_weight}% + {fragment_percentage:.0f}% x {fragment_weight}%)")
-    print(f"Entscheidung:           {decision}")
+    print(f"\033[92mUnbekannte Wörter\033[0m       {len(unknown_words)} = {unknown_percentage:.1f}%, " +
+          (f"{GREEN}unter Grenzwert{RESET}" if unknown_ok else f"{RED}über Grenzwert{RESET}") +
+          f" {unknown_words_threshold}%")
+    print(f"\033[93mWortfragmente\033[0m           {len(fragments)} = {fragment_percentage:.1f}%, " +
+          (f"{GREEN}unter Grenzwert{RESET}" if fragments_ok else f"{RED}über Grenzwert{RESET}") +
+          f" {word_fragments_threshold}%")
+    print(f"Entscheidung:           " +
+          (f"{GREEN}Geeignet{RESET}" if decision == "Geeignet" else f"{RED}Ungeeignet{RESET}"))
 
+    display_colored_text(file_name, EN_SCN_words, EN_US_words, EN_GB_words, config)
 
     return {
         "Dateiname": os.path.basename(file_path),
-        "Gesamtscore": f"{score:.2f}%",
         "Unbekannte_Wörter": f"{unknown_percentage:.2f}%",
         "Wortfragmente": f"{fragment_percentage:.2f}%",
         "Wortanzahl": total_words,
@@ -202,7 +204,7 @@ def debug_file(file_name, EN_SCN_words, EN_US_words, EN_GB_words, config):
         "Wortfragmente_Anzahl": len(fragments),
         "Unbekannte_Wörter_Schwellenwert": f"{unknown_words_threshold}%",
         "Wortfragmente_Schwellenwert": f"{word_fragments_threshold}%",
-        "Dateigröße_Bytes": os.path.getsize(file_path)
+        "Dateigröße_Bytes": file_size
     }
 
 def load_config():
@@ -239,8 +241,15 @@ def analyze_file(file_path, EN_SCN_words, EN_US_words, EN_GB_words, config):
             print(f"Warning: No words found in {file_path}")
             return None
 
-        unknown_words = [w for w in words_in_text if not is_word_known(w, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length)]
-        fragments = [w for w in words_in_text if is_word_fragment(w, min_word_length)]
+        unknown_words = []
+        fragments = []
+
+        for word in words_in_text:
+            if not is_word_known(word, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length):
+                if len(word.strip(WORD_SEPARATORS)) < min_word_length:
+                    fragments.append(word)
+                else:
+                    unknown_words.append(word)
 
         unknown_percentage = (len(unknown_words) / total_words) * 100
         fragment_percentage = (len(fragments) / total_words) * 100
@@ -250,8 +259,9 @@ def analyze_file(file_path, EN_SCN_words, EN_US_words, EN_GB_words, config):
         else:
             decision = "Ungeeignet"
 
-        score = 100 - ((unknown_percentage * unknown_weight / 100) +
-                    (fragment_percentage * fragment_weight / 100))
+        score = ((unknown_percentage * unknown_weight / 100) +
+        (fragment_percentage * fragment_weight / 100))
+        decision = "Ungeeignet" if score >= score_threshold else "Geeignet"
 
         return {
             "Dateiname": os.path.basename(file_path),
