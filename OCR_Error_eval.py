@@ -10,7 +10,7 @@ from collections import Counter
 import string
 import re
 
-FILENAME = "711009 Issue 2 — HCO Bulletin — Drills Course for Auditors - Level 0 Drills  [B011-189].txt"
+FILENAME = "670630 — HCO Bulletin — Evidences of an Aberrated Area  [B041-028].txt"
 
 # Download NLTK words if not already present
 nltk.download('words', quiet=True)
@@ -22,8 +22,13 @@ ps = PorterStemmer()
 WORD_SEPARATORS = string.punctuation.replace('/', '').replace("'", "") + ' \t\n\r\v\f'
 
 def load_scn_words(file_path):
-    with open(file_path, 'r', encoding='utf-8') as f:
-        return set(word.strip().lower() for word in f)
+    """Lädt die Scientology-spezifischen Wörter aus einer Datei"""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return set(word.strip().lower() for word in f)
+    except Exception as e:
+        print(f"Error loading Scientology word list from {file_path}: {str(e)}")
+        return set()
 
 def is_valid_date_or_number(word):
     return bool(re.match(r'^\d{1,2}([./-])\d{1,2}\1\d{2,4}$', word) or  # Dates like 28.9.80
@@ -84,11 +89,22 @@ def analyze_word(token, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length)
 
 def analyze_text(text, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length):
     """Zentrale Analysefunktion für einen Text"""
-    tokens = re.findall(r'\S+|\s+|[^\w\s]', text)
+    # Erst die Zeilen verarbeiten
+    lines = text.split('\n')
+    processed_lines = []
+    for line in lines:
+        # Nummerierung am Zeilenanfang durch Leerzeichen ersetzen
+        processed_line = re.sub(r'^\s*\d+\.\s*', ' ', line)
+        processed_lines.append(processed_line)
+
+    # Text wieder zusammenfügen und tokenisieren
+    processed_text = '\n'.join(processed_lines)
+    tokens = re.findall(r'\S+|\s+|[^\w\s]', processed_text)
+
     unknown_words = []
     fragments = []
     total_words = 0
-    word_analysis = []  # Speichert Tokens mit ihrem Status
+    word_analysis = []
 
     for token in tokens:
         result = analyze_word(token, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length)
@@ -108,17 +124,23 @@ def analyze_text(text, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length):
         "total_words": total_words
     }
 
-def display_colored_text(file_name, analysis_results):
+def display_colored_text(file_name, text, EN_SCN_words, EN_US_words, EN_GB_words, config):
+    min_word_length = int(config['OCR_Error_Evaluation']['min_word_length'])
+    tokens = re.findall(r'\S+|\s+|[^\w\s]', text)
     colored_text = ""
-    for token, result in analysis_results["word_analysis"]:
-        if result == "space" or result == "number":
+
+    for token in tokens:
+        if re.match(r'^\s*\d+\.\s*$', token):  # Nummerierung
             colored_text += token
-        elif result == "known":
+        elif token.isspace() or token in string.punctuation:
             colored_text += token
-        elif result == "fragment":
+        elif is_word_known(token, EN_SCN_words, EN_US_words, EN_GB_words, min_word_length):
+            colored_text += token
+        elif len(token.strip(WORD_SEPARATORS)) < min_word_length:
             colored_text += f"\033[93m{token}\033[0m"  # Gelb
-        elif result == "unknown":
+        else:
             colored_text += f"\033[92m{token}\033[0m"  # Grün
+
     print(f"\nColored text for file: {file_name}")
     print(colored_text)
 
@@ -153,20 +175,26 @@ def generate_statistics(analysis_results, config):
     }
 
 def process_file(file_path, EN_SCN_words, EN_US_words, EN_GB_words, config, debug=False):
-    """Hauptfunktion für die Verarbeitung einer Datei"""
     with open(file_path, 'r', encoding='utf-8') as f:
         text = f.read()
 
-    # Zentrale Analyse durchführen
-    analysis_results = analyze_text(text, EN_SCN_words, EN_US_words, EN_GB_words,
+    # Für die Statistik: Text ohne Nummerierung
+    lines = text.split('\n')
+    processed_lines = []
+    for line in lines:
+        processed_line = re.sub(r'^\s*\d+\.\s*', ' ', line)
+        processed_lines.append(processed_line)
+    processed_text = '\n'.join(processed_lines)
+
+    # Analyse mit bereinigtem Text
+    analysis_results = analyze_text(processed_text, EN_SCN_words, EN_US_words, EN_GB_words,
                                   int(config['OCR_Error_Evaluation']['min_word_length']))
 
-    # Statistiken generieren
     stats = generate_statistics(analysis_results, config)
 
     if debug:
-        # Farbige Textanzeige
-        display_colored_text(os.path.basename(file_path), analysis_results)
+        # Farbige Textanzeige mit Originaltext
+        display_colored_text(os.path.basename(file_path), text, EN_SCN_words, EN_US_words, EN_GB_words, config)
 
         # Debug-Statistik ausgeben
         GREEN = "\033[32m"
@@ -222,15 +250,22 @@ def main():
             results.append(result)
     else:
         print("Normal mode: Processing all files")
-        for filename in os.listdir(input_dir):
-            if filename.endswith('.txt'):
-                file_path = os.path.join(input_dir, filename)
-                try:
-                    result = process_file(file_path, EN_SCN_words, EN_US_words, EN_GB_words, config)
-                    if result:
-                        results.append(result)
-                except Exception as e:
-                    print(f"Fehler bei der Verarbeitung von {filename}: {str(e)}")
+        files = [f for f in os.listdir(input_dir) if f.endswith('.txt')]
+        total_files = len(files)
+
+        for idx, filename in enumerate(files, 1):
+            file_path = os.path.join(input_dir, filename)
+            try:
+                result = process_file(file_path, EN_SCN_words, EN_US_words, EN_GB_words, config)
+                if result:
+                    results.append(result)
+                # Fortschrittsanzeige (überschreibt die vorherige Zeile)
+                print(f"\rProcessing file {idx}/{total_files}: {filename}", end="", flush=True)
+
+            except Exception as e:
+                print(f"\nFehler bei der Verarbeitung von {filename}: {str(e)}")
+
+        print("\nVerarbeitung abgeschlossen.")  # Neue Zeile nach der Fortschrittsanzeige
 
         if results:  # Only write to CSV if we have results
             output_file = os.path.join(output_dir, 'ocr_evaluation_results.csv')
